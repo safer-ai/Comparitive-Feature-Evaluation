@@ -197,17 +197,25 @@ def run_and_modify(tokens, model, modification_fns):
 
 
 def measure_confusions_grad(test, model):
-    res = torch.empty(2, 2)
+    inps1 = []
+    inps2 = []
     for i, q1 in enumerate([test.positive, test.negative]):
         for j, q2 in enumerate([test.positive, test.negative]):
-            inp1 = tokenizer(q1.prompt, return_tensors="pt").to(device)
-            inp2 = tokenizer(q2.prompt, return_tensors="pt").to(device)
-            out_mixed = torch.log_softmax(model(inp1, inp2)[0][0, -1], dim=-1)
-            correct = tokenizer.encode(q1.answer)[0]
-            wrong = tokenizer.encode([test.positive, test.negative][1 - i].answer)[0]
+            inps1.append(q1.prompt)
+            inps2.append(q2.prompt)
+    inps1t = tokenizer(inps1, return_tensors="pt").to(device)
+    inps2t = tokenizer(inps2, return_tensors="pt").to(device)
+    outs_mixed_raw = torch.log_softmax(model(inps1t, inps2t)[0][:, -1], dim=-1)
+    outs_mixed = [[outs_mixed_raw[0], outs_mixed_raw[1]], [outs_mixed_raw[2], outs_mixed_raw[3]]] 
+    
+    res = torch.empty(2, 2)
+    for i, q1 in enumerate([test.positive, test.negative]):
+        correct = tokenizer.encode(q1.answer)[0]
+        wrong = tokenizer.encode([test.positive, test.negative][1 - i].answer)[0]
+        for j, q2 in enumerate([test.positive, test.negative]):
+            out_mixed = outs_mixed[i][j]
             res[i, j] = out_mixed[correct] - out_mixed[wrong]
     return abs(res[0, 0] - res[0, 1]) + abs(res[1, 1] - res[1, 0])  # Err on first + Err on second
-
 
 def measure_confusions(test, model):
     with torch.no_grad():

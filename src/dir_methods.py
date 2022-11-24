@@ -28,12 +28,11 @@ def get_random(train_ds, train_tests, model, layer, seed=0):
     return d / torch.linalg.norm(d, dim=-1)
 
 
-def get_grad_descent(train_ds, train_tests, model, layer, epochs=8, batch_size=2, lr=1e-4, seed=0):
+def get_grad_descent(train_ds, train_tests, model, layer, epochs=8, batch_size=2, lr=1e-4, n_dirs=1, seed=0):
     torch.manual_seed(seed)
     random.seed(seed)
     h_size = train_ds.x_data.shape[-1]
-    rand_init = torch.randn((1, h_size))
-    rand_init /= torch.linalg.norm(rand_init, dim=-1)
+    rand_init = torch.randn((n_dirs, h_size))
     dirs = torch.autograd.Variable(rand_init.to(device), requires_grad=True)
     optimizer = torch.optim.Adam([dirs], lr=lr)
 
@@ -41,9 +40,11 @@ def get_grad_descent(train_ds, train_tests, model, layer, epochs=8, batch_size=2
         epoch_loss = 0
         g = tqdm(range(0, len(train_tests), batch_size))
         for i in g:
+            with torch.no_grad():
+                dirs[:] = dirs / torch.linalg.norm(dirs, dim=-1)[:, None]
             random.shuffle(train_tests)
             optimizer.zero_grad()
-            model_with_grad = create_frankenstein(dirs / torch.linalg.norm(dirs, dim=-1), model, layer)
+            model_with_grad = create_frankenstein(dirs / torch.linalg.norm(dirs, dim=-1)[:, None], model, layer)
             s = 0
             for t in train_tests[i : i + batch_size]:
                 s += measure_confusions_grad(t, model_with_grad)
@@ -52,7 +53,7 @@ def get_grad_descent(train_ds, train_tests, model, layer, epochs=8, batch_size=2
             optimizer.step()
             g.set_postfix({"loss": epoch_loss})
     d = dirs.detach()
-    return d / torch.linalg.norm(d, dim=-1)
+    return d / torch.linalg.norm(d, dim=-1)[:, None]
 
 
 def get_grad_she_he(train_ds, train_tests, model, layer, seed=0):
