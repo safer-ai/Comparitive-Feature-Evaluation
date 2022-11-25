@@ -10,7 +10,7 @@ import torch
 from attrs import define
 from tqdm import tqdm
 from transformers import GPT2LMHeadModel
-from src.data_generation import get_act_ds, get_train_tests, get_val_controls, get_val_tests
+from src.pairs_generation import get_act_ds, get_train_tests, get_val_controls, get_val_tests
 
 from src.constants import device, tokenizer
 from src.inlp import inlp
@@ -29,6 +29,7 @@ from src.utils import (
     measure_confusions,
     measure_confusions_grad,
 )
+
 #%%
 
 model_name = "gpt2"
@@ -156,6 +157,8 @@ def get_unembed(word):
 def get_unembed_she_he():
     d = get_unembed(" she") - get_unembed(" he")
     return d / torch.linalg.norm(d, dim=-1)
+
+
 from countergenedit import ActivationsDataset
 
 #%%

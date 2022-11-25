@@ -1,7 +1,15 @@
 from src.constants import device, tokenizer
 import torch
 
-from src.utils import create_frankenstein, measure_confusions_grad, project
+from src.utils import (
+    create_frankenstein,
+    measure_confusions_grad,
+    project,
+    zero_out,
+    create_handicaped,
+    measure_performance,
+)
+from src.singles_generations import SingleTest
 from src.inlp import inlp
 from src.rlace import rlace
 import random
@@ -28,7 +36,9 @@ def get_random(train_ds, train_tests, model, layer, seed=0):
     return d / torch.linalg.norm(d, dim=-1)
 
 
-def get_grad_descent(train_ds, train_tests, model, layer, epochs=8, batch_size=2, lr=1e-4, n_dirs=1, projection_fn=project, seed=0):
+def get_grad_descent(
+    train_ds, train_tests, model, layer, epochs=8, batch_size=2, lr=1e-4, n_dirs=1, projection_fn=project, seed=0
+):
     torch.manual_seed(seed)
     random.seed(seed)
     h_size = train_ds.x_data.shape[-1]
@@ -36,22 +46,24 @@ def get_grad_descent(train_ds, train_tests, model, layer, epochs=8, batch_size=2
     dirs = torch.autograd.Variable(rand_init.to(device), requires_grad=True)
     optimizer = torch.optim.Adam([dirs], lr=lr)
 
-    for _ in range(epochs):
+    for e in range(epochs):
         epoch_loss = 0
         g = tqdm(range(0, len(train_tests), batch_size))
+        random.shuffle(train_tests)
         for i in g:
             with torch.no_grad():
                 dirs[:] = dirs / torch.linalg.norm(dirs, dim=-1)[:, None]
-            random.shuffle(train_tests)
             optimizer.zero_grad()
-            model_with_grad = create_frankenstein(dirs / torch.linalg.norm(dirs, dim=-1)[:, None], model, layer, projection_fn=projection_fn)
+            model_with_grad = create_frankenstein(
+                dirs / torch.linalg.norm(dirs, dim=-1)[:, None], model, layer, projection_fn=projection_fn
+            )
             s = 0
             for t in train_tests[i : i + batch_size]:
                 s += measure_confusions_grad(t, model_with_grad)
             epoch_loss += s.item()
             s.backward()
             optimizer.step()
-            g.set_postfix({"loss": epoch_loss})
+            g.set_postfix({"epoch": e, "loss": epoch_loss})
     d = dirs.detach()
     return d / torch.linalg.norm(d, dim=-1)[:, None]
 
@@ -70,7 +82,7 @@ def get_grad_she_he(train_ds, train_tests, model, layer, seed=0):
 
     s = 0
     for t in tokenized:
-        out = torch.log_softmax(model_with_append(t, t)[0][0], dim=-1)
+        out = torch.log_softmax(model_with_append(t, t)[0], dim=-1)
         out_she = out[:, she_id].mean()
         out_he = out[:, he_id].mean()
         s += out_she - out_he
@@ -111,3 +123,55 @@ def get_inlp(train_ds, train_tests, model, layer, seed=0):
     np.random.seed(seed)
     torch.manual_seed(seed)
     return inlp(train_ds, n_dim=1, n_training_iters=2000).to(device)
+
+
+def get_destruction_SGD(
+    train_ds,
+    train_tests: list[SingleTest],
+    model,
+    layer,
+    epochs=8,
+    batch_size=2,
+    lr=1e-4,
+    n_dirs=1,
+    control_tests: list[SingleTest] = [],
+    control_batch_size=0,  # Higher means more weight for controls. Keep 0 if no control_tests
+    projection_fn=project,
+    destruction_fn=zero_out,
+    seed=0,
+):
+    torch.manual_seed(seed)
+    random.seed(seed)
+    h_size = train_ds.x_data.shape[-1]
+    rand_init = torch.randn((n_dirs, h_size))
+    dirs = torch.autograd.Variable(rand_init.to(device), requires_grad=True)
+    optimizer = torch.optim.Adam([dirs], lr=lr)
+
+    for e in range(epochs):
+        epoch_loss = 0
+        g = tqdm(range(0, len(train_tests), batch_size))
+        random.shuffle(train_tests)
+        for i in g:
+            with torch.no_grad():
+                dirs[:] = dirs / torch.linalg.norm(dirs, dim=-1)[:, None]
+
+            optimizer.zero_grad()
+            destructed_model = create_handicaped(
+                dirs / torch.linalg.norm(dirs, dim=-1)[:, None],
+                model,
+                layer,
+                projection_fn=projection_fn,
+                destruction_fn=destruction_fn,
+            )
+            s = 0
+
+            for t in train_tests[i : i + batch_size]:
+                s -= measure_performance(t, destructed_model)  # We want the lowest performance possible
+            for t in random.sample(control_tests, control_batch_size):
+                s += measure_performance(t, destructed_model)  # We want the highest perf possible on controls
+            epoch_loss += s.item()
+            s.backward()
+            optimizer.step()
+            g.set_postfix({"epoch": e, "loss": epoch_loss})
+    d = dirs.detach()
+    return d / torch.linalg.norm(d, dim=-1)[:, None]

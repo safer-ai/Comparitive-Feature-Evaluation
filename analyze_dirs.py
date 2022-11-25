@@ -8,7 +8,7 @@ import torch
 from attrs import define
 from tqdm import tqdm
 from transformers import GPT2LMHeadModel
-from src.data_generation import get_act_ds, get_train_tests, get_val_controls, get_val_tests
+from src.pairs_generation import get_act_ds, get_train_tests, get_val_controls, get_val_tests
 
 from src.constants import device, tokenizer
 from src.inlp import inlp
@@ -30,6 +30,7 @@ from src.utils import (
 from collections import defaultdict
 from pathlib import Path
 import matplotlib.pyplot as plt
+
 #%%
 
 model_name = "gpt2-xl"
@@ -44,7 +45,6 @@ n = 10
 path = Path(".") / "saved_dirs" / model_name
 
 
-
 for tensor_path in path.iterdir():
     name = tensor_path.stem
     if name.startswith("L"):
@@ -54,21 +54,22 @@ for tensor_path in path.iterdir():
         continue
     d = torch.load(tensor_path).to(device)
     d = d.reshape((1, d.shape[-1]))
-    all_dirs[method+id] = d
+    all_dirs[method + id] = d
     dirs_dict[method].append(d)
 #%%
 from matplotlib import rcParams
+
 rcParams["figure.dpi"] = 80
-rcParams["figure.figsize"] = (10,10)
+rcParams["figure.figsize"] = (10, 10)
 fig = plt.figure()
-fig.patch.set_facecolor('white')
+fig.patch.set_facecolor("white")
 
 all_dirs_vals = [d for dirs in dirs_dict.values() for d in dirs]
 
 all_dirs_t = torch.cat(all_dirs_vals)
 plt.imshow(torch.einsum("n h, m h -> n m", all_dirs_t, all_dirs_t).abs().cpu())
-plt.xticks(list(range(0, n*len(dirs_dict), n)), dirs_dict.keys(), rotation=45)
-plt.yticks(list(range(0, n*len(dirs_dict), n)), dirs_dict.keys())
+plt.xticks(list(range(0, n * len(dirs_dict), n)), dirs_dict.keys(), rotation=45)
+plt.yticks(list(range(0, n * len(dirs_dict), n)), dirs_dict.keys())
 plt.colorbar()
 #%%
 train_tests = get_train_tests()

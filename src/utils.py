@@ -7,6 +7,7 @@ import transformers
 from src.constants import tokenizer, device
 import gc
 from math import cos
+from src.singles_generations import SingleTest
 
 
 @define
@@ -223,7 +224,7 @@ def measure_confusions_grad(test, model):
             inps2.append(q2.prompt)
     inps1t = tokenizer(inps1, return_tensors="pt").to(device)
     inps2t = tokenizer(inps2, return_tensors="pt").to(device)
-    outs_mixed_raw = torch.log_softmax(model(inps1t, inps2t)[0][:, -1], dim=-1)
+    outs_mixed_raw = torch.log_softmax(model(inps1t, inps2t)[:, -1], dim=-1)
     outs_mixed = [[outs_mixed_raw[0], outs_mixed_raw[1]], [outs_mixed_raw[2], outs_mixed_raw[3]]]
 
     res = torch.empty(2, 2)
@@ -242,6 +243,10 @@ def measure_confusions(test, model):
 
 
 def create_frankenstein(dirs, model, layer_module, additional=0, projection_fn=project):
+    """Return a frankenstein model taking two inputs.
+
+    The first input is the correct one, but the activation of the second one will be used everywhere but the dirs."""
+
     def frankenstein(inp1, inp2):
         """inp1 is the one which should be used, inp2 is the wrong one"""
         act1 = get_activations(inp1, model, [layer_module], lambda x: x[0])[layer_module]
@@ -252,6 +257,36 @@ def create_frankenstein(dirs, model, layer_module, additional=0, projection_fn=p
             y = projection_fn(y, dirs) + proj_act1 + additional
             return (y, *rest)
 
-        return run_and_modify(inp2, model, {layer_module: mix})
+        return run_and_modify(inp2, model, {layer_module: mix}).logits
 
     return frankenstein
+
+
+def measure_performance(test: SingleTest, model):
+    good_answers = [tokenizer.encode(a)[0] for a in test.good_answers]
+    bad_answers = [tokenizer.encode(a)[0] for a in test.bad_answers]
+    inpt = tokenizer(test.prompt, return_tensors="pt").to(device)
+    outs = torch.log_softmax(model(inpt)[0, -1], dim=-1)
+    good_mass = outs[good_answers].sum()
+    bad_mass = outs[bad_answers].sum()
+    return good_mass - bad_mass
+
+
+def zero_out(x_along_dirs, dirs):
+    return 0
+
+
+def create_handicaped(dirs, model, layer_module, additional=0, projection_fn=project, destruction_fn=zero_out):
+    """Return an handicaped model taking one input.
+
+    But its activation will be destroyed at the given directions."""
+
+    def handicaped(inp):
+        def destroy_along_dirs(module, input, output):
+            y, *rest = output
+            y = projection_fn(y, dirs) + destruction_fn(y - projection_fn(y, dirs), dirs) + additional
+            return (y, *rest)
+
+        return run_and_modify(inp, model, {layer_module: destroy_along_dirs}).logits
+
+    return handicaped
