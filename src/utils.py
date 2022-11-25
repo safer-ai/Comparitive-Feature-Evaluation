@@ -59,7 +59,6 @@ def project_cone(X: torch.Tensor, dirs: torch.Tensor, gamma: float) -> torch.Ten
     #     )
 
     # grad compatible version
-    torch.autograd.set_detect_anomaly(True)
     norms = []
     cosines = []
     Xs = [X]

@@ -54,5 +54,5 @@ def run(
 
 if __name__ == "__main__":
     # python generate_dirs_sgd.py --layer_nbs 24,0,4,16,36,43,47 --ns 1,2,4
-    # python generate_dirs_sgd.py --layer_nbs 0,4,16,24,36,43,47 --ns 4,2,1 --use_cone True
+    # python generate_dirs_sgd.py --layer_nbs 0,4,16,24,36,43,47 --ns 2,1 --use_cone True
     fire.Fire(run)
