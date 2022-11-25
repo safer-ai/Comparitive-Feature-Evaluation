@@ -1,7 +1,7 @@
 from src.constants import device, tokenizer
 import torch
 
-from src.utils import create_frankenstein, measure_confusions_grad
+from src.utils import create_frankenstein, measure_confusions_grad, project
 from src.inlp import inlp
 from src.rlace import rlace
 import random
@@ -28,7 +28,7 @@ def get_random(train_ds, train_tests, model, layer, seed=0):
     return d / torch.linalg.norm(d, dim=-1)
 
 
-def get_grad_descent(train_ds, train_tests, model, layer, epochs=8, batch_size=2, lr=1e-4, n_dirs=1, seed=0):
+def get_grad_descent(train_ds, train_tests, model, layer, epochs=8, batch_size=2, lr=1e-4, n_dirs=1, projection_fn=project, seed=0):
     torch.manual_seed(seed)
     random.seed(seed)
     h_size = train_ds.x_data.shape[-1]
@@ -44,7 +44,7 @@ def get_grad_descent(train_ds, train_tests, model, layer, epochs=8, batch_size=2
                 dirs[:] = dirs / torch.linalg.norm(dirs, dim=-1)[:, None]
             random.shuffle(train_tests)
             optimizer.zero_grad()
-            model_with_grad = create_frankenstein(dirs / torch.linalg.norm(dirs, dim=-1)[:, None], model, layer)
+            model_with_grad = create_frankenstein(dirs / torch.linalg.norm(dirs, dim=-1)[:, None], model, layer, projection_fn=projection_fn)
             s = 0
             for t in train_tests[i : i + batch_size]:
                 s += measure_confusions_grad(t, model_with_grad)

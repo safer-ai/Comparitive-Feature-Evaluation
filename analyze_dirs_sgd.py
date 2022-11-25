@@ -70,45 +70,132 @@ plt.colorbar()
 train_tests = get_train_tests()
 val_tests = get_val_tests()
 val_controls = get_val_controls()
-#%%
-layer_nb = len(model.transformer.h) // 2
-module_name = f"transformer.h.{layer_nb}"
-layer = model.get_submodule(module_name)
-layers = {module_name: layer}
+
 #%%
 all_dirs_it = sorted(list(all_dirs.items()))
 train_tests_res = []
 for t in train_tests[::10]:
     print(t)
-    for n, d in all_dirs_it:
+    for (l,n), d in all_dirs_it:
+        module_name = f"transformer.h.{l}"
+        layer = model.get_submodule(module_name)
         r = measure_confusions(t, create_frankenstein(d, model, layer))
-        train_tests_res.append((n, r))
+        train_tests_res.append(((l,n), r))
         print(f"{n} {r:.2f}")
     r = measure_confusions(t, create_frankenstein(torch.empty(0, d.shape[-1]).to(device), model, layer))
     print(f"rdm {r:.2f}")
 #%%
-all_dirs_it = sorted(list(all_dirs.items()))
 val_tests_res = []
-for t in val_tests:
+val_tests_difficulties = []
+for i,t in enumerate(val_tests):
     print(t)
-    for n, d in all_dirs_it:
+    for (l,n), d in all_dirs_it:
+        module_name = f"transformer.h.{l}"
+        layer = model.get_submodule(module_name)
         r = measure_confusions(t, create_frankenstein(d, model, layer))
-        val_tests_res.append((n, r))
+        val_tests_res.append((i, (l,n), r))
         print(f"{n} {r:.2f}")
     r = measure_confusions(t, create_frankenstein(torch.empty(0, d.shape[-1]).to(device), model, layer))
+    val_tests_difficulties.append(r)
     print(f"rdm {r:.2f}")
 #%%
-all_dirs_it = sorted(list(all_dirs.items()))
 val_controls_res = []
-for t in val_controls:
+val_controls_difficulties = []
+for i,t in enumerate(val_controls):
     print(t)
-    for n, d in all_dirs_it:
+    for (l,n), d in all_dirs_it:
+        module_name = f"transformer.h.{l}"
+        layer = model.get_submodule(module_name)
         r = measure_confusions(t, create_frankenstein(d, model, layer))
-        val_controls_res.append((n, r))
+        val_controls_res.append((i, (l,n), r))
         print(f"{n} {r:.2f}")
     r = measure_confusions(t, create_frankenstein(torch.empty(0, d.shape[-1]).to(device), model, layer))
+    val_controls_difficulties.append(r)
     print(f"rdm {r:.2f}")
 
+#%%
+layers = list(set([l for i,(l,n), r in val_tests_res]))
+numbers = list(set([n for i,(l,n), r in val_tests_res]))
+for n in numbers:
+    for i in range(len(val_tests)):
+        xy = sorted([(l,1 - r / val_tests_difficulties[i]) for (i_,(l,n_),r) in val_tests_res if i_ == i and n_ == n])
+        x = [x for x,y in xy]
+        y = [y for x,y in xy]
+        label = f"{n} directions" if i == 0 else None
+        plt.plot(x,y,color="r" if n == 1 else "violet", alpha=0.5, label=label)
+plt.legend()
+plt.xlabel("layer number")
+plt.ylabel("proportion of success")
+plt.title("Proportions of success over different validation examples")
+plt.plot()
+#%%
+layers = list(set([l for i,(l,n), r in val_controls_res]))
+numbers = list(set([n for i,(l,n), r in val_controls_res]))
+for n in numbers:
+    for i in range(len(val_controls)):
+        xy = sorted([(l,1 - r / val_controls_difficulties[i]) for (i_,(l,n_),r) in val_controls_res if i_ == i and n_ == n])
+        x = [x for x,y in xy]
+        y = [y for x,y in xy]
+        label = f"{n} directions" if i == 0 else None
+        plt.plot(x,y,color="r" if n == 1 else "violet", alpha=0.5, label=label)
+plt.legend()
+plt.xlabel("layer number")
+plt.ylabel("proportion of success")
+plt.ylim(0,1)
+plt.title("Proportions of success over different validation examples")
+plt.plot()
+#%%
+l = 24
+rcParams["figure.figsize"] = (8, 4)
+module_name = f"transformer.h.{l}"
+layer = model.get_submodule(module_name)
+positive_activations_at_l = [get_activations(tokenizer(t.positive.prompt, return_tensors="pt").to(device), model, [layer])[layer] for t in val_tests]
+negative_activations_at_l = [get_activations(tokenizer(t.negative.prompt, return_tensors="pt").to(device), model, [layer])[layer] for t in val_tests]
+single_dir = all_dirs[(l, 1)][0]
+#%%
+for i,act in enumerate(positive_activations_at_l):
+    xs = torch.einsum("b n h, h -> n", act, single_dir).cpu()
+    ys = [i for _ in xs]
+    plt.scatter(xs, ys, color="r", alpha=0.5)
+for i,act in enumerate(negative_activations_at_l):
+    xs = torch.einsum("b n h, h -> n", act, single_dir).cpu()
+    ys = [i for _ in xs]
+    plt.scatter(xs, ys, color="b", alpha=0.5)
+#%%
+l = 24
+rcParams["figure.figsize"] = (8, 4)
+module_name = f"transformer.h.{l}"
+layer = model.get_submodule(module_name)
+positive_activations_at_l = [get_activations(tokenizer(t.positive.prompt, return_tensors="pt").to(device), model, [layer])[layer] for t in train_tests]
+negative_activations_at_l = [get_activations(tokenizer(t.negative.prompt, return_tensors="pt").to(device), model, [layer])[layer] for t in train_tests]
+single_dir = all_dirs[(l, 1)][0]
+#%%
+for i,act in enumerate(positive_activations_at_l):
+    xs = torch.einsum("b n h, h -> n", act, single_dir).cpu()
+    ys = [i for _ in xs]
+    plt.scatter(xs, ys, color="r", alpha=0.5)
+for i,act in enumerate(negative_activations_at_l):
+    xs = torch.einsum("b n h, h -> n", act, single_dir).cpu()
+    ys = [i for _ in xs]
+    plt.scatter(xs, ys, color="b", alpha=0.5)
+#%%
+l = 24
+rcParams["figure.figsize"] = (8, 4)
+module_name = f"transformer.h.{l}"
+layer = model.get_submodule(module_name)
+positive_activations_at_l = [get_activations(tokenizer(t.positive.prompt, return_tensors="pt").to(device), model, [layer])[layer] for t in val_controls]
+negative_activations_at_l = [get_activations(tokenizer(t.negative.prompt, return_tensors="pt").to(device), model, [layer])[layer] for t in val_controls]
+single_dir = all_dirs[(l, 1)][0]
+#%%
+for i,act in enumerate(positive_activations_at_l):
+    xs = torch.einsum("b n h, h -> n", act, single_dir).cpu()
+    ys = [i for _ in xs]
+    plt.scatter(xs, ys, color="r", alpha=0.5)
+for i,act in enumerate(negative_activations_at_l):
+    xs = torch.einsum("b n h, h -> n", act, single_dir).cpu()
+    ys = [i for _ in xs]
+    plt.scatter(xs, ys, color="b", alpha=0.5)
+#%%
 # prompts = [
 #   """In a shocking finding, scientist discovered a herd of unicorns""",
 #   """In a shocking finding, scientist discovered a herd of female unicorns""",

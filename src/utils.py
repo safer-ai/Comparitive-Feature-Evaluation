@@ -41,23 +41,42 @@ def project_cone(X: torch.Tensor, dirs: torch.Tensor, gamma: float) -> torch.Ten
     if gamma <= 0 or gamma >= np.pi / 2:
         raise ValueError(gamma)
 
+    # for i in range(dirs.shape[0]):
+    #     dir = dirs[-(i + 1)]
+    #     dot_products = torch.einsum("...h, h -> ...", X, dir)
+    #     norms_X = torch.sum(X ** 2, dim=-1) ** 0.5  # norms of the columns of X
+    #     cosines = dot_products / norms_X
+    #     sines = torch.sqrt(1 - cosines ** 2)
+
+    #     # mask the angles that are greater than gamma (out of the cone)
+    #     mask_cone = torch.abs(cosines) > cos(gamma)
+    #     cosines_inside_cone = cosines * mask_cone
+    #     sines_inside_cone = sines * mask_cone
+
+    #     X -= (
+    #         torch.einsum("h, ...->...h", dir, norms_X)
+    #         * (cosines_inside_cone - sines_inside_cone / np.tan(gamma))[..., None]
+    #     )
+
+    # grad compatible version
+    torch.autograd.set_detect_anomaly(True)
+    norms = []
+    cosines = []
+    Xs = [X]
     for i in range(dirs.shape[0]):
-        dir = dirs[-(i + 1)]
-        dot_products = torch.einsum("...h, h -> ...", X, dir)
-        norms_X = torch.sum(X ** 2, dim=-1) ** 0.5  # norms of the columns of X
-        cosines = dot_products / norms_X
-        sines = torch.sqrt(1 - cosines ** 2)
-
-        # mask the angles that are greater than gamma (out of the cone)
-        mask_cone = torch.abs(cosines) > cos(gamma)
-        cosines_inside_cone = cosines * mask_cone
-        sines_inside_cone = sines * mask_cone
-
-        X -= (
-            torch.einsum("h, ...->...h", dir, norms_X)
-            * (cosines_inside_cone - sines_inside_cone / np.tan(gamma))[..., None]
+        norms.append(torch.sum(Xs[i] ** 2, dim=-1) ** 0.5)  # norms of the columns of X
+        cosines.append(torch.einsum("...h, h -> ...", Xs[i], dirs[-(i + 1)]) / norms[i])
+        Xs.append(
+            Xs[i]
+            - (
+                torch.einsum("h, ...->...h", dirs[-(i + 1)], norms[i])
+                * (
+                    (cosines[i] - torch.sqrt(1 - cosines[i] ** 2) / np.tan(gamma))
+                    * (torch.abs(cosines[i]) > cos(gamma))
+                )[..., None]
+            )
         )
-    return X
+    return Xs[-1]
 
 
 def project(dir: torch.Tensor, dirs: torch.Tensor, strength: float = 1) -> torch.Tensor:
@@ -206,8 +225,8 @@ def measure_confusions_grad(test, model):
     inps1t = tokenizer(inps1, return_tensors="pt").to(device)
     inps2t = tokenizer(inps2, return_tensors="pt").to(device)
     outs_mixed_raw = torch.log_softmax(model(inps1t, inps2t)[0][:, -1], dim=-1)
-    outs_mixed = [[outs_mixed_raw[0], outs_mixed_raw[1]], [outs_mixed_raw[2], outs_mixed_raw[3]]] 
-    
+    outs_mixed = [[outs_mixed_raw[0], outs_mixed_raw[1]], [outs_mixed_raw[2], outs_mixed_raw[3]]]
+
     res = torch.empty(2, 2)
     for i, q1 in enumerate([test.positive, test.negative]):
         correct = tokenizer.encode(q1.answer)[0]
@@ -217,20 +236,21 @@ def measure_confusions_grad(test, model):
             res[i, j] = out_mixed[correct] - out_mixed[wrong]
     return abs(res[0, 0] - res[0, 1]) + abs(res[1, 1] - res[1, 0])  # Err on first + Err on second
 
+
 def measure_confusions(test, model):
     with torch.no_grad():
         return measure_confusions_grad(test, model).item()
 
 
-def create_frankenstein(dirs, model, layer_module, additional=0):
+def create_frankenstein(dirs, model, layer_module, additional=0, projection_fn=project):
     def frankenstein(inp1, inp2):
         """inp1 is the one which should be used, inp2 is the wrong one"""
         act1 = get_activations(inp1, model, [layer_module], lambda x: x[0])[layer_module]
-        proj_act1 = act1 - project(act1, dirs)
+        proj_act1 = act1 - projection_fn(act1, dirs)
 
         def mix(module, input, output):
             y, *rest = output
-            y = project(y, dirs) + proj_act1 + additional
+            y = projection_fn(y, dirs) + proj_act1 + additional
             return (y, *rest)
 
         return run_and_modify(inp2, model, {layer_module: mix})
