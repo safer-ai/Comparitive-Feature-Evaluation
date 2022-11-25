@@ -2,7 +2,6 @@
 
 #%%
 import random
-from countergenedit import ActivationsDataset
 
 import numpy as np
 import pandas as pd
@@ -10,17 +9,18 @@ import torch
 from attrs import define
 from tqdm import tqdm
 from transformers import GPT2LMHeadModel
-from src.pairs_generation import get_act_ds, get_train_tests, get_val_controls, get_val_tests
+from src.pairs_generation import get_train_tests, get_val_controls, get_val_tests
 
 from src.constants import device, tokenizer
 from src.inlp import inlp
 from src.rlace import rlace
 from src.utils import (
     ActivationsDataset,
-    edit_model_inplace,
+    get_act_ds,
     gen,
     gen_and_print,
     get_activations,
+    edit_model_inplace,
     project,
     project_cone,
     recover_model_inplace,
@@ -158,8 +158,6 @@ def get_unembed_she_he():
     d = get_unembed(" she") - get_unembed(" he")
     return d / torch.linalg.norm(d, dim=-1)
 
-
-from countergenedit import ActivationsDataset
 
 #%%
 dirs = rlace1(train_ds)

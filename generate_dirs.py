@@ -1,12 +1,12 @@
 import torch
 from transformers import GPT2LMHeadModel
-from src.pairs_generation import get_act_ds, get_train_tests
+from src.pairs_generation import get_train_tests
 
 from src.constants import device, tokenizer
 from src.inlp import inlp
 from src.rlace import rlace
 from src.dir_methods import (
-    get_rlace,
+    get_rlace, get_act_ds,
     get_inlp,
     get_grad_descent,
     get_embed_she_he,

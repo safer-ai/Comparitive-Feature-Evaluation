@@ -8,13 +8,13 @@ import torch
 from attrs import define
 from tqdm import tqdm
 from transformers import GPT2LMHeadModel
-from src.pairs_generation import get_act_ds, get_train_tests, get_val_controls, get_val_tests
+from src.pairs_generation import get_train_tests, get_val_controls, get_val_tests
 
 from src.constants import device, tokenizer
 from src.inlp import inlp
 from src.rlace import rlace
 from src.utils import (
-    ActivationsDataset,
+    ActivationsDataset,get_act_ds,
     edit_model_inplace,
     gen,
     gen_and_print,

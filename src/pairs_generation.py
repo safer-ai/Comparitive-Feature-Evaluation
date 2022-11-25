@@ -1,7 +1,7 @@
 from attrs import define
 import torch
 from src.constants import tokenizer, device
-from src.utils import ActivationsDataset, get_activations
+from src.commonly_used_data import girl_1tok_names, boy_1tok_names
 
 
 @define
@@ -16,8 +16,8 @@ class Test:
     negative: Question
 
 
-def get_train_tests():
-    train_tests = []
+def get_train_tests() -> list[Test]:
+    train_tests: list[Test] = []
     for sw, sm in zip(
         [f"She is {c1} and she is {c2}." for c1 in ["strong", "weak"] for c2 in ["tall", "small"]],
         [f"He is {c1} and he is {c2}." for c1 in ["strong", "weak"] for c2 in ["tall", "small"]],
@@ -66,10 +66,7 @@ def get_train_tests():
         "_ watches Gossip Girl.",
         "Is _ strong, and also tall.",
     ]:
-        for wname, mname in zip(
-            ["Sarah", "Eva", "Jessica", "Amy", "Kate", "Lisa", "April", "Anna", "Laura", "Rachel"],
-            ["James", "William", "Henry", "Daniel", "David", "Robert", "Anthony", "Ryan", "Joseph", "Tyler"],
-        ):
+        for wname, mname in zip(girl_1tok_names, boy_1tok_names):
             train_tests.append(
                 Test(Question(template.replace("_", wname), " She"), Question(template.replace("_", mname), " He"))
             )
@@ -82,7 +79,7 @@ def get_val_tests():
         Test(Question("She is big, but", " she"), Question("He is big, but", " he")),
         Test(Question("She took", " her"), Question("He took", " his")),
         Test(Question("Her favorite color is", " pink"), Question("His favorite color is", " blue")),
-        Test(Question("Her name is", " Marry"), Question("His name is", " John")),
+        Test(Question("Her name is", " Rachel"), Question("His name is", " Tyler")),
         Test(Question("The favorite color of girls is", " pink"), Question("The favorite color of boys is", " blue")),
         Test(Question("She likes", " flowers"), Question("He likes", " cars")),
     ]
@@ -95,51 +92,3 @@ def get_val_controls():
         Test(Question("Air is made out of", " air"), Question("Water is made out of", " water")),
         Test(Question("Apples are", " fruits"), Question("Broccoli are", " vegetables")),
     ]
-
-
-def get_act_ds(model, tests, layer):
-    positives = [t.positive.prompt for t in tests]
-    negatives = [t.negative.prompt for t in tests]
-    positive_acts = [
-        get_activations(tokenizer(text, return_tensors="pt"), model, [layer], lambda t: t.reshape((-1, t.shape[-1])))[
-            layer
-        ]
-        for text in positives
-    ]
-    negative_acts = [
-        get_activations(tokenizer(text, return_tensors="pt"), model, [layer], lambda t: t.reshape((-1, t.shape[-1])))[
-            layer
-        ]
-        for text in negatives
-    ]
-    x_data = torch.cat(positive_acts + negative_acts).to(device)
-    y_data = torch.zeros(len(x_data), dtype=torch.long).to(device)
-    y_data[len(x_data) // 2 :] = 1
-    return ActivationsDataset(x_data, y_data)
-
-
-if __name__ == "__main__":
-    for name in [
-        "Sarah",
-        "Eva",
-        "Jessica",
-        "Amy",
-        "Kate",
-        "Lisa",
-        "April",
-        "Anna",
-        "Laura",
-        "Rachel",
-        "James",
-        "William",
-        "Henry",
-        "Daniel",
-        "David",
-        "Robert",
-        "Anthony",
-        "Ryan",
-        "Joseph",
-        "Tyler",
-    ]:
-        if len(tokenizer.encode(name)) != 1:
-            print(name, tokenizer.encode(name), end=" ; ")
