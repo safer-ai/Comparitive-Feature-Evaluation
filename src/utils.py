@@ -8,6 +8,7 @@ from src.constants import tokenizer, device
 import gc
 from math import cos
 from src.singles_generations import SingleTest
+from src.pairs_generation import Test
 
 
 @define
@@ -291,9 +292,31 @@ def create_handicaped(dirs, model, layer_module, additional=0, projection_fn=pro
 
     return handicaped
 
-def get_act_ds(model, tests, layer):
+
+def get_act_ds(model, tests: list[Test], layer):
     positives = [t.positive.prompt for t in tests]
     negatives = [t.negative.prompt for t in tests]
+    positive_acts = [
+        get_activations(tokenizer(text, return_tensors="pt"), model, [layer], lambda t: t.reshape((-1, t.shape[-1])))[
+            layer
+        ]
+        for text in positives
+    ]
+    negative_acts = [
+        get_activations(tokenizer(text, return_tensors="pt"), model, [layer], lambda t: t.reshape((-1, t.shape[-1])))[
+            layer
+        ]
+        for text in negatives
+    ]
+    x_data = torch.cat(positive_acts + negative_acts).to(device)
+    y_data = torch.zeros(len(x_data), dtype=torch.long).to(device)
+    y_data[len(x_data) // 2 :] = 1
+    return ActivationsDataset(x_data, y_data)
+
+
+def get_act_ds(model, tests: list[SingleTest], control_test: list[SingleTest], layer):
+    positives = [t.prompt for t in tests]
+    negatives = [t.prompt for t in control_test]
     positive_acts = [
         get_activations(tokenizer(text, return_tensors="pt"), model, [layer], lambda t: t.reshape((-1, t.shape[-1])))[
             layer

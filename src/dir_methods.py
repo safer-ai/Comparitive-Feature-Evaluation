@@ -166,9 +166,9 @@ def get_destruction_SGD(
             s = 0
 
             for t in train_tests[i : i + batch_size]:
-                s -= measure_performance(t, destructed_model)  # We want the lowest performance possible
+                s += measure_performance(t, destructed_model)  # We want the lowest performance possible
             for t in random.sample(control_tests, control_batch_size):
-                s += measure_performance(t, destructed_model)  # We want the highest perf possible on controls
+                s -= measure_performance(t, destructed_model)  # We want the highest perf possible on controls
             epoch_loss += s.item()
             s.backward()
             optimizer.step()
