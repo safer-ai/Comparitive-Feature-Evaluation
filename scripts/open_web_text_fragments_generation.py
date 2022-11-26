@@ -37,3 +37,5 @@ df["football_empty"] = df.index.map(lambda i: 1 if i in football_empty else (-1 
 df.head(30)
 
 # %%
+df.to_csv("../data/open_text_fragments.csv")
+# %%
