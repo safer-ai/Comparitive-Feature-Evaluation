@@ -33,8 +33,11 @@ import matplotlib.pyplot as plt
 from src.singles_generations import (
     get_female_train_tests,
     get_male_train_tests,
+    get_female_val_tests,
+    get_male_val_tests,
     get_football_train_tests,
     get_housing_train_tests,
+    get_misc_val_controls
 )
 #%%
 
@@ -47,7 +50,7 @@ all_dirs = {}
 single_dirs = {}
 n = 10
 
-path = Path(".") / "saved_dirs" / f"{model_name}-sgd-cone"
+path = Path(".") / "saved_dirs" / f"{model_name}-sgd"
 
 
 for tensor_path in path.iterdir():
@@ -61,6 +64,8 @@ for tensor_path in path.iterdir():
         single_dirs[str(layer)] = d
 
 single_dirs["orig"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd" / "l24-n1.pt").to(device)
+single_dirs["orig2"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd2" / "l24-n1.pt").to(device)
+single_dirs["orig3"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd3" / "l24-n1.pt").to(device)
 #%%
 from matplotlib import rcParams
 
@@ -119,15 +124,23 @@ for i, t in enumerate(val_controls):
     val_controls_difficulties.append(r)
     print(f"rdm {r:.2f}")
 #%%
+module_name = f"transformer.h.{24}"
+layer = model.get_submodule(module_name)
 train_tests = get_female_train_tests() + get_male_train_tests()
 controls_train_tests = get_football_train_tests() + get_housing_train_tests()
-destructed = create_handicaped(single_dirs["orig"], model, layer)
+destructed = create_handicaped(single_dirs["24"], model, layer)
 orig_model = create_handicaped(torch.empty(0,single_dirs["orig"].shape[-1]).to(device), model, layer)
 for t in train_tests:
     print(f"{measure_performance(t, destructed):.2f} {measure_performance(t, orig_model):.2f} {t.prompt}")
 #%%
 for t in controls_train_tests:
     print(f"{measure_performance(t, destructed):.2f} {measure_performance(t, orig_model):.2f} {t.prompt}")
+#%%
+for t in get_female_val_tests() + get_male_val_tests():
+    print(f"{measure_performance(t, destructed):.2f} {measure_performance(t, orig_model):.2f} {t.prompt}{t.good_answers[0]}")
+#%%
+for t in get_misc_val_controls():
+    print(f"{measure_performance(t, destructed):.2f} {measure_performance(t, orig_model):.2f} {t.prompt}{t.good_answers[0]}")
 #%%
 layers = list(set([l for i, (l, n), r in val_tests_res]))
 numbers = list(set([n for i, (l, n), r in val_tests_res]))
