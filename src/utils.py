@@ -314,7 +314,7 @@ def get_act_ds(model, tests: list[Test], layer):
     return ActivationsDataset(x_data, y_data)
 
 
-def get_act_ds(model, tests: list[SingleTest], control_test: list[SingleTest], layer):
+def get_act_ds_with_controls(model, tests: list[SingleTest], control_test: list[SingleTest], layer):
     positives = [t.prompt for t in tests]
     negatives = [t.prompt for t in control_test]
     positive_acts = [

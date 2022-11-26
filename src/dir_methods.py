@@ -175,3 +175,71 @@ def get_destruction_SGD(
             g.set_postfix({"epoch": e, "loss": epoch_loss})
     d = dirs.detach()
     return d / torch.linalg.norm(d, dim=-1)[:, None]
+
+
+def get_destruction_SGD_KL(
+    train_ds,
+    train_tests: list[SingleTest],
+    model,
+    layer,
+    epochs=8,
+    batch_size=2,
+    lr=1e-4,
+    n_dirs=1,
+    controls: list[str] = [],
+    control_batch_size=0,  # Higher is more costly but reduces noise. Keep 0 if no controls
+    kl_strength: float = 1,
+    projection_fn=project,
+    destruction_fn=zero_out,
+    seed=0,
+):
+    torch.manual_seed(seed)
+    random.seed(seed)
+    h_size = train_ds.x_data.shape[-1]
+    rand_init = torch.randn((n_dirs, h_size))
+    dirs = torch.autograd.Variable(rand_init.to(device), requires_grad=True)
+    optimizer = torch.optim.Adam([dirs], lr=lr)
+
+    for e in range(epochs):
+        epoch_loss = 0
+        epoch_main_loss = 0
+        epoch_kl_loss = 0
+        g = tqdm(range(0, len(train_tests), batch_size))
+        random.shuffle(train_tests)
+        for i in g:
+            with torch.no_grad():
+                dirs[:] = dirs / torch.linalg.norm(dirs, dim=-1)[:, None]
+
+            optimizer.zero_grad()
+            destructed_model = create_handicaped(
+                dirs / torch.linalg.norm(dirs, dim=-1)[:, None],
+                model,
+                layer,
+                projection_fn=projection_fn,
+                destruction_fn=destruction_fn,
+            )
+            s = 0
+
+            for t in train_tests[i : i + batch_size]:
+                s += measure_performance(t, destructed_model)  # We want the lowest performance possible
+
+            epoch_main_loss += s.item()
+
+            # We want low KL div on controls
+            strs = random.sample(controls, control_batch_size)
+            inp_min_len = min(len(a) for a in tokenizer(strs)["input_ids"])
+            inpt = tokenizer(strs, return_tensors="pt", truncation=True, max_length=inp_min_len)
+            dmodel_logprobs = torch.log_softmax(destructed_model(inpt), dim=-1)
+            model_logprobs = torch.log_softmax(model(**inpt).logits, dim=-1)
+            kl_loss = kl_strength * torch.nn.KLDivLoss()(dmodel_logprobs, model_logprobs)
+
+            epoch_kl_loss += kl_loss.item()
+
+            s += kl_loss
+
+            epoch_loss += s.item()
+            s.backward()
+            optimizer.step()
+            g.set_postfix({"epoch": e, "loss": epoch_loss, "kl_loss": epoch_kl_loss, "main_loss": epoch_main_loss})
+    d = dirs.detach()
+    return d / torch.linalg.norm(d, dim=-1)[:, None]

@@ -10,7 +10,7 @@ from src.singles_generations import (
 
 from src.constants import device
 from src.dir_methods import get_destruction_SGD
-from src.utils import project_cone, project, get_act_ds, zero_out
+from src.utils import project_cone, project, get_act_ds_with_controls, zero_out
 from math import pi
 
 import fire
@@ -35,7 +35,7 @@ def run(
     for layer_nb in layer_nbs:
         module_name = f"transformer.h.{layer_nb}"
         layer = model.get_submodule(module_name)
-        train_ds = get_act_ds(model, train_tests, controls_train_tests, layer)
+        train_ds = get_act_ds_with_controls(model, train_tests, controls_train_tests, layer)
         for n in ns:
             print("layer", layer_nb, "n", n)
             d = get_destruction_SGD(
