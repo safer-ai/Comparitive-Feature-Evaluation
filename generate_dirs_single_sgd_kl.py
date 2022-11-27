@@ -24,9 +24,10 @@ def run(
     layer_nbs: tuple[int, ...] = (0,),
     ns: tuple[int, ...] = (1,),
     kl_strength: float = 1,
+    rev_kl_strength: float = 0,
     use_cone: bool = False,
 ):
-    print(layer_nbs, ns, kl_strength, use_cone)
+    print(layer_nbs, ns, kl_strength, rev_kl_strength, use_cone)
 
     projection_fn = partial(project_cone, gamma=pi / 2 * 0.9) if use_cone else project
     cone_suffix = "-cone" if use_cone else ""
@@ -57,11 +58,12 @@ def run(
                 control_batch_size=12,
                 controls=controls,
                 kl_strength=kl_strength,
+                rev_kl_strength=rev_kl_strength,
                 projection_fn=projection_fn,
                 destruction_fn=zero_out,
             )
 
-            file_name = f"l{layer_nb}-n{n}-kl{kl_strength:.2f}.pt"
+            file_name = f"l{layer_nb}-n{n}-kl{kl_strength:.2f}-rkl{rev_kl_strength:.2f}.pt"
             dir_path = Path(".") / "saved_dirs" / f"{model_name}-single-sgd_kl{cone_suffix}"
             dir_path.mkdir(parents=True, exist_ok=True)
             path = dir_path / file_name
@@ -72,6 +74,7 @@ def run(
 if __name__ == "__main__":
     # python generate_dirs_single_sgd_kl.py --layer_nbs 6, --ns 1, --model_name gpt2
     # python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 1
-    # python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 1; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 100; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 0.01; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 10; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 0.1
+    # python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 1; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 100;python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 10; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 0.1
+    # python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 1000; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 100 --rev_kl_strength 100; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 1 --rev_kl_strength 1;
     # python generate_dirs_single_sgd_kl.py --layer_nbs 24,0,4,16,36,43,47 --ns 1,2,4
     fire.Fire(run)

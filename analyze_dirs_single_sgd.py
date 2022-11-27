@@ -66,6 +66,11 @@ for tensor_path in path.iterdir():
 single_dirs["orig"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd" / "l24-n1.pt").to(device)
 single_dirs["orig2"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd2" / "l24-n1.pt").to(device)
 single_dirs["orig3"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd3" / "l24-n1.pt").to(device)
+single_dirs["kl0.01"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd_kl" / "l24-n1-kl0.01.pt").to(device)
+single_dirs["kl0.10"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd_kl" / "l24-n1-kl0.10.pt").to(device)
+single_dirs["kl1.00"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd_kl" / "l24-n1-kl1.00.pt").to(device)
+single_dirs["kl10.00"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd_kl" / "l24-n1-kl10.00.pt").to(device)
+single_dirs["kl100.00"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd_kl" / "l24-n1-kl100.00.pt").to(device)
 #%%
 from matplotlib import rcParams
 
@@ -90,7 +95,7 @@ all_dirs_it = sorted(list(all_dirs.items()))
 train_tests_res = []
 l = 24
 n = 1
-d = single_dirs["orig"]
+d = single_dirs["kl100.00"]
 for t in train_tests[::10]:
     module_name = f"transformer.h.{l}"
     layer = model.get_submodule(module_name)
@@ -128,9 +133,9 @@ module_name = f"transformer.h.{24}"
 layer = model.get_submodule(module_name)
 train_tests = get_female_train_tests() + get_male_train_tests()
 controls_train_tests = get_football_train_tests() + get_housing_train_tests()
-destructed = create_handicaped(single_dirs["24"], model, layer)
+destructed = create_handicaped(single_dirs["kl100.00"], model, layer)
 orig_model = create_handicaped(torch.empty(0,single_dirs["orig"].shape[-1]).to(device), model, layer)
-for t in train_tests:
+for t in train_tests[::10]:
     print(f"{measure_performance(t, destructed):.2f} {measure_performance(t, orig_model):.2f} {t.prompt}")
 #%%
 for t in controls_train_tests:

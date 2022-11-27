@@ -189,6 +189,7 @@ def get_destruction_SGD_KL(
     controls: list[str] = [],
     control_batch_size=0,  # Higher is more costly but reduces noise. Keep 0 if no controls
     kl_strength: float = 1,
+    rev_kl_strength: float = 0,
     projection_fn=project,
     destruction_fn=zero_out,
     seed=0,
@@ -231,7 +232,12 @@ def get_destruction_SGD_KL(
             inpt = tokenizer(strs, return_tensors="pt", truncation=True, max_length=inp_min_len)
             dmodel_logprobs = torch.log_softmax(destructed_model(inpt), dim=-1)
             model_logprobs = torch.log_softmax(model(**inpt).logits, dim=-1)
-            kl_loss = kl_strength * torch.nn.KLDivLoss(log_target=True)(dmodel_logprobs, model_logprobs)
+            kl_loss = kl_strength * torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
+                dmodel_logprobs, model_logprobs
+            )
+            kl_loss += rev_kl_strength * torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
+                model_logprobs, dmodel_logprobs
+            )
 
             epoch_kl_loss += kl_loss.item()
 
