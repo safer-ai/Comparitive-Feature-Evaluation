@@ -192,14 +192,18 @@ def get_destruction_SGD_KL(
     rev_kl_strength: float = 0,
     projection_fn=project,
     destruction_fn=zero_out,
+    use_bias=False,
     seed=0,
 ):
     torch.manual_seed(seed)
     random.seed(seed)
     h_size = train_ds.x_data.shape[-1]
-    rand_init = torch.randn((n_dirs, h_size))
-    dirs = torch.autograd.Variable(rand_init.to(device), requires_grad=True)
-    optimizer = torch.optim.Adam([dirs], lr=lr)
+    dirs = torch.randn((n_dirs, h_size), requires_grad=True).to(device)
+    bias = torch.zeros((), requires_grad=True)
+    optimizer = torch.optim.Adam([dirs, bias], lr=lr)
+
+    def destruct(x_along_dirs, dirs):
+        return destruction_fn(x_along_dirs, dirs) + bias
 
     for e in range(epochs):
         epoch_loss = 0
@@ -217,7 +221,7 @@ def get_destruction_SGD_KL(
                 model,
                 layer,
                 projection_fn=projection_fn,
-                destruction_fn=destruction_fn,
+                destruction_fn=destruct if use_bias else destruction_fn,
             )
             s = 0
 

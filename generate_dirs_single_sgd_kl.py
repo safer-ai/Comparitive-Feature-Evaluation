@@ -61,10 +61,11 @@ def run(
                 rev_kl_strength=rev_kl_strength,
                 projection_fn=projection_fn,
                 destruction_fn=zero_out,
+                use_bias=True,
             )
 
             file_name = f"l{layer_nb}-n{n}-kl{kl_strength:.2f}-rkl{rev_kl_strength:.2f}.pt"
-            dir_path = Path(".") / "saved_dirs" / f"{model_name}-single-sgd_kl{cone_suffix}"
+            dir_path = Path(".") / "saved_dirs" / f"{model_name}-single-sgd_kl_bias{cone_suffix}"
             dir_path.mkdir(parents=True, exist_ok=True)
             path = dir_path / file_name
 
@@ -76,5 +77,8 @@ if __name__ == "__main__":
     # python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 1
     # python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 1; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 100;python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 10; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 0.1
     # python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 1000; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 100 --rev_kl_strength 100; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 1 --rev_kl_strength 1;
+
+    # python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 40000; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 4000 --rev_kl_strength 4000; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 40000 --rev_kl_strength 40000; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 400000 --rev_kl_strength 400000; python generate_dirs_single_sgd_kl.py --layer_nbs 24, --ns 1, --kl_strength 4000000 --rev_kl_strength 4000000;
+
     # python generate_dirs_single_sgd_kl.py --layer_nbs 24,0,4,16,36,43,47 --ns 1,2,4
     fire.Fire(run)
