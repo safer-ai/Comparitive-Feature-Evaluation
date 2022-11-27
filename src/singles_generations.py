@@ -21,27 +21,27 @@ football_players = ["Messi", "Ronaldo", "Xavi", "Iniesta"]
 
 def get_female_train_tests():
     tests = []
-    for name in girl_1tok_names:
-        tests.append(
-            SingleTest(
-                f"{name} likes", good_answers=female_things_stereotypes_1tok, bad_answers=male_things_stereotypes_1tok
-            )
-        )
-    tests.append(
-        SingleTest(
-            f"She has many", good_answers=female_things_stereotypes_1tok, bad_answers=male_things_stereotypes_1tok
-        )
-    )
-    tests.append(
-        SingleTest(
-            f"She loves",
-            good_answers=female_things_stereotypes_1tok + female_activities_stereotypes_1tok,
-            bad_answers=male_things_stereotypes_1tok + male_activities_stereotypes_1tok,
-        )
-    )
-    for name in girl_1tok_names:
-        for thing in female_things_stereotypes_1tok:
-            tests.append(SingleTest(f"{name} likes{thing}.", good_answers=[" She"], bad_answers=[" He"]))
+    # for name in girl_1tok_names:
+    #     tests.append(
+    #         SingleTest(
+    #             f"{name} likes", good_answers=female_things_stereotypes_1tok, bad_answers=male_things_stereotypes_1tok
+    #         )
+    #     )
+    # tests.append(
+    #     SingleTest(
+    #         f"She has many", good_answers=female_things_stereotypes_1tok, bad_answers=male_things_stereotypes_1tok
+    #     )
+    # )
+    # tests.append(
+    #     SingleTest(
+    #         f"She loves",
+    #         good_answers=female_things_stereotypes_1tok + female_activities_stereotypes_1tok,
+    #         bad_answers=male_things_stereotypes_1tok + male_activities_stereotypes_1tok,
+    #     )
+    # )
+    # for name in girl_1tok_names:
+    #     for thing in female_things_stereotypes_1tok:
+    #         tests.append(SingleTest(f"{name} likes{thing}.", good_answers=[" She"], bad_answers=[" He"]))
 
     for test in get_train_tests():
         tests.append(SingleTest(test.positive.prompt, [test.positive.answer], [test.negative.answer]))
@@ -51,27 +51,27 @@ def get_female_train_tests():
 
 def get_male_train_tests():
     tests = []
-    for name in boy_1tok_names:
-        tests.append(
-            SingleTest(
-                f"{name} likes", good_answers=male_things_stereotypes_1tok, bad_answers=female_things_stereotypes_1tok
-            )
-        )
-    tests.append(
-        SingleTest(
-            f"He has many", good_answers=male_things_stereotypes_1tok, bad_answers=female_things_stereotypes_1tok
-        )
-    )
-    tests.append(
-        SingleTest(
-            f"He loves",
-            good_answers=male_things_stereotypes_1tok + male_activities_stereotypes_1tok,
-            bad_answers=female_things_stereotypes_1tok + female_activities_stereotypes_1tok,
-        )
-    )
-    for name in boy_1tok_names:
-        for thing in male_things_stereotypes_1tok:
-            tests.append(SingleTest(f"{name} likes{thing}.", good_answers=[" He"], bad_answers=[" She"]))
+    # for name in boy_1tok_names:
+    #     tests.append(
+    #         SingleTest(
+    #             f"{name} likes", good_answers=male_things_stereotypes_1tok, bad_answers=female_things_stereotypes_1tok
+    #         )
+    #     )
+    # tests.append(
+    #     SingleTest(
+    #         f"He has many", good_answers=male_things_stereotypes_1tok, bad_answers=female_things_stereotypes_1tok
+    #     )
+    # )
+    # tests.append(
+    #     SingleTest(
+    #         f"He loves",
+    #         good_answers=male_things_stereotypes_1tok + male_activities_stereotypes_1tok,
+    #         bad_answers=female_things_stereotypes_1tok + female_activities_stereotypes_1tok,
+    #     )
+    # )
+    # for name in boy_1tok_names:
+    #     for thing in male_things_stereotypes_1tok:
+    #         tests.append(SingleTest(f"{name} likes{thing}.", good_answers=[" He"], bad_answers=[" She"]))
 
     for test in get_train_tests():
         tests.append(SingleTest(test.negative.prompt, [test.negative.answer], [test.positive.answer]))
