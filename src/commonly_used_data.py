@@ -21,7 +21,7 @@ def get_opt_samples(only: Optional[str] = None) -> list[str]:
     only should be None, or a column of the fragments dataframe."""
 
     df = get_opt_fragments_df()
-    return df[df[only] == 1].fragment.values.tolist()
+    return df[df[only] == 1].fragment.values.tolist()  # type: ignore
 
 
 def test_names():

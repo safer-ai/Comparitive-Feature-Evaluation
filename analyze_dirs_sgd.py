@@ -4,19 +4,19 @@ import numpy as np
 import pandas as pd
 import torch
 from attrs import define
-from tqdm import tqdm
 from transformers import GPT2LMHeadModel
-from src.pairs_generation import get_train_tests, get_val_controls, get_val_tests
+from src.direction_methods.pairs_generation import get_train_tests, get_val_controls, get_val_tests
 
 from src.constants import device, tokenizer
-from src.inlp import inlp
-from src.rlace import rlace
+from src.direction_methods.inlp import inlp
+from src.direction_methods.rlace import rlace
 from src.utils import (
     ActivationsDataset,
     edit_model_inplace,
     gen,
     gen_and_print,
-    get_activations,get_act_ds,
+    get_activations,
+    get_act_ds,
     project,
     project_cone,
     recover_model_inplace,
@@ -27,7 +27,7 @@ from src.utils import (
 )
 from collections import defaultdict
 from pathlib import Path
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 
 #%%
 
@@ -46,12 +46,12 @@ path = Path(".") / "saved_dirs" / f"{model_name}-sgd-cone"
 for tensor_path in path.iterdir():
     name = tensor_path.stem
     layer_s, n_dirs_s = name.split("-")
-    layer = int(layer_s[1:])
+    layer_nb = int(layer_s[1:])
     n_dirs = int(n_dirs_s[1:])
     d = torch.load(tensor_path).to(device)
-    all_dirs[(layer, n_dirs)] = d
+    all_dirs[(layer_nb, n_dirs)] = d
     if n_dirs == 1:
-        single_dirs[layer] = d
+        single_dirs[layer_nb] = d
 #%%
 from matplotlib import rcParams
 

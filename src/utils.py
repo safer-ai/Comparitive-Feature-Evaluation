@@ -7,8 +7,8 @@ import transformers
 from src.constants import tokenizer, device
 import gc
 from math import cos
-from src.singles_generations import SingleTest
-from src.pairs_generation import Test
+from src.direction_methods.singles_generations import SingleTest
+from src.direction_methods.pairs_generation import Test
 from transformers import BatchEncoding
 
 
@@ -122,7 +122,7 @@ def edit_model_inplace(
     module_name: str,
     projection: Callable[[torch.Tensor], torch.Tensor],
     has_leftover: bool,
-) -> nn.Module:
+):
     """Return a new module where the replacements described in the config have been done."""
     new_module = ProjectionWrapper(old_module, projection, has_leftover)
 
@@ -136,7 +136,7 @@ def edit_model_inplace(
     gc.collect()
 
 
-def recover_model_inplace(model: nn.Module, old_module: nn.Module, module_name: str) -> nn.Module:
+def recover_model_inplace(model: nn.Module, old_module: nn.Module, module_name: str):
     """Return a new module where the replacements have been canceled."""
     *parent_path, name = module_name.split(".")
     parent_name = ".".join(parent_path)

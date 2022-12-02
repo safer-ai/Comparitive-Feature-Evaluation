@@ -1,8 +1,9 @@
 from src.utils import ActivationsDataset
-from tqdm import tqdm
+from tqdm import tqdm  # type: ignore
 import torch
 from src.constants import device
 from src.utils import project
+
 
 def inlp(
     ds: ActivationsDataset,

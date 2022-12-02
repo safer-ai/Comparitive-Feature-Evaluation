@@ -1,14 +1,14 @@
 from functools import partial
 import torch
 from transformers import GPT2LMHeadModel
-from src.pairs_generation import get_train_tests
+from src.direction_methods.pairs_generation import get_train_tests
 
 from src.constants import device
-from src.dir_methods import get_grad_descent
+from src.direction_methods.direction_methods import get_grad_descent
 from src.utils import project_cone, project, get_act_ds
 from math import pi
 
-import fire
+import fire  # type: ignore
 from pathlib import Path
 
 

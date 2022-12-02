@@ -4,12 +4,12 @@
 # from interp.tools.interpretability_tools import toks_to_string_list
 # v = get_val_seqs(n_files=1)
 # s = toks_to_string_list(v[:, 1:]) # Exclude begin token
-s = []
+s: list[str] = []
 
-from tqdm import tqdm
+from tqdm import tqdm # type: ignore
 import pandas as pd
 
-fragments = []
+fragments: list[str] = []
 for ss in tqdm(s):
     # Exclude the start space, and select 32 words
     fragments.append(" ".join(ss.split(" ")[1:33]))

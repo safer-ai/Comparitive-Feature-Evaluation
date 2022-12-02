@@ -1,20 +1,18 @@
 #%%
 import random
-from countergenedit import ActivationsDataset
 
 import numpy as np
-import pandas as pd
 import torch
 from attrs import define
-from tqdm import tqdm
 from transformers import GPT2LMHeadModel
-from src.pairs_generation import get_train_tests, get_val_controls, get_val_tests
+from src.direction_methods.pairs_generation import get_train_tests, get_val_controls, get_val_tests
 
 from src.constants import device, tokenizer
-from src.inlp import inlp
-from src.rlace import rlace
+from src.direction_methods.inlp import inlp
+from src.direction_methods.rlace import rlace
 from src.utils import (
-    ActivationsDataset,get_act_ds,
+    ActivationsDataset,
+    get_act_ds,
     edit_model_inplace,
     gen,
     gen_and_print,
@@ -29,7 +27,7 @@ from src.utils import (
 )
 from collections import defaultdict
 from pathlib import Path
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 
 #%%
 
@@ -77,28 +75,28 @@ train_tests = get_train_tests()
 val_tests = get_val_tests()
 val_controls = get_val_controls()
 #%%
-layer_nb = len(model.transformer.h) // 2
+layer_nb = len(model.transformer.h) // 2  # type: ignore
 module_name = f"transformer.h.{layer_nb}"
 layer = model.get_submodule(module_name)
 layers = {module_name: layer}
 #%%
 for t in train_tests[::10]:
     print(t)
-    for n, d_list in dirs_dict.items():
+    for name, d_list in dirs_dict.items():
         results = np.array([measure_confusions(t, create_frankenstein(d, model, layer)) for d in d_list])
-        print(f"{n} {results.mean():.2f} {results.std():.2f}")
+        print(f"{name} {results.mean():.2f} {results.std():.2f}")
 #%%
 for t in val_tests:
     print(t)
-    for n, d_list in dirs_dict.items():
+    for name, d_list in dirs_dict.items():
         results = np.array([measure_confusions(t, create_frankenstein(d, model, layer)) for d in d_list])
-        print(f"{n} {results.mean():.2f} {results.std():.2f}")
+        print(f"{name} {results.mean():.2f} {results.std():.2f}")
 #%%
 for t in val_controls:
     print(t)
-    for n, d_list in dirs_dict.items():
+    for name, d_list in dirs_dict.items():
         results = np.array([measure_confusions(t, create_frankenstein(d, model, layer)) for d in d_list])
-        print(f"{n} {results.mean():.2f} {results.std():.2f}")
+        print(f"{name} {results.mean():.2f} {results.std():.2f}")
 
 # prompts = [
 #   """In a shocking finding, scientist discovered a herd of unicorns""",

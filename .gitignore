@@ -1,3 +1,4 @@
 *.pyc
 *.pt
 .vscode
+.mypy_cache

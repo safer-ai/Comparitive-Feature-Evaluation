@@ -4,13 +4,14 @@ import numpy as np
 import pandas as pd
 import torch
 from attrs import define
-from tqdm import tqdm
+from typing import cast
+from tqdm import tqdm  # type: ignore
 from transformers import GPT2LMHeadModel
-from src.pairs_generation import get_train_tests, get_val_controls, get_val_tests
+from src.direction_methods.pairs_generation import get_train_tests, get_val_controls, get_val_tests
 
 from src.constants import device, tokenizer
-from src.inlp import inlp
-from src.rlace import rlace
+from src.direction_methods.inlp import inlp
+from src.direction_methods.rlace import rlace
 from src.utils import (
     ActivationsDataset,
     edit_model_inplace,
@@ -30,8 +31,8 @@ from src.utils import (
 )
 from collections import defaultdict
 from pathlib import Path
-import matplotlib.pyplot as plt
-from src.singles_generations import (
+import matplotlib.pyplot as plt  # type: ignore
+from src.direction_methods.singles_generations import (
     get_female_train_tests,
     get_male_train_tests,
     get_female_val_tests,
@@ -39,6 +40,7 @@ from src.singles_generations import (
     get_football_train_tests,
     get_housing_train_tests,
     get_misc_val_controls,
+    SingleTest,
 )
 
 #%%
@@ -54,17 +56,19 @@ path = Path(".") / "saved_dirs" / f"{model_name}-sgd"
 for tensor_path in path.iterdir():
     name = tensor_path.stem
     layer_s, n_dirs_s = name.split("-")
-    layer = int(layer_s[1:])
+    layer_nb = int(layer_s[1:])
     n_dirs = int(n_dirs_s[1:])
     d = torch.load(tensor_path).to(device)
-    all_dirs[(layer, n_dirs)] = d
+    all_dirs[(layer_nb, n_dirs)] = d
     if n_dirs == 1:
-        single_dirs[str(layer)] = d
+        single_dirs[str(layer_nb)] = d
 
 single_dirs["orig"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd" / "l24-n1.pt").to(device)
 single_dirs["orig2"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd2" / "l24-n1.pt").to(device)
 single_dirs["orig3"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd3" / "l24-n1.pt").to(device)
-single_dirs["kl"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}" / "L24 - get_grad_descent_kl - 0 - v0.pt").to(device)
+single_dirs["kl"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}" / "L24 - get_grad_descent_kl - 0 - v0.pt").to(
+    device
+)
 
 path = Path(".") / "saved_dirs" / f"{model_name}-single-sgd_kl"
 
@@ -72,14 +76,14 @@ path = Path(".") / "saved_dirs" / f"{model_name}-single-sgd_kl"
 for tensor_path in path.iterdir():
     name = tensor_path.stem
     layer_s, n_dirs_s, kl_s, rkl_s = name.split("-")
-    layer = int(layer_s[1:])
+    layer_nb = int(layer_s[1:])
     n_dirs = int(n_dirs_s[1:])
     kl = float(kl_s[2:])
     rkl = float(rkl_s[3:])
     d = torch.load(tensor_path).to(device)
-    # all_dirs[(layer, n_dirs)] = d
+    # all_dirs[(layer_nb, n_dirs)] = d
     if n_dirs == 1:
-        single_dirs[str((layer, kl, rkl))] = d
+        single_dirs[str((layer_nb, kl, rkl))] = d
 
 path = Path(".") / "saved_dirs" / f"{model_name}-single-sgd-kl2"
 
@@ -87,16 +91,16 @@ path = Path(".") / "saved_dirs" / f"{model_name}-single-sgd-kl2"
 for tensor_path in path.iterdir():
     name = tensor_path.stem
     layer_s, n_dirs_s, kl_s, rkl_s, bias_s = name.split("-")
-    layer = int(layer_s[1:])
+    layer_nb = int(layer_s[1:])
     n_dirs = int(n_dirs_s[1:])
     kl = float(kl_s[2:])
     rkl = float(rkl_s[3:])
-    bias = bias_s[1] == 'T'
+    bias = bias_s[1] == "T"
     d = torch.load(tensor_path).to(device)
-    # all_dirs[(layer, n_dirs)] = d
-    print(layer, kl, rkl, bias)
+    # all_dirs[(layer_nb, n_dirs)] = d
+    print(layer_nb, kl, rkl, bias)
     if n_dirs == 1:
-        single_dirs[str((layer, kl, rkl, bias))] = d
+        single_dirs[str((layer_nb, kl, rkl, bias))] = d
 
 
 #%%
@@ -163,24 +167,24 @@ for i, t in enumerate(val_controls):
 #%%
 module_name = f"transformer.h.{24}"
 layer = model.get_submodule(module_name)
-train_tests = get_female_train_tests() + get_male_train_tests()
+train_single_tests = get_female_train_tests() + get_male_train_tests()
 controls_train_tests = get_football_train_tests() + get_housing_train_tests()
 destructed = create_handicaped(single_dirs["(24, 1000.0, 0.0, True)"], model, layer)
 orig_model = create_handicaped(torch.empty(0, single_dirs["orig"].shape[-1]).to(device), model, layer)
-for t in train_tests[::10]:
-    print(f"{measure_performance(t, destructed):.2f} {measure_performance(t, orig_model):.2f} {t.prompt}")
+for st in train_single_tests[::10]:
+    print(f"{measure_performance(st, destructed):.2f} {measure_performance(st, orig_model):.2f} {st.prompt}")
 #%%
-for t in controls_train_tests:
-    print(f"{measure_performance(t, destructed):.2f} {measure_performance(t, orig_model):.2f} {t.prompt}")
+for st in controls_train_tests:
+    print(f"{measure_performance(st, destructed):.2f} {measure_performance(st, orig_model):.2f} {st.prompt}")
 #%%
-for t in get_female_val_tests() + get_male_val_tests():
+for st in get_female_val_tests() + get_male_val_tests():
     print(
-        f"{measure_performance(t, destructed):.2f} {measure_performance(t, orig_model):.2f} {t.prompt}{t.good_answers[0]}"
+        f"{measure_performance(st, destructed):.2f} {measure_performance(st, orig_model):.2f} {st.prompt}{st.good_answers[0]}"
     )
 #%%
-for t in get_misc_val_controls():
+for st in get_misc_val_controls():
     print(
-        f"{measure_performance(t, destructed):.2f} {measure_performance(t, orig_model):.2f} {t.prompt}{t.good_answers[0]}"
+        f"{measure_performance(st, destructed):.2f} {measure_performance(st, orig_model):.2f} {st.prompt}{st.good_answers[0]}"
     )
 #%%
 layers = list(set([l for i, (l, n), r in val_tests_res]))

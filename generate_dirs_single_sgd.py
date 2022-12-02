@@ -1,7 +1,7 @@
 from functools import partial
 import torch
 from transformers import GPT2LMHeadModel
-from src.singles_generations import (
+from src.direction_methods.singles_generations import (
     get_female_train_tests,
     get_male_train_tests,
     get_football_train_tests,
@@ -9,11 +9,11 @@ from src.singles_generations import (
 )
 
 from src.constants import device
-from src.dir_methods import get_destruction_SGD
+from src.direction_methods.direction_methods import get_destruction_SGD
 from src.utils import project_cone, project, get_act_ds_with_controls, zero_out
 from math import pi
 
-import fire
+import fire  # type: ignore
 from pathlib import Path
 
 

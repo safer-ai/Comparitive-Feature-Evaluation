@@ -1,7 +1,7 @@
 from attrs import define
 from src.commonly_used_data import boy_1tok_names, girl_1tok_names
 from src.data_utils import assert_one_token, assert_n_token
-from src.pairs_generation import get_train_tests, get_val_tests, get_val_controls
+from src.direction_methods.pairs_generation import get_train_tests, get_val_tests, get_val_controls
 
 
 @define
@@ -20,7 +20,7 @@ football_players = ["Messi", "Ronaldo", "Xavi", "Iniesta"]
 
 
 def get_female_train_tests():
-    tests = []
+    tests: list[SingleTest] = []
     # for name in girl_1tok_names:
     #     tests.append(
     #         SingleTest(
@@ -50,7 +50,7 @@ def get_female_train_tests():
 
 
 def get_male_train_tests():
-    tests = []
+    tests: list[SingleTest] = []
     # for name in boy_1tok_names:
     #     tests.append(
     #         SingleTest(
@@ -80,7 +80,7 @@ def get_male_train_tests():
 
 
 def get_football_train_tests():
-    tests = []
+    tests: list[SingleTest] = []
     for team in football_teams_1tok:
         tests.append(
             SingleTest(
@@ -109,7 +109,7 @@ def get_football_train_tests():
 
 
 def get_housing_train_tests():
-    tests = []
+    tests: list[SingleTest] = []
     for name in boy_1tok_names + girl_1tok_names:
         for house_type in ["house", "flat"]:
             tests.append(
@@ -137,21 +137,21 @@ def get_housing_train_tests():
 
 
 def get_female_val_tests():
-    tests = []
+    tests: list[SingleTest] = []
     for test in get_val_tests():
         tests.append(SingleTest(test.positive.prompt, [test.positive.answer], [test.negative.answer]))
     return tests
 
 
 def get_male_val_tests():
-    tests = []
+    tests: list[SingleTest] = []
     for test in get_val_tests():
         tests.append(SingleTest(test.negative.prompt, [test.negative.answer], [test.positive.answer]))
     return tests
 
 
 def get_misc_val_controls():
-    tests = []
+    tests: list[SingleTest] = []
     for test in get_val_controls():
         tests.append(SingleTest(test.negative.prompt, [test.negative.answer], [test.positive.answer]))
         tests.append(SingleTest(test.positive.prompt, [test.positive.answer], [test.negative.answer]))

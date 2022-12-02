@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 import torch
-from countergen.tools.utils import maybe_tqdm
 from torch.optim import SGD
 from tqdm import tqdm  # type: ignore
 from src.utils import ActivationsDataset

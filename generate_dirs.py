@@ -1,11 +1,11 @@
 import torch
 from transformers import GPT2LMHeadModel
-from src.pairs_generation import get_train_tests
+from src.direction_methods.pairs_generation import get_train_tests
 
 from src.constants import device, tokenizer
-from src.inlp import inlp
-from src.rlace import rlace
-from src.dir_methods import (
+from src.direction_methods.inlp import inlp
+from src.direction_methods.rlace import rlace
+from src.direction_methods.direction_methods import (
     get_rlace,
     get_inlp,
     get_grad_descent,
@@ -18,7 +18,7 @@ from src.dir_methods import (
 from src.utils import get_act_ds
 from functools import partial
 
-import fire
+import fire  # type: ignore
 from pathlib import Path
 
 
@@ -39,11 +39,11 @@ def run(model_name: str, n: int = 1, layer_nb: int = None):
         get_inlp,
         get_rlace,
         get_grad_descent,
-        get_grad_descent_kl
+        get_grad_descent_kl,
     ]
 
     train_tests = get_train_tests()
-    layer_nb_ = layer_nb or len(model.transformer.h) // 2
+    layer_nb_ = layer_nb or len(model.transformer.h) // 2  # type: ignore
     module_name = f"transformer.h.{layer_nb_}"
     layer = model.get_submodule(module_name)
     layers = {module_name: layer}
@@ -53,7 +53,7 @@ def run(model_name: str, n: int = 1, layer_nb: int = None):
         print("round", i)
         for m in methods:
             print(m.__name__)
-            d = m(train_ds, train_tests, model, layer, seed=i)
+            d = m(train_ds, train_tests, model, layer, seed=i)  # type: ignore
 
             file_name = f"L{layer_nb} - {m.__name__} - {i} - v0.pt" if layer_nb else f"{m.__name__} - {i} - v0.pt"
             path = Path(".") / "saved_dirs" / model_name / file_name

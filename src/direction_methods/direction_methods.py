@@ -10,11 +10,11 @@ from src.utils import (
     create_handicaped,
     measure_performance,
 )
-from src.singles_generations import SingleTest
-from src.inlp import inlp
-from src.rlace import rlace
+from src.direction_methods.singles_generations import SingleTest
+from src.direction_methods.inlp import inlp
+from src.direction_methods.rlace import rlace
 import random
-from tqdm import tqdm
+from tqdm import tqdm  # type: ignore
 import numpy as np
 
 
@@ -58,7 +58,7 @@ def get_grad_descent(
     optimizer = torch.optim.Adam([dirs], lr=lr)
 
     for e in range(epochs):
-        epoch_loss = 0
+        epoch_loss = 0.0
         g = tqdm(range(0, len(train_tests), batch_size))
         random.shuffle(train_tests)
         for i in g:
@@ -68,7 +68,7 @@ def get_grad_descent(
             model_with_grad = create_frankenstein(
                 dirs / torch.linalg.norm(dirs, dim=-1)[:, None], model, layer, projection_fn=projection_fn
             )
-            s = 0
+            s = torch.zeros(())
             for t in train_tests[i : i + batch_size]:
                 s += (measure_kl_confusions_grad if use_kl_confusion else measure_confusions_grad)(t, model_with_grad)
             epoch_loss += s.item()
@@ -77,6 +77,7 @@ def get_grad_descent(
             g.set_postfix({"epoch": e, "loss": epoch_loss})
     d = dirs.detach()
     return d / torch.linalg.norm(d, dim=-1)[:, None]
+
 
 def get_grad_she_he(train_ds, train_tests, model, layer, seed=0):
     torch.manual_seed(seed)
@@ -158,7 +159,7 @@ def get_destruction_SGD(
     optimizer = torch.optim.Adam([dirs], lr=lr)
 
     for e in range(epochs):
-        epoch_loss = 0
+        epoch_loss = 0.0
         g = tqdm(range(0, len(train_tests), batch_size))
         random.shuffle(train_tests)
         for i in g:
@@ -173,7 +174,7 @@ def get_destruction_SGD(
                 projection_fn=projection_fn,
                 destruction_fn=destruction_fn,
             )
-            s = 0
+            s = torch.zeros(())
 
             for t in train_tests[i : i + batch_size]:
                 s += measure_performance(t, destructed_model)  # We want the lowest performance possible
@@ -216,9 +217,9 @@ def get_destruction_SGD_KL(
         return destruction_fn(x_along_dirs, dirs) + bias
 
     for e in range(epochs):
-        epoch_loss = 0
-        epoch_main_loss = 0
-        epoch_kl_loss = 0
+        epoch_loss = 0.0
+        epoch_main_loss = 0.0
+        epoch_kl_loss = 0.0
         g = tqdm(range(0, len(train_tests), batch_size))
         random.shuffle(train_tests)
         for i in g:
@@ -233,7 +234,7 @@ def get_destruction_SGD_KL(
                 projection_fn=projection_fn,
                 destruction_fn=destruct if use_bias else destruction_fn,
             )
-            s = 0
+            s = torch.zeros(())
 
             for t in train_tests[i : i + batch_size]:
                 s += measure_performance(t, destructed_model)  # We want the lowest performance possible

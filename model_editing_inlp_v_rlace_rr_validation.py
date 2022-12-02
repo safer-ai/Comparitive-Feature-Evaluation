@@ -7,13 +7,13 @@ import numpy as np
 import pandas as pd
 import torch
 from attrs import define
-from tqdm import tqdm
+from tqdm import tqdm  # type: ignore
 from transformers import GPT2LMHeadModel
-from src.pairs_generation import get_train_tests, get_val_controls, get_val_tests
+from src.direction_methods.pairs_generation import get_train_tests, get_val_controls, get_val_tests
 
 from src.constants import device, tokenizer
-from src.inlp import inlp
-from src.rlace import rlace
+from src.direction_methods.inlp import inlp
+from src.direction_methods.rlace import rlace
 from src.utils import (
     ActivationsDataset,
     get_act_ds,
@@ -67,7 +67,7 @@ val_controls = get_val_controls()
 
 
 #%%
-layer_nb = len(model.transformer.h) // 2
+layer_nb = len(model.transformer.h) // 2  # type: ignore
 module_name = f"transformer.h.{layer_nb}"
 layer = model.get_submodule(module_name)
 layers = {module_name: layer}
@@ -195,7 +195,7 @@ dirs_dict = {
     "empty": torch.empty((0, dirs.shape[-1])).to(device),
 }
 
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 
 all_dirs = torch.cat(list(dirs_dict.values())[:-1])
 plt.imshow(torch.einsum("n h, m h -> n m", all_dirs, all_dirs).abs().cpu())
