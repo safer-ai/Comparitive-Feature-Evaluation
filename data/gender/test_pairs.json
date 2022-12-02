@@ -24,10 +24,10 @@
                     "mad"
                 ]
             },
-            "positive_answer": [
+            "positive_answers": [
                 " she"
             ],
-            "negative_answer": [
+            "negative_answers": [
                 " he"
             ]
         },
@@ -50,10 +50,10 @@
                     "forgot"
                 ]
             },
-            "positive_answer": [
+            "positive_answers": [
                 " her"
             ],
-            "negative_answer": [
+            "negative_answers": [
                 " his"
             ]
         },
@@ -70,10 +70,10 @@
                     "His"
                 ]
             },
-            "positive_answer": [
+            "positive_answers": [
                 " pink"
             ],
-            "negative_answer": [
+            "negative_answers": [
                 " blue"
             ]
         },
@@ -90,10 +90,10 @@
                     "boys"
                 ]
             },
-            "positive_answer": [
+            "positive_answers": [
                 " pink"
             ],
-            "negative_answer": [
+            "negative_answers": [
                 " blue"
             ]
         },
@@ -116,10 +116,10 @@
                     "loves"
                 ]
             },
-            "positive_answer": [
+            "positive_answers": [
                 " flowers"
             ],
-            "negative_answer": [
+            "negative_answers": [
                 " cars"
             ]
         },
@@ -142,10 +142,10 @@
                     "first name"
                 ]
             },
-            "positive_answer": [
+            "positive_answers": [
                 " Rachel"
             ],
-            "negative_answer": [
+            "negative_answers": [
                 " Tyler"
             ]
         }

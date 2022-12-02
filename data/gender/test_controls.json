@@ -19,10 +19,10 @@
                     ""
                 ]
             },
-            "positive_answer": [
+            "positive_answers": [
                 " drink"
             ],
-            "negative_answer": [
+            "negative_answers": [
                 " eat"
             ]
         },
@@ -42,10 +42,10 @@
                     "Peppers"
                 ]
             },
-            "positive_answer": [
+            "positive_answers": [
                 " fruits"
             ],
-            "negative_answer": [
+            "negative_answers": [
                 " vegetables"
             ]
         },
@@ -67,10 +67,10 @@
                     ""
                 ]
             },
-            "positive_answer": [
+            "positive_answers": [
                 " they"
             ],
-            "negative_answer": [
+            "negative_answers": [
                 " it"
             ]
         }
