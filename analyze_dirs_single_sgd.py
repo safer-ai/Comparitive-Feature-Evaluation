@@ -42,12 +42,8 @@ from src.singles_generations import (
 )
 
 #%%
-
 model_name = "gpt2-xl"
-model: torch.nn.Module = GPT2LMHeadModel.from_pretrained(model_name).to(device)
-for param in model.parameters():
-    param.requires_grad = False
-#%%
+
 all_dirs = {}
 single_dirs = {}
 n = 10
@@ -68,6 +64,7 @@ for tensor_path in path.iterdir():
 single_dirs["orig"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd" / "l24-n1.pt").to(device)
 single_dirs["orig2"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd2" / "l24-n1.pt").to(device)
 single_dirs["orig3"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}-single-sgd3" / "l24-n1.pt").to(device)
+single_dirs["kl"] = torch.load(Path(".") / "saved_dirs" / f"{model_name}" / "L24 - get_grad_descent_kl - 0 - v0.pt").to(device)
 
 path = Path(".") / "saved_dirs" / f"{model_name}-single-sgd_kl"
 
@@ -83,6 +80,25 @@ for tensor_path in path.iterdir():
     # all_dirs[(layer, n_dirs)] = d
     if n_dirs == 1:
         single_dirs[str((layer, kl, rkl))] = d
+
+path = Path(".") / "saved_dirs" / f"{model_name}-single-sgd-kl2"
+
+
+for tensor_path in path.iterdir():
+    name = tensor_path.stem
+    layer_s, n_dirs_s, kl_s, rkl_s, bias_s = name.split("-")
+    layer = int(layer_s[1:])
+    n_dirs = int(n_dirs_s[1:])
+    kl = float(kl_s[2:])
+    rkl = float(rkl_s[3:])
+    bias = bias_s[1] == 'T'
+    d = torch.load(tensor_path).to(device)
+    # all_dirs[(layer, n_dirs)] = d
+    print(layer, kl, rkl, bias)
+    if n_dirs == 1:
+        single_dirs[str((layer, kl, rkl, bias))] = d
+
+
 #%%
 from matplotlib import rcParams
 
@@ -94,9 +110,13 @@ single_dirs_it = sorted(list(single_dirs.items()))
 keys = [k for k, _ in single_dirs_it]
 all_dirs_t = torch.cat([d for _, d in single_dirs_it])
 plt.imshow(torch.einsum("n h, m h -> n m", all_dirs_t, all_dirs_t).abs().cpu())
-plt.xticks(list(range(len(single_dirs))), keys, rotation=45)
+plt.xticks(list(range(len(single_dirs))), keys, rotation=90)
 plt.yticks(list(range(len(single_dirs))), keys)
 plt.colorbar()
+#%%
+model: torch.nn.Module = GPT2LMHeadModel.from_pretrained(model_name).to(device)
+for param in model.parameters():
+    param.requires_grad = False
 #%%
 train_tests = get_train_tests()
 val_tests = get_val_tests()
@@ -107,7 +127,7 @@ all_dirs_it = sorted(list(all_dirs.items()))
 train_tests_res = []
 l = 24
 n = 1
-d = single_dirs["kl100.00"]
+d = single_dirs["kl"]
 for t in train_tests[::10]:
     module_name = f"transformer.h.{l}"
     layer = model.get_submodule(module_name)
@@ -145,7 +165,7 @@ module_name = f"transformer.h.{24}"
 layer = model.get_submodule(module_name)
 train_tests = get_female_train_tests() + get_male_train_tests()
 controls_train_tests = get_football_train_tests() + get_housing_train_tests()
-destructed = create_handicaped(single_dirs["kl100.00"], model, layer)
+destructed = create_handicaped(single_dirs["(24, 1000.0, 0.0, True)"], model, layer)
 orig_model = create_handicaped(torch.empty(0, single_dirs["orig"].shape[-1]).to(device), model, layer)
 for t in train_tests[::10]:
     print(f"{measure_performance(t, destructed):.2f} {measure_performance(t, orig_model):.2f} {t.prompt}")

@@ -34,10 +34,6 @@ import matplotlib.pyplot as plt
 #%%
 
 model_name = "gpt2-xl"
-model: torch.nn.Module = GPT2LMHeadModel.from_pretrained(model_name).to(device)
-for param in model.parameters():
-    param.requires_grad = False
-#%%
 dirs_dict = defaultdict(lambda: [])
 all_dirs = {}
 n = 10
@@ -71,6 +67,11 @@ plt.imshow(torch.einsum("n h, m h -> n m", all_dirs_t, all_dirs_t).abs().cpu())
 plt.xticks(list(range(0, n * len(dirs_dict), n)), dirs_dict.keys(), rotation=45)
 plt.yticks(list(range(0, n * len(dirs_dict), n)), dirs_dict.keys())
 plt.colorbar()
+#%%
+
+model: torch.nn.Module = GPT2LMHeadModel.from_pretrained(model_name).to(device)
+for param in model.parameters():
+    param.requires_grad = False
 #%%
 train_tests = get_train_tests()
 val_tests = get_val_tests()

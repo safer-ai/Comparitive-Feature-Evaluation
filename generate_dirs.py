@@ -6,7 +6,7 @@ from src.constants import device, tokenizer
 from src.inlp import inlp
 from src.rlace import rlace
 from src.dir_methods import (
-    get_rlace, get_act_ds,
+    get_rlace,
     get_inlp,
     get_grad_descent,
     get_embed_she_he,
@@ -15,6 +15,8 @@ from src.dir_methods import (
     get_grad_she_he,
     get_random,
 )
+from src.utils import get_act_ds
+from functools import partial
 
 import fire
 from pathlib import Path
@@ -25,6 +27,9 @@ def run(model_name: str, n: int = 1, layer_nb: int = None):
     for param in model.parameters():
         param.requires_grad = False
 
+    def get_grad_descent_kl(*args, **kwargs):
+        return partial(get_grad_descent, use_kl_confusion=True)(*args, **kwargs)
+
     methods = [
         get_random,
         get_embed_she_he,
@@ -34,6 +39,7 @@ def run(model_name: str, n: int = 1, layer_nb: int = None):
         get_inlp,
         get_rlace,
         get_grad_descent,
+        get_grad_descent_kl
     ]
 
     train_tests = get_train_tests()
@@ -56,4 +62,7 @@ def run(model_name: str, n: int = 1, layer_nb: int = None):
 
 
 if __name__ == "__main__":
+    # python generate_dirs.py --model_name gpt2 --n 1 --layer_nb 6
+    # python generate_dirs.py --model_name gpt2-xl --n 1 --layer_nb 24
+    # python generate_dirs.py --model_name gpt2-xl --n 10 --layer_nb 24
     fire.Fire(run)

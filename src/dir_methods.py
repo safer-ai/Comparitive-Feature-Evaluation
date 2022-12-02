@@ -4,6 +4,7 @@ import torch
 from src.utils import (
     create_frankenstein,
     measure_confusions_grad,
+    measure_kl_confusions_grad,
     project,
     zero_out,
     create_handicaped,
@@ -37,7 +38,17 @@ def get_random(train_ds, train_tests, model, layer, seed=0):
 
 
 def get_grad_descent(
-    train_ds, train_tests, model, layer, epochs=8, batch_size=2, lr=1e-4, n_dirs=1, projection_fn=project, seed=0
+    train_ds,
+    train_tests,
+    model,
+    layer,
+    epochs=8,
+    batch_size=2,
+    lr=1e-4,
+    n_dirs=1,
+    projection_fn=project,
+    seed=0,
+    use_kl_confusion: bool = False,
 ):
     torch.manual_seed(seed)
     random.seed(seed)
@@ -59,14 +70,13 @@ def get_grad_descent(
             )
             s = 0
             for t in train_tests[i : i + batch_size]:
-                s += measure_confusions_grad(t, model_with_grad)
+                s += (measure_kl_confusions_grad if use_kl_confusion else measure_confusions_grad)(t, model_with_grad)
             epoch_loss += s.item()
             s.backward()
             optimizer.step()
             g.set_postfix({"epoch": e, "loss": epoch_loss})
     d = dirs.detach()
     return d / torch.linalg.norm(d, dim=-1)[:, None]
-
 
 def get_grad_she_he(train_ds, train_tests, model, layer, seed=0):
     torch.manual_seed(seed)
@@ -198,8 +208,8 @@ def get_destruction_SGD_KL(
     torch.manual_seed(seed)
     random.seed(seed)
     h_size = train_ds.x_data.shape[-1]
-    dirs = torch.randn((n_dirs, h_size), requires_grad=True).to(device)
-    bias = torch.zeros((), requires_grad=True)
+    dirs = torch.randn((n_dirs, h_size), requires_grad=True, device=device)
+    bias = torch.zeros((), requires_grad=True, device=device)
     optimizer = torch.optim.Adam([dirs, bias], lr=lr)
 
     def destruct(x_along_dirs, dirs):

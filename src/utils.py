@@ -9,6 +9,7 @@ import gc
 from math import cos
 from src.singles_generations import SingleTest
 from src.pairs_generation import Test
+from transformers import BatchEncoding
 
 
 @define
@@ -216,7 +217,11 @@ def run_and_modify(tokens, model, modification_fns):
             handle.remove()
 
 
-def measure_confusions_grad(test, model):
+# The first input is the correct one, but the activation of the second one is the distraction.
+FrankenSteinModel = Callable[[BatchEncoding, BatchEncoding], torch.Tensor]
+
+
+def measure_confusions_grad(test, model: FrankenSteinModel):
     inps1 = []
     inps2 = []
     for i, q1 in enumerate([test.positive, test.negative]):
@@ -238,12 +243,32 @@ def measure_confusions_grad(test, model):
     return abs(res[0, 0] - res[0, 1]) + abs(res[1, 1] - res[1, 0])  # Err on first + Err on second
 
 
-def measure_confusions(test, model):
+def measure_kl_confusions_grad(test, model: FrankenSteinModel):
+    inps1 = []
+    inps2 = []
+    for i, q1 in enumerate([test.positive, test.negative]):
+        for j, q2 in enumerate([test.positive, test.negative]):
+            inps1.append(q1.prompt)
+            inps2.append(q2.prompt)
+    inps1t = tokenizer(inps1, return_tensors="pt").to(device)
+    inps2t = tokenizer(inps2, return_tensors="pt").to(device)
+    outs_mixed_raw = torch.log_softmax(model(inps1t, inps2t)[:, -1], dim=-1)
+
+    # 1 is 0 distracted
+    # 3 is 2 distracted
+    return torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
+        outs_mixed_raw[[0, 2]], outs_mixed_raw[[1, 3]]
+    ) + torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(outs_mixed_raw[[1, 3]], outs_mixed_raw[[0, 2]])
+
+
+def measure_confusions(test, model: FrankenSteinModel):
     with torch.no_grad():
         return measure_confusions_grad(test, model).item()
 
 
-def create_frankenstein(dirs, model, layer_module, additional=0, projection_fn=project):
+def create_frankenstein(
+    dirs, model: torch.nn.Module, layer_module, additional=0, projection_fn=project
+) -> FrankenSteinModel:
     """Return a frankenstein model taking two inputs.
 
     The first input is the correct one, but the activation of the second one will be used everywhere but the dirs."""
