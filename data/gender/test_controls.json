@@ -1,0 +1,78 @@
+{
+    "version": "1",
+    "samples": [
+        {
+            "pattern": "If you're {thirsty},{ just}",
+            "positive_replacements": {
+                "thirsty": [
+                    "thirsty"
+                ]
+            },
+            "negative_replacements": {
+                "thirsty": [
+                    "hungry"
+                ]
+            },
+            "neutral_replacements": {
+                " just": [
+                    " just",
+                    ""
+                ]
+            },
+            "positive_answer": [
+                " drink"
+            ],
+            "negative_answer": [
+                " eat"
+            ]
+        },
+        {
+            "pattern": "{Apples} are",
+            "positive_replacements": {
+                "Apples": [
+                    "Apples",
+                    "Bananas",
+                    "Strawberries"
+                ]
+            },
+            "negative_replacements": {
+                "Apples": [
+                    "Broccoli",
+                    "Cucumbers",
+                    "Peppers"
+                ]
+            },
+            "positive_answer": [
+                " fruits"
+            ],
+            "negative_answer": [
+                " vegetables"
+            ]
+        },
+        {
+            "pattern": "{They are}{ not} working because",
+            "positive_replacements": {
+                "They are": [
+                    "They are"
+                ]
+            },
+            "negative_replacements": {
+                "They are": [
+                    "It is"
+                ]
+            },
+            "neutral_replacements": {
+                " not": [
+                    " not",
+                    ""
+                ]
+            },
+            "positive_answer": [
+                " they"
+            ],
+            "negative_answer": [
+                " it"
+            ]
+        }
+    ]
+}
