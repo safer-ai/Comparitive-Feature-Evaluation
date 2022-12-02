@@ -18,7 +18,10 @@ from pathlib import Path
 
 
 def run(
-    model_name: str = "gpt2-xl", layer_nbs: tuple[int, ...] = (0,), ns: tuple[int, ...] = (1,), use_cone: bool = False
+    model_name: str = "gpt2-xl",
+    layer_nbs: tuple[int, ...] = (0,),
+    ns: tuple[int, ...] = (1,),
+    use_cone: bool = False,
 ):
     print(layer_nbs, ns, use_cone)
 
@@ -35,7 +38,9 @@ def run(
     for layer_nb in layer_nbs:
         module_name = f"transformer.h.{layer_nb}"
         layer = model.get_submodule(module_name)
-        train_ds = get_act_ds_with_controls(model, train_tests, controls_train_tests, layer)
+        train_ds = get_act_ds_with_controls(
+            model, train_tests, controls_train_tests, layer
+        )
         for n in ns:
             print("layer", layer_nb, "n", n)
             d = get_destruction_SGD(
@@ -54,7 +59,9 @@ def run(
             )
 
             file_name = f"l{layer_nb}-n{n}.pt"
-            dir_path = Path(".") / "saved_dirs" / f"{model_name}-single-sgd3{cone_suffix}"
+            dir_path = (
+                Path(".") / "saved_dirs" / f"{model_name}-single-sgd3{cone_suffix}"
+            )
             dir_path.mkdir(parents=True, exist_ok=True)
             path = dir_path / file_name
 

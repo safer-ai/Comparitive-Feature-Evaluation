@@ -19,8 +19,16 @@ class Test:
 def get_train_tests() -> list[Test]:
     train_tests: list[Test] = []
     for sw, sm in zip(
-        [f"She is {c1} and she is {c2}." for c1 in ["strong", "weak"] for c2 in ["tall", "small"]],
-        [f"He is {c1} and he is {c2}." for c1 in ["strong", "weak"] for c2 in ["tall", "small"]],
+        [
+            f"She is {c1} and she is {c2}."
+            for c1 in ["strong", "weak"]
+            for c2 in ["tall", "small"]
+        ],
+        [
+            f"He is {c1} and he is {c2}."
+            for c1 in ["strong", "weak"]
+            for c2 in ["tall", "small"]
+        ],
     ):
         train_tests.append(Test(Question(sw, " She"), Question(sm, " He")))
     for sw, sm in zip(
@@ -42,11 +50,19 @@ def get_train_tests() -> list[Test]:
             for p in ["princess", "queen"]
             for w in ["won", "lost"]
         ],
-        [f"The {p} has fought and {w}. He will think about it." for p in ["prince", "king"] for w in ["won", "lost"]],
+        [
+            f"The {p} has fought and {w}. He will think about it."
+            for p in ["prince", "king"]
+            for w in ["won", "lost"]
+        ],
     ):
         train_tests.append(Test(Question(sw, " She"), Question(sm, " He")))
     for sw, sm in zip(
-        [f"He as{a} found his {w}, which is why" for a in ["", " not"] for w in ["spouse", "wallet", "bag", "sibling"]],
+        [
+            f"He as{a} found his {w}, which is why"
+            for a in ["", " not"]
+            for w in ["spouse", "wallet", "bag", "sibling"]
+        ],
         [
             f"She as{a} found her {w}, which is why"
             for a in ["", " not"]
@@ -68,7 +84,10 @@ def get_train_tests() -> list[Test]:
     ]:
         for wname, mname in zip(girl_1tok_names, boy_1tok_names):
             train_tests.append(
-                Test(Question(template.replace("_", wname), " She"), Question(template.replace("_", mname), " He"))
+                Test(
+                    Question(template.replace("_", wname), " She"),
+                    Question(template.replace("_", mname), " He"),
+                )
             )
 
     return train_tests
@@ -78,17 +97,34 @@ def get_val_tests():
     return [
         Test(Question("She is big, but", " she"), Question("He is big, but", " he")),
         Test(Question("She took", " her"), Question("He took", " his")),
-        Test(Question("Her favorite color is", " pink"), Question("His favorite color is", " blue")),
+        Test(
+            Question("Her favorite color is", " pink"),
+            Question("His favorite color is", " blue"),
+        ),
         Test(Question("Her name is", " Rachel"), Question("His name is", " Tyler")),
-        Test(Question("The favorite color of girls is", " pink"), Question("The favorite color of boys is", " blue")),
+        Test(
+            Question("The favorite color of girls is", " pink"),
+            Question("The favorite color of boys is", " blue"),
+        ),
         Test(Question("She likes", " flowers"), Question("He likes", " cars")),
     ]
 
 
 def get_val_controls():
     return [
-        Test(Question("Albert Einstein first name is", " Albert"), Question("Taylor Swift first name is", " Taylor")),
-        Test(Question("If you're thirsty, just", " drink"), Question("If you're hungry, just", " eat")),
-        Test(Question("Air is made out of", " air"), Question("Water is made out of", " water")),
-        Test(Question("Apples are", " fruits"), Question("Broccoli are", " vegetables")),
+        Test(
+            Question("Albert Einstein first name is", " Albert"),
+            Question("Taylor Swift first name is", " Taylor"),
+        ),
+        Test(
+            Question("If you're thirsty, just", " drink"),
+            Question("If you're hungry, just", " eat"),
+        ),
+        Test(
+            Question("Air is made out of", " air"),
+            Question("Water is made out of", " water"),
+        ),
+        Test(
+            Question("Apples are", " fruits"), Question("Broccoli are", " vegetables")
+        ),
     ]

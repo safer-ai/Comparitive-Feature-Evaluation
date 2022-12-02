@@ -151,7 +151,9 @@ def rlace(
     P = 1e-1 * torch.randn(hidden_dim, hidden_dim).to(device)
     P.requires_grad = True
 
-    optimizer_predictor = optimizer_class(predictor.parameters(), **optimizer_params_predictor)
+    optimizer_predictor = optimizer_class(
+        predictor.parameters(), **optimizer_params_predictor
+    )
     optimizer_P = optimizer_class([P], **optimizer_params_P)
 
     maj = get_majority_acc(y_np)
@@ -169,7 +171,9 @@ def rlace(
             np.random.shuffle(idx)
             X_batch, y_batch = X_torch[idx[:batch_size]], y_torch[idx[:batch_size]]
 
-            loss_P = get_loss_fn(X_batch, y_batch, predictor, symmetric(P), bce_loss_fn, optimize_P=True)
+            loss_P = get_loss_fn(
+                X_batch, y_batch, predictor, symmetric(P), bce_loss_fn, optimize_P=True
+            )
             loss_P.backward()
             optimizer_P.step()
 
@@ -189,22 +193,30 @@ def rlace(
             np.random.shuffle(idx)
             X_batch, y_batch = X_torch[idx[:batch_size]], y_torch[idx[:batch_size]]
 
-            loss_predictor = get_loss_fn(X_batch, y_batch, predictor, symmetric(P), bce_loss_fn, optimize_P=False)
+            loss_predictor = get_loss_fn(
+                X_batch, y_batch, predictor, symmetric(P), bce_loss_fn, optimize_P=False
+            )
             loss_predictor.backward()
             optimizer_predictor.step()
             count_examples += batch_size
 
         if i % evalaute_every == 0:
             # pbar.set_description("Evaluating current adversary...")
-            loss_val, score = get_score(X_np, y_np, X_dev_np, y_dev_np, P.detach().cpu().numpy(), n_dim)
-            if loss_val > best_loss:  # if np.abs(score - maj) < np.abs(best_score - maj):
+            loss_val, score = get_score(
+                X_np, y_np, X_dev_np, y_dev_np, P.detach().cpu().numpy(), n_dim
+            )
+            if (
+                loss_val > best_loss
+            ):  # if np.abs(score - maj) < np.abs(best_score - maj):
                 best_P, best_loss = symmetric(P).detach().cpu().numpy().copy(), loss_val
             if np.abs(score - maj) < np.abs(best_score - maj):
                 best_score = score
 
             # update progress bar
 
-            best_so_far = best_score if np.abs(best_score - maj) < np.abs(score - maj) else score
+            best_so_far = (
+                best_score if np.abs(best_score - maj) < np.abs(score - maj) else score
+            )
             pbar.set_description(
                 "{:.0f}/{:.0f}. Acc post-projection: {:.3f}%; best so-far: {:.3f}%; Maj: {:.3f}%; Gap: {:.3f}%; best loss: {:.4f}; current loss: {:.4f}".format(
                     i,

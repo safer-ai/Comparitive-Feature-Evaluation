@@ -16,15 +16,21 @@ def inlp(
 
     INLP by Ravfogel, 2020: see https://aclanthology.org/2020.acl-main.647/"""
 
-    working_ds = ActivationsDataset(torch.clone(ds.x_data), torch.clone(ds.y_data[:, None].float()))
+    working_ds = ActivationsDataset(
+        torch.clone(ds.x_data), torch.clone(ds.y_data[:, None].float())
+    )
     tot_n_dims = ds.x_data.shape[-1]
     dirs: list[torch.Tensor] = []
 
     for i in tqdm(range(n_dim)):
         model = torch.nn.Linear(tot_n_dims, 1).to(device)
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-        dataloader = torch.utils.data.DataLoader(working_ds, batch_size=256, shuffle=True)
+        optimizer = torch.optim.Adam(
+            model.parameters(), lr=learning_rate, weight_decay=weight_decay
+        )
+        dataloader = torch.utils.data.DataLoader(
+            working_ds, batch_size=256, shuffle=True
+        )
         loss_fn = torch.nn.BCEWithLogitsLoss()
 
         for _ in range(n_training_iters):

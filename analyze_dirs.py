@@ -5,7 +5,11 @@ import numpy as np
 import torch
 from attrs import define
 from transformers import GPT2LMHeadModel
-from src.direction_methods.pairs_generation import get_train_tests, get_val_controls, get_val_tests
+from src.direction_methods.pairs_generation import (
+    get_train_tests,
+    get_val_controls,
+    get_val_tests,
+)
 
 from src.constants import device, tokenizer
 from src.direction_methods.inlp import inlp
@@ -83,19 +87,34 @@ layers = {module_name: layer}
 for t in train_tests[::10]:
     print(t)
     for name, d_list in dirs_dict.items():
-        results = np.array([measure_confusions(t, create_frankenstein(d, model, layer)) for d in d_list])
+        results = np.array(
+            [
+                measure_confusions(t, create_frankenstein(d, model, layer))
+                for d in d_list
+            ]
+        )
         print(f"{name} {results.mean():.2f} {results.std():.2f}")
 #%%
 for t in val_tests:
     print(t)
     for name, d_list in dirs_dict.items():
-        results = np.array([measure_confusions(t, create_frankenstein(d, model, layer)) for d in d_list])
+        results = np.array(
+            [
+                measure_confusions(t, create_frankenstein(d, model, layer))
+                for d in d_list
+            ]
+        )
         print(f"{name} {results.mean():.2f} {results.std():.2f}")
 #%%
 for t in val_controls:
     print(t)
     for name, d_list in dirs_dict.items():
-        results = np.array([measure_confusions(t, create_frankenstein(d, model, layer)) for d in d_list])
+        results = np.array(
+            [
+                measure_confusions(t, create_frankenstein(d, model, layer))
+                for d in d_list
+            ]
+        )
         print(f"{name} {results.mean():.2f} {results.std():.2f}")
 
 # prompts = [

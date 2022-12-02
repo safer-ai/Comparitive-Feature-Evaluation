@@ -1,7 +1,11 @@
 from attrs import define
 from src.commonly_used_data import boy_1tok_names, girl_1tok_names
 from src.data_utils import assert_one_token, assert_n_token
-from src.direction_methods.pairs_generation import get_train_tests, get_val_tests, get_val_controls
+from src.direction_methods.pairs_generation import (
+    get_train_tests,
+    get_val_tests,
+    get_val_controls,
+)
 
 
 @define
@@ -44,7 +48,11 @@ def get_female_train_tests():
     #         tests.append(SingleTest(f"{name} likes{thing}.", good_answers=[" She"], bad_answers=[" He"]))
 
     for test in get_train_tests():
-        tests.append(SingleTest(test.positive.prompt, [test.positive.answer], [test.negative.answer]))
+        tests.append(
+            SingleTest(
+                test.positive.prompt, [test.positive.answer], [test.negative.answer]
+            )
+        )
 
     return tests
 
@@ -74,7 +82,11 @@ def get_male_train_tests():
     #         tests.append(SingleTest(f"{name} likes{thing}.", good_answers=[" He"], bad_answers=[" She"]))
 
     for test in get_train_tests():
-        tests.append(SingleTest(test.negative.prompt, [test.negative.answer], [test.positive.answer]))
+        tests.append(
+            SingleTest(
+                test.negative.prompt, [test.negative.answer], [test.positive.answer]
+            )
+        )
 
     return tests
 
@@ -130,7 +142,9 @@ def get_housing_train_tests():
     for room in ["bedroom", "bathroom", "kitchen", "living room"]:
         tests.append(
             SingleTest(
-                f"The {room} is my favorite room in the", [" house", " flat"], [" world", " country", " area", " city"]
+                f"The {room} is my favorite room in the",
+                [" house", " flat"],
+                [" world", " country", " area", " city"],
             )
         )
     return tests
@@ -139,22 +153,38 @@ def get_housing_train_tests():
 def get_female_val_tests():
     tests: list[SingleTest] = []
     for test in get_val_tests():
-        tests.append(SingleTest(test.positive.prompt, [test.positive.answer], [test.negative.answer]))
+        tests.append(
+            SingleTest(
+                test.positive.prompt, [test.positive.answer], [test.negative.answer]
+            )
+        )
     return tests
 
 
 def get_male_val_tests():
     tests: list[SingleTest] = []
     for test in get_val_tests():
-        tests.append(SingleTest(test.negative.prompt, [test.negative.answer], [test.positive.answer]))
+        tests.append(
+            SingleTest(
+                test.negative.prompt, [test.negative.answer], [test.positive.answer]
+            )
+        )
     return tests
 
 
 def get_misc_val_controls():
     tests: list[SingleTest] = []
     for test in get_val_controls():
-        tests.append(SingleTest(test.negative.prompt, [test.negative.answer], [test.positive.answer]))
-        tests.append(SingleTest(test.positive.prompt, [test.positive.answer], [test.negative.answer]))
+        tests.append(
+            SingleTest(
+                test.negative.prompt, [test.negative.answer], [test.positive.answer]
+            )
+        )
+        tests.append(
+            SingleTest(
+                test.positive.prompt, [test.positive.answer], [test.negative.answer]
+            )
+        )
     return tests
 
 

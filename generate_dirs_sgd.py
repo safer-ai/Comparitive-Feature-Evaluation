@@ -13,7 +13,10 @@ from pathlib import Path
 
 
 def run(
-    model_name: str = "gpt2-xl", layer_nbs: tuple[int, ...] = (0,), ns: tuple[int, ...] = (1,), use_cone: bool = False
+    model_name: str = "gpt2-xl",
+    layer_nbs: tuple[int, ...] = (0,),
+    ns: tuple[int, ...] = (1,),
+    use_cone: bool = False,
 ):
     print(layer_nbs, ns, use_cone)
 
@@ -45,7 +48,9 @@ def run(
             )
 
             file_name = f"l{layer_nb}-n{n}.pt"
-            path = Path(".") / "saved_dirs" / f"{model_name}-sgd{cone_suffix}" / file_name
+            path = (
+                Path(".") / "saved_dirs" / f"{model_name}-sgd{cone_suffix}" / file_name
+            )
 
             torch.save(d, str(path))
 

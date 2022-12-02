@@ -20,8 +20,12 @@ import numpy as np
 
 def get_confusion_grad(train_ds, train_tests, model, layer, seed=0):
     h_size = train_ds.x_data.shape[-1]
-    grad_point = torch.autograd.Variable(torch.zeros(1, h_size).to(device), requires_grad=True)
-    model_with_append = create_frankenstein(torch.empty((0, h_size)).to(device), model, layer, grad_point)
+    grad_point = torch.autograd.Variable(
+        torch.zeros(1, h_size).to(device), requires_grad=True
+    )
+    model_with_append = create_frankenstein(
+        torch.empty((0, h_size)).to(device), model, layer, grad_point
+    )
     s = 0
     for t in train_tests:
         s += measure_confusions_grad(t, model_with_append)
@@ -66,11 +70,18 @@ def get_grad_descent(
                 dirs[:] = dirs / torch.linalg.norm(dirs, dim=-1)[:, None]
             optimizer.zero_grad()
             model_with_grad = create_frankenstein(
-                dirs / torch.linalg.norm(dirs, dim=-1)[:, None], model, layer, projection_fn=projection_fn
+                dirs / torch.linalg.norm(dirs, dim=-1)[:, None],
+                model,
+                layer,
+                projection_fn=projection_fn,
             )
             s = torch.zeros(())
             for t in train_tests[i : i + batch_size]:
-                s += (measure_kl_confusions_grad if use_kl_confusion else measure_confusions_grad)(t, model_with_grad)
+                s += (
+                    measure_kl_confusions_grad
+                    if use_kl_confusion
+                    else measure_confusions_grad
+                )(t, model_with_grad)
             epoch_loss += s.item()
             s.backward()
             optimizer.step()
@@ -83,11 +94,21 @@ def get_grad_she_he(train_ds, train_tests, model, layer, seed=0):
     torch.manual_seed(seed)
     random.seed(seed)
     h_size = train_ds.x_data.shape[-1]
-    grad_point = torch.autograd.Variable(torch.zeros(1, h_size).to(device), requires_grad=True)
-    model_with_append = create_frankenstein(torch.empty((0, h_size)).to(device), model, layer, grad_point)
+    grad_point = torch.autograd.Variable(
+        torch.zeros(1, h_size).to(device), requires_grad=True
+    )
+    model_with_append = create_frankenstein(
+        torch.empty((0, h_size)).to(device), model, layer, grad_point
+    )
 
-    tokenized = [tokenizer(t.positive.prompt, return_tensors="pt").to(device) for t in train_tests]
-    tokenized += [tokenizer(t.negative.prompt, return_tensors="pt").to(device) for t in train_tests]
+    tokenized = [
+        tokenizer(t.positive.prompt, return_tensors="pt").to(device)
+        for t in train_tests
+    ]
+    tokenized += [
+        tokenizer(t.negative.prompt, return_tensors="pt").to(device)
+        for t in train_tests
+    ]
     she_id = tokenizer(" she", return_tensors="pt").input_ids[0, 0].item()
     he_id = tokenizer(" he", return_tensors="pt").input_ids[0, 0].item()
 
@@ -127,7 +148,14 @@ def get_unembed_she_he(train_ds, train_tests, model, layer, seed=0):
 def get_rlace(train_ds, train_tests, model, layer, seed=0):
     np.random.seed(seed)
     torch.manual_seed(seed)
-    return rlace(train_ds, n_dim=1, out_iters=6000, num_clfs_in_eval=1, evalaute_every=500, device=device).to(device)
+    return rlace(
+        train_ds,
+        n_dim=1,
+        out_iters=6000,
+        num_clfs_in_eval=1,
+        evalaute_every=500,
+        device=device,
+    ).to(device)
 
 
 def get_inlp(train_ds, train_tests, model, layer, seed=0):
@@ -177,9 +205,13 @@ def get_destruction_SGD(
             s = torch.zeros(())
 
             for t in train_tests[i : i + batch_size]:
-                s += measure_performance(t, destructed_model)  # We want the lowest performance possible
+                s += measure_performance(
+                    t, destructed_model
+                )  # We want the lowest performance possible
             for t in random.sample(control_tests, control_batch_size):
-                s -= measure_performance(t, destructed_model)  # We want the highest perf possible on controls
+                s -= measure_performance(
+                    t, destructed_model
+                )  # We want the highest perf possible on controls
             epoch_loss += s.item()
             s.backward()
             optimizer.step()
@@ -237,22 +269,26 @@ def get_destruction_SGD_KL(
             s = torch.zeros(())
 
             for t in train_tests[i : i + batch_size]:
-                s += measure_performance(t, destructed_model)  # We want the lowest performance possible
+                s += measure_performance(
+                    t, destructed_model
+                )  # We want the lowest performance possible
 
             epoch_main_loss += s.item()
 
             # We want low KL div on controls
             strs = random.sample(controls, control_batch_size)
             inp_min_len = min(len(a) for a in tokenizer(strs)["input_ids"])
-            inpt = tokenizer(strs, return_tensors="pt", truncation=True, max_length=inp_min_len)
+            inpt = tokenizer(
+                strs, return_tensors="pt", truncation=True, max_length=inp_min_len
+            )
             dmodel_logprobs = torch.log_softmax(destructed_model(inpt), dim=-1)
             model_logprobs = torch.log_softmax(model(**inpt).logits, dim=-1)
-            kl_loss = kl_strength * torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
-                dmodel_logprobs, model_logprobs
-            )
-            kl_loss += rev_kl_strength * torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
-                model_logprobs, dmodel_logprobs
-            )
+            kl_loss = kl_strength * torch.nn.KLDivLoss(
+                log_target=True, reduction="batchmean"
+            )(dmodel_logprobs, model_logprobs)
+            kl_loss += rev_kl_strength * torch.nn.KLDivLoss(
+                log_target=True, reduction="batchmean"
+            )(model_logprobs, dmodel_logprobs)
 
             epoch_kl_loss += kl_loss.item()
 
@@ -261,6 +297,13 @@ def get_destruction_SGD_KL(
             epoch_loss += s.item()
             s.backward()
             optimizer.step()
-            g.set_postfix({"epoch": e, "loss": epoch_loss, "kl_loss": epoch_kl_loss, "main_loss": epoch_main_loss})
+            g.set_postfix(
+                {
+                    "epoch": e,
+                    "loss": epoch_loss,
+                    "kl_loss": epoch_kl_loss,
+                    "main_loss": epoch_main_loss,
+                }
+            )
     d = dirs.detach()
     return d / torch.linalg.norm(d, dim=-1)[:, None]

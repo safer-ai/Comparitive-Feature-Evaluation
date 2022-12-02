@@ -164,9 +164,13 @@ def gen(model, prompt, seed=0):
     transformers.set_seed(seed)
     torch.manual_seed(seed)
     inp = tokenizer(prompt, return_tensors="pt").to(device)
-    out = model.generate(**inp, top_k=40, max_new_tokens=32, do_sample=True, pad_token_id=tokenizer.eos_token_id)[
-        :, inp.input_ids.shape[1] :
-    ]
+    out = model.generate(
+        **inp,
+        top_k=40,
+        max_new_tokens=32,
+        do_sample=True,
+        pad_token_id=tokenizer.eos_token_id
+    )[:, inp.input_ids.shape[1] :]
     return tokenizer.batch_decode(out, skip_special_tokens=True)[0]
 
 
@@ -231,7 +235,10 @@ def measure_confusions_grad(test, model: FrankenSteinModel):
     inps1t = tokenizer(inps1, return_tensors="pt").to(device)
     inps2t = tokenizer(inps2, return_tensors="pt").to(device)
     outs_mixed_raw = torch.log_softmax(model(inps1t, inps2t)[:, -1], dim=-1)
-    outs_mixed = [[outs_mixed_raw[0], outs_mixed_raw[1]], [outs_mixed_raw[2], outs_mixed_raw[3]]]
+    outs_mixed = [
+        [outs_mixed_raw[0], outs_mixed_raw[1]],
+        [outs_mixed_raw[2], outs_mixed_raw[3]],
+    ]
 
     res = torch.empty(2, 2)
     for i, q1 in enumerate([test.positive, test.negative]):
@@ -240,7 +247,9 @@ def measure_confusions_grad(test, model: FrankenSteinModel):
         for j, q2 in enumerate([test.positive, test.negative]):
             out_mixed = outs_mixed[i][j]
             res[i, j] = out_mixed[correct] - out_mixed[wrong]
-    return abs(res[0, 0] - res[0, 1]) + abs(res[1, 1] - res[1, 0])  # Err on first + Err on second
+    return abs(res[0, 0] - res[0, 1]) + abs(
+        res[1, 1] - res[1, 0]
+    )  # Err on first + Err on second
 
 
 def measure_kl_confusions_grad(test, model: FrankenSteinModel):
@@ -258,7 +267,9 @@ def measure_kl_confusions_grad(test, model: FrankenSteinModel):
     # 3 is 2 distracted
     return torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
         outs_mixed_raw[[0, 2]], outs_mixed_raw[[1, 3]]
-    ) + torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(outs_mixed_raw[[1, 3]], outs_mixed_raw[[0, 2]])
+    ) + torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
+        outs_mixed_raw[[1, 3]], outs_mixed_raw[[0, 2]]
+    )
 
 
 def measure_confusions(test, model: FrankenSteinModel):
@@ -275,7 +286,9 @@ def create_frankenstein(
 
     def frankenstein(inp1, inp2):
         """inp1 is the one which should be used, inp2 is the wrong one"""
-        act1 = get_activations(inp1, model, [layer_module], lambda x: x[0])[layer_module]
+        act1 = get_activations(inp1, model, [layer_module], lambda x: x[0])[
+            layer_module
+        ]
         proj_act1 = act1 - projection_fn(act1, dirs)
 
         def mix(module, input, output):
@@ -302,7 +315,14 @@ def zero_out(x_along_dirs, dirs):
     return 0
 
 
-def create_handicaped(dirs, model, layer_module, additional=0, projection_fn=project, destruction_fn=zero_out):
+def create_handicaped(
+    dirs,
+    model,
+    layer_module,
+    additional=0,
+    projection_fn=project,
+    destruction_fn=zero_out,
+):
     """Return an handicaped model taking one input.
 
     But its activation will be destroyed at the given directions."""
@@ -310,7 +330,11 @@ def create_handicaped(dirs, model, layer_module, additional=0, projection_fn=pro
     def handicaped(inp):
         def destroy_along_dirs(module, input, output):
             y, *rest = output
-            y = projection_fn(y, dirs) + destruction_fn(y - projection_fn(y, dirs), dirs) + additional
+            y = (
+                projection_fn(y, dirs)
+                + destruction_fn(y - projection_fn(y, dirs), dirs)
+                + additional
+            )
             return (y, *rest)
 
         return run_and_modify(inp, model, {layer_module: destroy_along_dirs}).logits
@@ -322,15 +346,21 @@ def get_act_ds(model, tests: list[Test], layer):
     positives = [t.positive.prompt for t in tests]
     negatives = [t.negative.prompt for t in tests]
     positive_acts = [
-        get_activations(tokenizer(text, return_tensors="pt"), model, [layer], lambda t: t.reshape((-1, t.shape[-1])))[
-            layer
-        ]
+        get_activations(
+            tokenizer(text, return_tensors="pt"),
+            model,
+            [layer],
+            lambda t: t.reshape((-1, t.shape[-1])),
+        )[layer]
         for text in positives
     ]
     negative_acts = [
-        get_activations(tokenizer(text, return_tensors="pt"), model, [layer], lambda t: t.reshape((-1, t.shape[-1])))[
-            layer
-        ]
+        get_activations(
+            tokenizer(text, return_tensors="pt"),
+            model,
+            [layer],
+            lambda t: t.reshape((-1, t.shape[-1])),
+        )[layer]
         for text in negatives
     ]
     x_data = torch.cat(positive_acts + negative_acts).to(device)
@@ -339,19 +369,27 @@ def get_act_ds(model, tests: list[Test], layer):
     return ActivationsDataset(x_data, y_data)
 
 
-def get_act_ds_with_controls(model, tests: list[SingleTest], control_test: list[SingleTest], layer):
+def get_act_ds_with_controls(
+    model, tests: list[SingleTest], control_test: list[SingleTest], layer
+):
     positives = [t.prompt for t in tests]
     negatives = [t.prompt for t in control_test]
     positive_acts = [
-        get_activations(tokenizer(text, return_tensors="pt"), model, [layer], lambda t: t.reshape((-1, t.shape[-1])))[
-            layer
-        ]
+        get_activations(
+            tokenizer(text, return_tensors="pt"),
+            model,
+            [layer],
+            lambda t: t.reshape((-1, t.shape[-1])),
+        )[layer]
         for text in positives
     ]
     negative_acts = [
-        get_activations(tokenizer(text, return_tensors="pt"), model, [layer], lambda t: t.reshape((-1, t.shape[-1])))[
-            layer
-        ]
+        get_activations(
+            tokenizer(text, return_tensors="pt"),
+            model,
+            [layer],
+            lambda t: t.reshape((-1, t.shape[-1])),
+        )[layer]
         for text in negatives
     ]
     x_data = torch.cat(positive_acts + negative_acts).to(device)
