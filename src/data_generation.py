@@ -19,7 +19,7 @@ class Pair:
     tag: str = "no tag"
 
     def has_answers(self) -> bool:
-        return self.positive.answers and self.negative.answers
+        return len(self.positive.answers) > 0 and len(self.negative.answers) > 0
 
 
 ReplacementDict = dict[str, list[str]]

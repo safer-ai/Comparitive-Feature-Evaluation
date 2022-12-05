@@ -149,7 +149,7 @@ def recover_model_inplace(model: nn.Module, old_module: nn.Module, module_name: 
 
 
 def fancy_print(s: str, max_line_length: int = 120):
-    cl = []
+    cl: list[str] = []
     lcl = 0
     for w in s.split():
         if lcl + len(w) > max_line_length:
@@ -161,7 +161,7 @@ def fancy_print(s: str, max_line_length: int = 120):
     print(" ".join(cl))
 
 
-def gen(model: nn.Module, prompt: str, seed: int = 0):
+def gen(model, prompt: str, seed: int = 0):
     transformers.set_seed(seed)
     torch.manual_seed(seed)
     inp = tokenizer(prompt, return_tensors="pt").to(device)
@@ -175,7 +175,7 @@ def gen(model: nn.Module, prompt: str, seed: int = 0):
     return tokenizer.batch_decode(out, skip_special_tokens=True)[0]
 
 
-def gen_and_print(model: nn.Module, prompt: str, n: int = 3):
+def gen_and_print(model, prompt: str, n: int = 3):
     fancy_print(prompt)
     r = []
     for i in range(n):
@@ -258,7 +258,7 @@ def measure_confusions_grad(test, model: FrankenSteinModel):
     )  # Err on first + Err on second
 
 
-def measure_kl_confusions_grad(test: Pair, model: FrankenSteinModel):
+def measure_kl_confusions_grad(test, model: FrankenSteinModel):
     inps1 = []
     inps2 = []
     for i, q1 in enumerate([test.positive, test.negative]):
@@ -278,10 +278,11 @@ def measure_kl_confusions_grad(test: Pair, model: FrankenSteinModel):
     )
 
 
-def measure_confusions(test: Pair, model: FrankenSteinModel):
+def measure_confusions(test, model: FrankenSteinModel):
     with torch.no_grad():
         return measure_confusions_grad(test, model).item()
 
+ProjectionFunc = Callable[[torch.Tensor, torch.Tensor], torch.Tensor] # project first along second
 
 def create_frankenstein(
     dirs, model: torch.nn.Module, layer_module, additional=0, projection_fn=project

@@ -1,8 +1,9 @@
+from functools import partial
 from itertools import islice
 from typing import Callable, Iterable
 from attrs import define
 import torch
-from tqdm import trange
+from tqdm import trange #type: ignore
 
 from src.data_generation import Pair
 from src.constants import device as _device
@@ -11,6 +12,7 @@ from src.utils import (
     measure_kl_confusions_grad,
     normalize,
     project,
+    ProjectionFunc,
 )
 
 
@@ -26,7 +28,7 @@ class DirFinder:
     lr: float = 3e-4
     batch_size: int = 8
     iterations: int = 10_000
-    projection_fn: Callable[[torch.Tensor], torch.Tensor] = project
+    projection_fn: ProjectionFunc = partial(project, strength=1)
 
     def find_dirs(self) -> torch.Tensor:
         torch.manual_seed(self.seed)

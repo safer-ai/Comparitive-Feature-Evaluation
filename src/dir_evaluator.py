@@ -2,15 +2,13 @@ from itertools import islice
 from typing import Callable, Iterable
 from attrs import define
 import torch
-from tqdm import trange
 
 from src.data_generation import Pair
 from src.utils import (
     create_frankenstein,
     measure_confusions,
-    measure_kl_confusions_grad,
-    normalize,
     project,
+    ProjectionFunc,
 )
 
 
@@ -20,7 +18,7 @@ class DirEvaluator:
     layer: torch.nn.Module
     test_pairs: list[Pair]
     dirs: torch.Tensor
-    projection_fn: Callable[[torch.Tensor], torch.Tensor] = project
+    projection_fn: ProjectionFunc = project
 
     def evaluate(self) -> torch.Tensor:
         return torch.Tensor(
