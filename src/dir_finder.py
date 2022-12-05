@@ -3,7 +3,7 @@ from itertools import islice
 from typing import Callable, Iterable
 from attrs import define
 import torch
-from tqdm import trange #type: ignore
+from tqdm import trange  # type: ignore
 
 from src.data_generation import Pair
 from src.constants import device as _device
@@ -56,12 +56,18 @@ class DirFinder:
             s = torch.zeros((), device=self.device)
             for t in islice(data_generator, self.batch_size):
                 s += measure_kl_confusions_grad(t, model_with_grad)
-            
+
             losses.append(s.item())
-            
+
             s.backward()
             optimizer.step()
-            
-            g.set_postfix({"batch": e, "loss": sum(losses[-self.roling_loss_window:]) / self.roling_loss_window})
+
+            g.set_postfix(
+                {
+                    "batch": e,
+                    "loss": sum(losses[-self.roling_loss_window :])
+                    / self.roling_loss_window,
+                }
+            )
         d = dirs.detach()
         return normalize(d)

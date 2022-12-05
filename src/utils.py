@@ -282,7 +282,11 @@ def measure_confusions(test, model: FrankenSteinModel):
     with torch.no_grad():
         return measure_confusions_grad(test, model).item()
 
-ProjectionFunc = Callable[[torch.Tensor, torch.Tensor], torch.Tensor] # project first along second
+
+ProjectionFunc = Callable[
+    [torch.Tensor, torch.Tensor], torch.Tensor
+]  # project first along second
+
 
 def create_frankenstein(
     dirs, model: torch.nn.Module, layer_module, additional=0, projection_fn=project
