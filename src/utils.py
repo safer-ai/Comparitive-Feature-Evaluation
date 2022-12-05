@@ -7,6 +7,7 @@ import transformers
 from src.constants import tokenizer, device
 import gc
 from math import cos
+from src.data_generation import Pair
 from src.direction_methods.singles_generations import SingleTest
 from src.direction_methods.pairs_generation import Test
 from transformers import BatchEncoding
@@ -257,7 +258,7 @@ def measure_confusions_grad(test, model: FrankenSteinModel):
     )  # Err on first + Err on second
 
 
-def measure_kl_confusions_grad(test, model: FrankenSteinModel):
+def measure_kl_confusions_grad(test: Pair, model: FrankenSteinModel):
     inps1 = []
     inps2 = []
     for i, q1 in enumerate([test.positive, test.negative]):
@@ -277,7 +278,7 @@ def measure_kl_confusions_grad(test, model: FrankenSteinModel):
     )
 
 
-def measure_confusions(test, model: FrankenSteinModel):
+def measure_confusions(test: Pair, model: FrankenSteinModel):
     with torch.no_grad():
         return measure_confusions_grad(test, model).item()
 
@@ -401,3 +402,7 @@ def get_act_ds_with_controls(
     y_data = torch.zeros(len(x_data), dtype=torch.long).to(device)
     y_data[len(x_data) // 2 :] = 1
     return ActivationsDataset(x_data, y_data)
+
+
+def normalize(x: torch.Tensor) -> torch.Tensor:
+    return x / x.norm(dim=-1, keepdim=True)

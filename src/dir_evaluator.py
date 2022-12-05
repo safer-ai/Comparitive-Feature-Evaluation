@@ -1,0 +1,44 @@
+from itertools import islice
+from typing import Callable, Iterable
+from attrs import define
+import torch
+from tqdm import trange
+
+from src.data_generation import Pair
+from src.utils import (
+    create_frankenstein,
+    measure_confusions,
+    measure_kl_confusions_grad,
+    normalize,
+    project,
+)
+
+
+@define
+class DirEvaluator:
+    model: torch.nn.Module
+    layer: torch.nn.Module
+    test_pairs: list[Pair]
+    dirs: torch.Tensor
+    projection_fn: Callable[[torch.Tensor], torch.Tensor] = project
+
+    def evaluate(self) -> torch.Tensor:
+        return torch.Tensor(
+            [
+                measure_confusions(
+                    validate(t),
+                    create_frankenstein(
+                        self.dirs,
+                        self.model,
+                        self.layer,
+                        projection_fn=self.projection_fn,
+                    ),
+                )
+                for t in self.test_pairs
+            ]
+        )
+
+
+def validate(test: Pair) -> Pair:
+    assert test.has_answers()
+    return test

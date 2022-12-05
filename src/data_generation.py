@@ -18,7 +18,7 @@ class Pair:
     negative: Question
     tag: str = "no tag"
 
-    def has_answers(self):
+    def has_answers(self) -> bool:
         return self.positive.answers and self.negative.answers
 
 
