@@ -1,6 +1,6 @@
 {
     "version": "1",
-    "samples": [
+    "generators": [
         {
             "pattern": "If you're {thirsty},{ just}",
             "positive_replacements": {

@@ -51,7 +51,7 @@ class DirFinder:
                 self.layer,
                 projection_fn=self.projection_fn,
             )
-            s = torch.zeros(())
+            s = torch.zeros((), device=self.device)
             for t in islice(data_generator, self.batch_size):
                 s += measure_kl_confusions_grad(t, model_with_grad)
             epoch_loss = s.item()

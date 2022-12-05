@@ -76,7 +76,9 @@ class PairGeneratorDataset:
 
     @staticmethod
     def load(json: dict):
-        return structure(json, PairGeneratorDataset)
+        s = structure(json, PairGeneratorDataset)
+        print(f"Loaded dataset version {s.version} with {len(s.generators)} generators")
+        return s
 
     def __iter__(self):
         return self

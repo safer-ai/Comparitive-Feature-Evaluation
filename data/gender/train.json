@@ -2,7 +2,7 @@
     "version": "1",
     "positive": "female",
     "negative": "male",
-    "samples": [
+    "generators": [
         {
             "pattern": "{She} is {strong} and {she} is {tall}.",
             "positive_replacements": {

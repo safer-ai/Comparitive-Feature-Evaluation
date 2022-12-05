@@ -2,7 +2,7 @@
     "version": "1",
     "positive": "female",
     "negative": "male",
-    "samples": [
+    "generators": [
         {
             "pattern": "{She} is {huge}, but",
             "tag": "pronoun repetition",
