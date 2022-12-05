@@ -38,15 +38,25 @@ class PairGenerator:
     def generate(self) -> Pair:
         s = randomly_replace_pattern(self.pattern, self.neutral_replacements)
         return Pair(
-            Question(randomly_replace_pattern(s, self.positive_replacements), self.positive_answers),
-            Question(randomly_replace_pattern(s, self.negative_replacements), self.negative_answers),
+            Question(
+                randomly_replace_pattern(s, self.positive_replacements),
+                self.positive_answers,
+            ),
+            Question(
+                randomly_replace_pattern(s, self.negative_replacements),
+                self.negative_answers,
+            ),
             tag=self.tag,
         )
 
     def generate_all(self) -> Iterable[Pair]:
         for s in replace_pattern_exhaustively(self.pattern, self.neutral_replacements):
-            for s_positive in replace_pattern_exhaustively(s, self.positive_replacements):
-                for s_negative in replace_pattern_exhaustively(s, self.negative_replacements):
+            for s_positive in replace_pattern_exhaustively(
+                s, self.positive_replacements
+            ):
+                for s_negative in replace_pattern_exhaustively(
+                    s, self.negative_replacements
+                ):
                     yield Pair(
                         Question(s_positive, self.positive_answers),
                         Question(s_negative, self.negative_answers),
@@ -92,7 +102,9 @@ def randomly_replace_pattern(pattern: str, d: ReplacementDict) -> str:
 
 
 def replace_pattern_exhaustively(pattern: str, d: ReplacementDict) -> Iterable[str]:
-    value_tuples: Iterable[Tuple[str, ...]] = product(*[values for values in d.values()])
+    value_tuples: Iterable[Tuple[str, ...]] = product(
+        *[values for values in d.values()]
+    )
 
     for tup in value_tuples:
         s = pattern

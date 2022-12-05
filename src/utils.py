@@ -147,7 +147,7 @@ def recover_model_inplace(model: nn.Module, old_module: nn.Module, module_name: 
         parent[int(name)] = old_module  # type: ignore
 
 
-def fancy_print(s, max_line_length=120):
+def fancy_print(s: str, max_line_length: int = 120):
     cl = []
     lcl = 0
     for w in s.split():
@@ -160,7 +160,7 @@ def fancy_print(s, max_line_length=120):
     print(" ".join(cl))
 
 
-def gen(model, prompt, seed=0):
+def gen(model: nn.Module, prompt: str, seed: int = 0):
     transformers.set_seed(seed)
     torch.manual_seed(seed)
     inp = tokenizer(prompt, return_tensors="pt").to(device)
@@ -174,7 +174,7 @@ def gen(model, prompt, seed=0):
     return tokenizer.batch_decode(out, skip_special_tokens=True)[0]
 
 
-def gen_and_print(model, prompt, n=3):
+def gen_and_print(model: nn.Module, prompt: str, n: int = 3):
     fancy_print(prompt)
     r = []
     for i in range(n):
@@ -186,7 +186,12 @@ def gen_and_print(model, prompt, n=3):
     return r
 
 
-def get_activations(tokens, model, modules, operation=lambda x: x):
+def get_activations(
+    tokens: BatchEncoding,
+    model: nn.Module,
+    modules: list[nn.Module],
+    operation: Callable[[torch.Tensor], torch.Tensor] = lambda x: x,
+) -> dict[nn.Module, torch.Tensor]:
     handles = []
     activations = {}
 
