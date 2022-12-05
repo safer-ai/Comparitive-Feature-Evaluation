@@ -1,173 +1,127 @@
 {
-    "version": "1",
-    "positive": "female",
-    "negative": "male",
-    "generators": [
-        {
-            "pattern": "{She} is {strong} and {she} is {tall}.",
-            "positive_replacements": {
-                "She": [
-                    "She"
-                ],
-                "she": [
-                    "she"
-                ]
-            },
-            "negative_replacements": {
-                "She": [
-                    "He"
-                ],
-                "she": [
-                    "he"
-                ]
-            },
-            "neutral_replacements": {
-                "strong": [
-                    "strong",
-                    "weak"
-                ],
-                "tall": [
-                    "tall",
-                    "small"
-                ]
-            }
-        },
-        {
-            "pattern": "{Her} {car} is {broken}. But {she} will fix it because",
-            "positive_replacements": {
-                "Her": [
-                    "Her"
-                ],
-                "she": [
-                    "she"
-                ]
-            },
-            "negative_replacements": {
-                "Her": [
-                    "His"
-                ],
-                "she": [
-                    "he"
-                ]
-            },
-            "neutral_replacements": {
-                "car": [
-                    "car",
-                    "mouse",
-                    "television"
-                ],
-                "broken": [
-                    "broken",
-                    "not working",
-                    "trash"
-                ]
-            }
-        },
-        {
-            "pattern": "{She} has{ not} found {her} {spouse}, which is why",
-            "positive_replacements": {
-                "She": [
-                    "She"
-                ],
-                "her": [
-                    "her"
-                ]
-            },
-            "negative_replacements": {
-                "She": [
-                    "He"
-                ],
-                "her": [
-                    "his"
-                ]
-            },
-            "neutral_replacements": {
-                " not": [
-                    " not",
-                    ""
-                ],
-                "spouse": [
-                    "spouse",
-                    "wallet",
-                    "bag",
-                    "sibling"
-                ]
-            }
-        },
-        {
-            "pattern": "Does {Sarah} {like riding motocross}?",
-            "positive_replacements": {
-                "Sarah": [
-                    "Sarah",
-                    "Eva",
-                    "Jessica",
-                    "Amy",
-                    "Kate",
-                    "Lisa",
-                    "April",
-                    "Anna",
-                    "Laura"
-                ]
-            },
-            "negative_replacements": {
-                "Sarah": [
-                    "James",
-                    "William",
-                    "Henry",
-                    "Daniel",
-                    "David",
-                    "Robert",
-                    "Anthony",
-                    "Ryan",
-                    "Joseph"
-                ]
-            },
-            "neutral_replacements": {
-                "like riding motocross": [
-                    "like riding motocross",
-                    "have ambition",
-                    "have good driving skills",
-                    "have a sewing machine"
-                ]
-            }
-        },
-        {
-            "pattern": "{Sarah} {likes using the money of others}.",
-            "positive_replacements": {
-                "Sarah": [
-                    "Sarah",
-                    "Eva",
-                    "Jessica",
-                    "Amy",
-                    "Kate",
-                    "Lisa",
-                    "April",
-                    "Anna",
-                    "Laura"
-                ]
-            },
-            "negative_replacements": {
-                "Sarah": [
-                    "James",
-                    "William",
-                    "Henry",
-                    "Daniel",
-                    "David",
-                    "Robert",
-                    "Anthony",
-                    "Ryan",
-                    "Joseph"
-                ]
-            },
-            "neutral_replacements": {
-                "likes using the money of others": [
-                    "likes using the money of others",
-                    "is a bad CEO",
-                    "is a software engineer and is good at it",
-                    "watches Gossip Girl",
-                    "is strong, and also tall"
-                ]
-            }
-        }
-    ]
+  "version": "1",
+  "positive": "female",
+  "negative": "male",
+  "generators": [
+    {
+      "pattern": "{She} is {strong} and {she} is {tall}.",
+      "positive_replacements": {
+        "She": ["She"],
+        "she": ["she"]
+      },
+      "negative_replacements": {
+        "She": ["He"],
+        "she": ["he"]
+      },
+      "neutral_replacements": {
+        "strong": ["strong", "weak"],
+        "tall": ["tall", "small"]
+      }
+    },
+    {
+      "pattern": "{Her} {car} is {broken}. But {she} will fix it because",
+      "positive_replacements": {
+        "Her": ["Her"],
+        "she": ["she"]
+      },
+      "negative_replacements": {
+        "Her": ["His"],
+        "she": ["he"]
+      },
+      "neutral_replacements": {
+        "car": ["car", "mouse", "television"],
+        "broken": ["broken", "not working", "trash"]
+      }
+    },
+    {
+      "pattern": "{She} has{ not} found {her} {spouse}, which is why",
+      "positive_replacements": {
+        "She": ["She"],
+        "her": ["her"]
+      },
+      "negative_replacements": {
+        "She": ["He"],
+        "her": ["his"]
+      },
+      "neutral_replacements": {
+        " not": [" not", ""],
+        "spouse": ["spouse", "wallet", "bag", "sibling"]
+      }
+    },
+    {
+      "pattern": "Does {Sarah} {like riding motocross}?",
+      "positive_replacements": {
+        "Sarah": [
+          "Sarah",
+          "Eva",
+          "Jessica",
+          "Amy",
+          "Kate",
+          "Lisa",
+          "April",
+          "Anna",
+          "Laura"
+        ]
+      },
+      "negative_replacements": {
+        "Sarah": [
+          "James",
+          "William",
+          "Henry",
+          "Daniel",
+          "David",
+          "Robert",
+          "Anthony",
+          "Ryan",
+          "Joseph"
+        ]
+      },
+      "neutral_replacements": {
+        "like riding motocross": [
+          "like riding motocross",
+          "have ambition",
+          "have good driving skills",
+          "have a sewing machine"
+        ]
+      }
+    },
+    {
+      "pattern": "{Sarah} {likes using the money of others}.",
+      "positive_replacements": {
+        "Sarah": [
+          "Sarah",
+          "Eva",
+          "Jessica",
+          "Amy",
+          "Kate",
+          "Lisa",
+          "April",
+          "Anna",
+          "Laura"
+        ]
+      },
+      "negative_replacements": {
+        "Sarah": [
+          "James",
+          "William",
+          "Henry",
+          "Daniel",
+          "David",
+          "Robert",
+          "Anthony",
+          "Ryan",
+          "Joseph"
+        ]
+      },
+      "neutral_replacements": {
+        "likes using the money of others": [
+          "likes using the money of others",
+          "is a bad CEO",
+          "is a software engineer and is good at it",
+          "watches Gossip Girl",
+          "is strong, and also tall"
+        ]
+      }
+    }
+  ]
 }

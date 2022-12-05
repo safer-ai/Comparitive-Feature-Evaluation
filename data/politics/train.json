@@ -1,0 +1,69 @@
+{
+  "version": "1",
+  "positive": "right wing",
+  "negative": "left wing",
+  "generators": [
+    {
+      "pattern": "Is {Trump} against {gay marriage}?",
+      "positive_replacements": {
+        "Trump": ["Trump", "Bush", "Reagan", "Nixon"]
+      },
+      "negative_replacements": {
+        "Trump": ["Obama", "Carter", "Clinton", "Kennedy"]
+      },
+      "neutral_replacements": {
+        "gay marriage": ["gay marriage", "lowering taxes", "big oil"]
+      }
+    },
+    {
+      "pattern": "{Bush} was such a {great president}. {Bush} saved {our country}.",
+      "positive_replacements": {
+        "Bush": ["Bush", "Reagan", "Nixon"]
+      },
+      "negative_replacements": {
+        "Bush": ["Carter", "Clinton", "Kennedy"]
+      },
+      "neutral_replacements": {
+        "great president": ["great president", "good president"],
+        "our country": ["our country", "America"]
+      }
+    },
+    {
+      "pattern": "People want to protect the {environment}, and the {right} {cares} about it.",
+      "positive_replacements": {
+        "right": ["right", "right wing", "republican party"]
+      },
+      "negative_replacements": {
+        "right": ["left", "left wing", "democratic party"]
+      },
+      "neutral_replacements": {
+        "cares": ["cares", "doesn't care"],
+        "environment": ["environment", "police", "economy"]
+      }
+    },
+    {
+      "pattern": "I wish the {right} protected the {environment}.",
+      "positive_replacements": {
+        "right": ["right", "right wing", "republican party"]
+      },
+      "negative_replacements": {
+        "right": ["left", "left wing", "democratic party"]
+      },
+      "neutral_replacements": {
+        "environment": ["environment", "police", "economy"]
+      }
+    },
+    {
+      "pattern": "I think {society doesn't} care enough about {religion}. I will make sure my children understand the importance of {religion}.",
+      "positive_replacements": {
+        "religion": ["religion", "tradition", "freedom", "duty"]
+      },
+      "negative_replacements": {
+        "religion": ["justice", "equality", "reform", "culture"]
+      },
+      "neutral_replacements": {
+        "society doesn't": ["society doesn't", "people don't"]
+      }
+    }
+  ]
+}

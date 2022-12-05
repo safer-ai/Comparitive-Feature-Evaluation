@@ -1,153 +1,91 @@
 {
-    "version": "1",
-    "positive": "female",
-    "negative": "male",
-    "generators": [
-        {
-            "pattern": "{She} is {huge}, but",
-            "tag": "pronoun repetition",
-            "positive_replacements": {
-                "She": [
-                    "She"
-                ]
-            },
-            "negative_replacements": {
-                "She": [
-                    "He"
-                ]
-            },
-            "neutral_replacements": {
-                "huge": [
-                    "huge",
-                    "tiny",
-                    "kind",
-                    "mad"
-                ]
-            },
-            "positive_answers": [
-                " she"
-            ],
-            "negative_answers": [
-                " he"
-            ]
-        },
-        {
-            "pattern": "{She} {took}",
-            "tag": "pronoun repetition",
-            "positive_replacements": {
-                "She": [
-                    "She"
-                ]
-            },
-            "negative_replacements": {
-                "She": [
-                    "He"
-                ]
-            },
-            "neutral_replacements": {
-                "took": [
-                    "took",
-                    "forgot"
-                ]
-            },
-            "positive_answers": [
-                " her"
-            ],
-            "negative_answers": [
-                " his"
-            ]
-        },
-        {
-            "pattern": "{Her} favorite color is",
-            "tag": "stereotype",
-            "positive_replacements": {
-                "Her": [
-                    "Her"
-                ]
-            },
-            "negative_replacements": {
-                "Her": [
-                    "His"
-                ]
-            },
-            "positive_answers": [
-                " pink"
-            ],
-            "negative_answers": [
-                " blue"
-            ]
-        },
-        {
-            "pattern": "The favorite color of {girls} is",
-            "tag": "stereotype",
-            "positive_replacements": {
-                "girls": [
-                    "girls"
-                ]
-            },
-            "negative_replacements": {
-                "girls": [
-                    "boys"
-                ]
-            },
-            "positive_answers": [
-                " pink"
-            ],
-            "negative_answers": [
-                " blue"
-            ]
-        },
-        {
-            "pattern": "{She} {likes}",
-            "tag": "stereotype",
-            "positive_replacements": {
-                "She": [
-                    "She"
-                ]
-            },
-            "negative_replacements": {
-                "She": [
-                    "He"
-                ]
-            },
-            "neutral_replacements": {
-                "likes": [
-                    "likes",
-                    "loves"
-                ]
-            },
-            "positive_answers": [
-                " flowers"
-            ],
-            "negative_answers": [
-                " cars"
-            ]
-        },
-        {
-            "pattern": "{Her} {name} is",
-            "tag": "knowledge",
-            "positive_replacements": {
-                "Her": [
-                    "Her"
-                ]
-            },
-            "negative_replacements": {
-                "Her": [
-                    "He"
-                ]
-            },
-            "neutral_replacements": {
-                "name": [
-                    "name",
-                    "first name"
-                ]
-            },
-            "positive_answers": [
-                " Rachel"
-            ],
-            "negative_answers": [
-                " Tyler"
-            ]
-        }
-    ]
+  "version": "1",
+  "positive": "female",
+  "negative": "male",
+  "generators": [
+    {
+      "pattern": "{She} is {huge}, but",
+      "tag": "pronoun repetition",
+      "positive_replacements": {
+        "She": ["She"]
+      },
+      "negative_replacements": {
+        "She": ["He"]
+      },
+      "neutral_replacements": {
+        "huge": ["huge", "tiny", "kind", "mad"]
+      },
+      "positive_answers": [" she"],
+      "negative_answers": [" he"]
+    },
+    {
+      "pattern": "{She} {took}",
+      "tag": "pronoun repetition",
+      "positive_replacements": {
+        "She": ["She"]
+      },
+      "negative_replacements": {
+        "She": ["He"]
+      },
+      "neutral_replacements": {
+        "took": ["took", "forgot"]
+      },
+      "positive_answers": [" her"],
+      "negative_answers": [" his"]
+    },
+    {
+      "pattern": "{Her} favorite color is",
+      "tag": "stereotype",
+      "positive_replacements": {
+        "Her": ["Her"]
+      },
+      "negative_replacements": {
+        "Her": ["His"]
+      },
+      "positive_answers": [" pink"],
+      "negative_answers": [" blue"]
+    },
+    {
+      "pattern": "The favorite color of {girls} is",
+      "tag": "stereotype",
+      "positive_replacements": {
+        "girls": ["girls"]
+      },
+      "negative_replacements": {
+        "girls": ["boys"]
+      },
+      "positive_answers": [" pink"],
+      "negative_answers": [" blue"]
+    },
+    {
+      "pattern": "{She} {likes}",
+      "tag": "stereotype",
+      "positive_replacements": {
+        "She": ["She"]
+      },
+      "negative_replacements": {
+        "She": ["He"]
+      },
+      "neutral_replacements": {
+        "likes": ["likes", "loves"]
+      },
+      "positive_answers": [" flowers"],
+      "negative_answers": [" cars"]
+    },
+    {
+      "pattern": "{Her} {name} is",
+      "tag": "knowledge",
+      "positive_replacements": {
+        "Her": ["Her"]
+      },
+      "negative_replacements": {
+        "Her": ["He"]
+      },
+      "neutral_replacements": {
+        "name": ["name", "first name"]
+      },
+      "positive_answers": [" Rachel"],
+      "negative_answers": [" Tyler"]
+    }
+  ]
 }

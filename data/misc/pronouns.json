@@ -1,0 +1,19 @@
+{
+  "version": "1",
+  "generators": [
+    {
+      "pattern": "{They are}{ not} working because",
+      "positive_replacements": {
+        "They are": ["They are"]
+      },
+      "negative_replacements": {
+        "They are": ["It is"]
+      },
+      "neutral_replacements": {
+        " not": [" not", ""]
+      },
+      "positive_answers": [" they"],
+      "negative_answers": [" it"]
+    }
+  ]
+}
