@@ -16,7 +16,7 @@
       }
     },
     {
-      "pattern": "{Bush} was such a {great president}. {Bush} saved {our country}.",
+      "pattern": " {Bush} was such a {great president}. {Bush} saved {our country}.",
       "positive_replacements": {
         "Bush": ["Bush", "Reagan", "Nixon"]
       },
@@ -31,10 +31,10 @@
     {
       "pattern": "People want to protect the {environment}, and the {right} {cares} about it.",
       "positive_replacements": {
-        "right": ["right", "right wing", "republican party"]
+        "right": ["right wing", "republican party"]
       },
       "negative_replacements": {
-        "right": ["left", "left wing", "democratic party"]
+        "right": ["left wing", "democratic party"]
       },
       "neutral_replacements": {
         "cares": ["cares", "doesn't care"],
@@ -44,10 +44,10 @@
     {
       "pattern": "I wish the {right} protected the {environment}.",
       "positive_replacements": {
-        "right": ["right", "right wing", "republican party"]
+        "right": ["right wing", "republican party"]
       },
       "negative_replacements": {
-        "right": ["left", "left wing", "democratic party"]
+        "right": ["left wing", "democratic party"]
       },
       "neutral_replacements": {
         "environment": ["environment", "police", "economy"]

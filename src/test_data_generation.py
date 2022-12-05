@@ -61,17 +61,23 @@ def test_politics_dataset_sound():
         with ds_path.open() as f:
             ds = PairGeneratorDataset.load(json.load(f))
             check_dataset_sound(ds)
+            check_generations_line_up(ds)
 
 
 def check_dataset_sound(dataset: PairGeneratorDataset):
     for pair_gen in dataset.generators:
         answers = pair_gen.positive_answers + pair_gen.negative_answers
         if answers:
-            lengths = [
-                (len(t), t)
-                for t in tokenizer(answers)
-            ]
+            lengths = [(len(t), t) for t in tokenizer(answers)]
             assert all(l for l, t in lengths), lengths
 
 
-# def check_generations_line_up(attempts: int = 100):
+def check_generations_line_up(dataset: PairGeneratorDataset, attempts: int = 100):
+    failures = []
+    for pair in dataset.take(attempts):
+        lp, ln = map(
+            len, tokenizer([pair.positive.prompt, pair.negative.prompt]).input_ids
+        )
+        if lp != ln:
+            failures.append((lp, ln, pair))
+    assert len(failures) == 0, failures

@@ -4,7 +4,7 @@
   "negative": "male",
   "generators": [
     {
-      "pattern": "{Trump} was a",
+      "pattern": "It is well known that {Trump} was a",
       "tag": "repetition",
       "positive_replacements": {
         "Trump": ["Trump", "Bush", "Reagan", "Nixon"]
@@ -19,10 +19,10 @@
       "pattern": "The {right} will always be the",
       "tag": "repetition",
       "positive_replacements": {
-        "right": ["right", "right wing"]
+        "right": ["right", "Republicans"]
       },
       "negative_replacements": {
-        "right": ["left", "left wing"]
+        "right": ["left", "Democrats"]
       },
       "positive_answers": [" right"],
       "negative_answers": [" left"]
