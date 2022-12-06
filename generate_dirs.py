@@ -57,4 +57,5 @@ def run(
 if __name__ == "__main__":
     # python generate_dirs.py --layer_nbs 6, --n_dirs 1 --model_name gpt2
     # python generate_dirs.py --layer_nbs 0,1,4,8,12,16,20,24,28,32,44,46,47, --n_dirs 1 --model_name gpt2-xl
+    # python generate_dirs.py --layer_nbs 36,40, --n_dirs 1 --model_name gpt2-xl
     fire.Fire(run)

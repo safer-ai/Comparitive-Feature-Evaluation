@@ -45,6 +45,9 @@ model_name = "gpt2-xl"
 gender_dirs = {
     l: torch.load(path).to(device) for l, path in [(l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dgender.pt")) for l in range(80)] if path.exists()
 }
+politics_dirs = {
+    l: torch.load(path).to(device) for l, path in [(l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dpolitics.pt")) for l in range(80)] if path.exists()
+}
 empty_dirs = list(gender_dirs.values())[0][0:0]
 
 #%%
@@ -67,18 +70,19 @@ some_train_tests = load("gender/train", max_amount=10)
 specific_tests = load("gender/test")
 other_tests = load("politics/test") + load("misc/pronouns") + load("misc/repetitions")
 #%%
+dirs_dict = gender_dirs
 def plot_tests(tests, label: str = ""):
     evaluator = DirEvaluator(model, None, tests, None)
     means = []
     stds = []
     
     baseline_confusions = evolve(evaluator, layer=model.get_submodule(f"transformer.h.{0}"), dirs=empty_dirs).evaluate()
-    for l, dirs in tqdm(gender_dirs.items()):
+    for l, dirs in tqdm(dirs_dict.items()):
         layer = model.get_submodule(f"transformer.h.{l}")
         confusions = 1 - evolve(evaluator, layer=layer, dirs=dirs).evaluate() / baseline_confusions
         means.append(torch.mean(confusions).item())
         stds.append(torch.std(confusions).item() / np.sqrt(len(confusions)))
-    plt.errorbar(gender_dirs.keys(), means, yerr=stds, capsize=3, label=label)
+    plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label)
 # %%
 gender_stereotype = [t for t in specific_tests if t.tag == "stereotype"]
 plot_tests(gender_stereotype, label="gender stereotype")
@@ -95,4 +99,17 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.legend();
 # %%
+dirs_dict = politics_dirs
+plot_tests(gender_stereotype, label="gender stereotype")
+plot_tests(gender_incompetence, label="gender incompetence")
+plot_tests(load("politics/test"), label="politics")
+plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
+plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
+
+plt.xlabel("Layer")
+plt.ylabel("Swap success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.legend();
 # %%
