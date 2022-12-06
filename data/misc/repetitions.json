@@ -16,12 +16,12 @@
       "negative_answers": [" eat"]
     },
     {
-      "pattern": "{Apples} are",
+      "pattern": " {Apples} are",
       "positive_replacements": {
         "Apples": ["Apples", "Bananas", "Strawberries"]
       },
       "negative_replacements": {
-        "Apples": ["Broccoli", "Cucumbers", "Peppers"]
+        "Apples": ["Broccoli", "Peppers"]
       },
       "positive_answers": [" fruits"],
       "negative_answers": [" vegetables"]

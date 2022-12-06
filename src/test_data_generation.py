@@ -47,6 +47,7 @@ def test_gender_dataset_sound():
         with ds_path.open() as f:
             ds = PairGeneratorDataset.load(json.load(f))
             check_dataset_sound(ds)
+            check_generations_line_up(ds)
 
 
 def test_misc_dataset_sound():
@@ -54,6 +55,7 @@ def test_misc_dataset_sound():
         with ds_path.open() as f:
             ds = PairGeneratorDataset.load(json.load(f))
             check_dataset_sound(ds)
+            check_generations_line_up(ds)
 
 
 def test_politics_dataset_sound():
@@ -79,5 +81,5 @@ def check_generations_line_up(dataset: PairGeneratorDataset, attempts: int = 100
             len, tokenizer([pair.positive.prompt, pair.negative.prompt]).input_ids
         )
         if lp != ln:
-            failures.append((lp, ln, pair))
+            failures.append((lp, ln, pair.positive.prompt, pair.negative.prompt))
     assert len(failures) == 0, failures

@@ -1,16 +1,18 @@
-import torch
-from attrs import define
-from typing import Callable
-import numpy as np
-import torch.nn as nn
-import transformers
-from src.constants import tokenizer, device
 import gc
 from math import cos
-from src.data_generation import Pair
-from src.direction_methods.singles_generations import SingleTest
-from src.direction_methods.pairs_generation import Test
+from typing import Callable
+
+import numpy as np
+import torch
+import torch.nn as nn
+import transformers
+from attrs import define
 from transformers import BatchEncoding
+
+from src.constants import device, tokenizer
+from src.data_generation import Pair
+from src.direction_methods.pairs_generation import Test
+from src.direction_methods.singles_generations import SingleTest
 
 
 @define
@@ -248,11 +250,18 @@ def measure_confusions_grad(test, model: FrankenSteinModel):
 
     res = torch.empty(2, 2)
     for i, q1 in enumerate([test.positive, test.negative]):
-        correct = tokenizer.encode(q1.answer)[0]
-        wrong = tokenizer.encode([test.positive, test.negative][1 - i].answer)[0]
-        for j, q2 in enumerate([test.positive, test.negative]):
-            out_mixed = outs_mixed[i][j]
-            res[i, j] = out_mixed[correct] - out_mixed[wrong]
+        if isinstance(test, Pair):
+            corrects = [tokenizer.encode(a)[0] for a in q1.answers]
+            wrongs = [tokenizer.encode(a)[0] for a in [test.positive, test.negative][1 - i].answers]
+            for j, q2 in enumerate([test.positive, test.negative]):
+                out_mixed = outs_mixed[i][j]
+                res[i, j] = out_mixed[corrects].sum() - out_mixed[wrongs].sum()
+        elif isinstance(test, Test):
+            correct = tokenizer.encode(q1.answer)[0]
+            wrong = tokenizer.encode([test.positive, test.negative][1 - i].answer)[0]
+            for j, q2 in enumerate([test.positive, test.negative]):
+                out_mixed = outs_mixed[i][j]
+                res[i, j] = out_mixed[correct] - out_mixed[wrong]
     return abs(res[0, 0] - res[0, 1]) + abs(
         res[1, 1] - res[1, 0]
     )  # Err on first + Err on second

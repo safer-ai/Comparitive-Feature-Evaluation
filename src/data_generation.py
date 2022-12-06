@@ -77,7 +77,6 @@ class PairGeneratorDataset:
     @staticmethod
     def load(json: dict):
         s = structure(json, PairGeneratorDataset)
-        print(f"Loaded dataset version {s.version} with {len(s.generators)} generators")
         return s
 
     def __iter__(self):
@@ -87,6 +86,8 @@ class PairGeneratorDataset:
         return islice(self, n)
 
     def __next__(self) -> Pair:
+        if not self.generators:
+            raise StopIteration
         return choice(self.generators).generate()
 
     def generate_all(self) -> Iterable[Pair]:
