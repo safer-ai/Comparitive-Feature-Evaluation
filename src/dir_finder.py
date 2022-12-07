@@ -47,19 +47,21 @@ class DirFinder:
             with torch.no_grad():
                 dirs[:] = normalize(dirs)
             optimizer.zero_grad()
-            model_with_grad = create_frankenstein(
-                normalize(dirs),
-                self.model,
-                self.layer,
-                projection_fn=self.projection_fn,
-            )
-            s = torch.zeros((), device=self.device)
+            
+            loss: float = 0
             for t in islice(data_generator, self.batch_size):
-                s += measure_kl_confusions_grad(t, model_with_grad)
+                model_with_grad = create_frankenstein(
+                    normalize(dirs),
+                    self.model,
+                    self.layer,
+                    projection_fn=self.projection_fn,
+                )
+                s = measure_kl_confusions_grad(t, model_with_grad)
+                loss += s.item()
+                s.backward()
 
-            losses.append(s.item())
+            losses.append(loss)
 
-            s.backward()
             optimizer.step()
 
             g.set_postfix(

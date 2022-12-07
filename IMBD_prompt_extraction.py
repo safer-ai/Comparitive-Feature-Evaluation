@@ -19,8 +19,9 @@ def inverse(sentiment: str) -> str:
     return "negative" if sentiment == "positive" else "positive"
 
 
-def generate_pairs(df: pd.DataFrame, n=10, n_few_shot=10, review_max_len=300):
+def generate_pairs(df: pd.DataFrame, n=10, n_few_shot=5, review_max_len=200):
     array = df[df.review.map(lambda x: len(x) < review_max_len)].to_numpy()
+    print(array.shape)
 
     template: str = "review: [{review}] sentiment: {{{sentiment}}}"
 
@@ -49,7 +50,7 @@ def generate_pairs(df: pd.DataFrame, n=10, n_few_shot=10, review_max_len=300):
     
     return PairGeneratorDataset(version="1", positive="correct", negative="inverse", generators=pair_generators)
 
-json.dump(generate_pairs(train_df, n=1000, n_few_shot=10).to_dict(), open("data/imdb_sentiments/train.json", "w"))
-json.dump(generate_pairs(test_df, n=20, n_few_shot=10).to_dict(), open("data/imdb_sentiments/test.json", "w"))
+json.dump(generate_pairs(train_df, n=1000).to_dict(), open("data/imdb_sentiments/train.json", "w"))
+json.dump(generate_pairs(test_df, n=100).to_dict(), open("data/imdb_sentiments/test.json", "w"))
 # %%
 
