@@ -45,7 +45,7 @@ def test_generate_all():
 def test_gender_dataset_sound():
     for ds_path in (Path(".") / "data" / "gender").iterdir():
         with ds_path.open() as f:
-            ds = PairGeneratorDataset.load(json.load(f))
+            ds = PairGeneratorDataset.from_dict(json.load(f))
             check_dataset_sound(ds)
             check_generations_line_up(ds)
 
@@ -53,7 +53,7 @@ def test_gender_dataset_sound():
 def test_misc_dataset_sound():
     for ds_path in (Path(".") / "data" / "misc").iterdir():
         with ds_path.open() as f:
-            ds = PairGeneratorDataset.load(json.load(f))
+            ds = PairGeneratorDataset.from_dict(json.load(f))
             check_dataset_sound(ds)
             check_generations_line_up(ds)
 
@@ -61,10 +61,16 @@ def test_misc_dataset_sound():
 def test_politics_dataset_sound():
     for ds_path in (Path(".") / "data" / "politics").iterdir():
         with ds_path.open() as f:
-            ds = PairGeneratorDataset.load(json.load(f))
+            ds = PairGeneratorDataset.from_dict(json.load(f))
             check_dataset_sound(ds)
             check_generations_line_up(ds)
 
+def test_imdb_sentiments_dataset_sound():
+    for ds_path in (Path(".") / "data" / "imdb_sentiments").iterdir():
+        with ds_path.open() as f:
+            ds = PairGeneratorDataset.from_dict(json.load(f))
+            check_dataset_sound(ds)
+            check_generations_line_up(ds)
 
 def check_dataset_sound(dataset: PairGeneratorDataset):
     for pair_gen in dataset.generators:

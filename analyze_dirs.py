@@ -29,6 +29,7 @@ from src.utils import (
     create_frankenstein,
     measure_confusions,
     measure_confusions_grad,
+    measure_kl_confusions_grad,
 )
 from collections import defaultdict
 from pathlib import Path
@@ -56,7 +57,7 @@ for param in model.parameters():
     param.requires_grad = False
 #%%
 def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]:
-    g = PairGeneratorDataset.load(
+    g = PairGeneratorDataset.from_dict(
         json.load(Path(f"./data/{ds}.json").open("r"))
     )
     
@@ -67,8 +68,9 @@ def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]
         return list(g.take(max_amount))
 
 some_train_tests = load("gender/train", max_amount=10)
-specific_tests = load("gender/test")
-other_tests = load("politics/test") + load("misc/pronouns") + load("misc/repetitions")
+gender_tests = load("gender/test")
+politics_tests = load("politics/test")
+imdb_sentiments_tests = load("imdb_sentiments/test")[:5]
 #%%
 dirs_dict = gender_dirs
 def plot_tests(tests, label: str = ""):
@@ -82,15 +84,17 @@ def plot_tests(tests, label: str = ""):
         confusions = 1 - evolve(evaluator, layer=layer, dirs=dirs).evaluate() / baseline_confusions
         means.append(torch.mean(confusions).item())
         stds.append(torch.std(confusions).item() / np.sqrt(len(confusions)))
+    
     plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label)
 # %%
-gender_stereotype = [t for t in specific_tests if t.tag == "stereotype"]
+gender_stereotype = [t for t in gender_tests if t.tag == "stereotype"]
 plot_tests(gender_stereotype, label="gender stereotype")
-gender_incompetence = [t for t in specific_tests if t.tag != "stereotype"]
+gender_incompetence = [t for t in gender_tests if t.tag != "stereotype"]
 plot_tests(gender_incompetence, label="gender incompetence")
-plot_tests(load("politics/test"), label="politics")
+plot_tests(politics_tests, label="politics")
 plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
 plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
+plot_tests(imdb_sentiments_tests, label="imdb sentiments")
 
 plt.xlabel("Layer")
 plt.ylabel("Swap success rate")
@@ -100,11 +104,14 @@ plt.axhline(1, color="black", linestyle="--")
 plt.legend();
 # %%
 dirs_dict = politics_dirs
-plot_tests(gender_stereotype, label="gender stereotype")
-plot_tests(gender_incompetence, label="gender incompetence")
-plot_tests(load("politics/test"), label="politics")
+politics_stereotype = [t for t in politics_tests if t.tag == "stereotype"]
+plot_tests(politics_stereotype, label="politics stereotype")
+politics_incompetence = [t for t in politics_tests if t.tag != "stereotype"]
+plot_tests(politics_incompetence, label="politics incompetence")
+plot_tests(gender_tests, label="gender")
 plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
 plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
+plot_tests(imdb_sentiments_tests, label="imdb sentiments")
 
 plt.xlabel("Layer")
 plt.ylabel("Swap success rate")
@@ -112,4 +119,12 @@ plt.ylim(-0.1, 1.1)
 plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.legend();
+# %%
+single_dirs_it = sorted(list(gender_dirs.items()))
+keys = [k for k, _ in single_dirs_it]
+all_dirs_t = torch.cat([d for _, d in single_dirs_it])
+plt.imshow(torch.einsum("n h, m h -> n m", all_dirs_t, all_dirs_t).abs().cpu())
+plt.xticks(list(range(len(single_dirs_it))), keys, rotation=45)
+plt.yticks(list(range(len(single_dirs_it))), keys)
+plt.colorbar()
 # %%

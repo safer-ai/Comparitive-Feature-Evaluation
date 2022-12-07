@@ -2,6 +2,6 @@ from src.data_generation import PairGeneratorDataset, PairGenerator, Pair, Quest
 import json
 
 if __name__ == "__main__":
-    g = PairGeneratorDataset.load(json.load(open("data/politics/train.json")))
+    g = PairGeneratorDataset.from_dict(json.load(open("data/politics/train.json")))
     for p in g.take(10):
         print(p)

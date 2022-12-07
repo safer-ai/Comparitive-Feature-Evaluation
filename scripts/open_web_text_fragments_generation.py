@@ -16,12 +16,12 @@ for ss in tqdm(s):
 
 df = pd.DataFrame(fragments, columns=["fragment"])
 
-df.to_csv("../data/open_text_fragments.csv")
+df.to_csv("data/raw/open_text_fragments.csv")
 #%%
 # You can still run this from here to do manual feature selection
 import pandas as pd
 
-df = pd.read_csv("../data/open_text_fragments.csv", index_col=0)
+df = pd.read_csv("data/raw/open_text_fragments.csv", index_col=0)
 df.head(30)
 for i, row in df.iterrows():
     print("---", i, "---")
@@ -41,5 +41,5 @@ df["football_empty"] = df.index.map(
 df.head(30)
 
 # %%
-df.to_csv("../data/open_text_fragments.csv")
+df.to_csv("data/raw/open_text_fragments.csv")
 # %%

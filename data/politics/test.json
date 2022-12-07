@@ -1,10 +1,10 @@
 {
   "version": "1",
-  "positive": "female",
-  "negative": "male",
+  "positive": "right wing",
+  "negative": "left wing",
   "generators": [
     {
-      "pattern": "It is well known that {Trump} was a",
+      "pattern": "It is well known that {Trump} was a member of the",
       "tag": "repetition",
       "positive_replacements": {
         "Trump": ["Trump", "Bush", "Reagan", "Nixon"]
@@ -16,7 +16,7 @@
       "negative_answers": [" Democrat"]
     },
     {
-      "pattern": "The {right} will always be the",
+      "pattern": "American politics won't change, the {right} will always be the",
       "tag": "repetition",
       "positive_replacements": {
         "right": ["right", "Republicans"]
@@ -28,7 +28,7 @@
       "negative_answers": [" left"]
     },
     {
-      "pattern": "The {Republicans} love",
+      "pattern": "In the US, the {Republicans} love",
       "tag": "stereotype",
       "positive_replacements": {
         "Republicans": ["Republicans"]
@@ -40,31 +40,18 @@
       "negative_answers": [" culture"]
     },
     {
-      "pattern": "{Right} wing supporter hate the",
+      "pattern": "{Right} wing supporter like {priests} and hate the",
       "tag": "stereotype",
       "positive_replacements": {
-        "Right": ["Right"]
+        "Right": ["Right"],
+        "priests": ["priests"]
       },
       "negative_replacements": {
-        "Right": ["Left"]
+        "Right": ["Left"],
+        "priests": ["unions"]
       },
       "positive_answers": [" professors"],
       "negative_answers": [" cops"]
-    },
-    {
-      "pattern": "During the 20th century, the {Republicans} have {often pushed} to fund the",
-      "tag": "knowledge",
-      "positive_replacements": {
-        "Republicans": ["Republicans"]
-      },
-      "negative_replacements": {
-        "Republicans": ["Democrats"]
-      },
-      "neutral_replacements": {
-        "often pushed": ["often pushed", "wanted"]
-      },
-      "positive_answers": [" army"],
-      "negative_answers": [" social"]
     }
   ]
 }

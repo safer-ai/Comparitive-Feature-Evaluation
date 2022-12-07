@@ -9,8 +9,10 @@ from src.utils import (
     measure_confusions,
     project,
     ProjectionFunc,
+    FrankenSteinModel,
 )
 
+ConfusionFn = Callable[[Pair, FrankenSteinModel], float]
 
 @define
 class DirEvaluator:
@@ -19,11 +21,12 @@ class DirEvaluator:
     test_pairs: list[Pair]
     dirs: torch.Tensor
     projection_fn: ProjectionFunc = project
+    confusion_fn: ConfusionFn = measure_confusions
 
     def evaluate(self) -> torch.Tensor:
         return torch.Tensor(
             [
-                measure_confusions(
+                self.confusion_fn(
                     validate(t),
                     create_frankenstein(
                         self.dirs,

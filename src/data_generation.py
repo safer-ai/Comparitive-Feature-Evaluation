@@ -75,7 +75,7 @@ class PairGeneratorDataset:
     generators: list[PairGenerator] = []
 
     @staticmethod
-    def load(json: dict):
+    def from_dict(json: dict):
         s = structure(json, PairGeneratorDataset)
         return s
 
@@ -93,7 +93,7 @@ class PairGeneratorDataset:
     def generate_all(self) -> Iterable[Pair]:
         return chain.from_iterable(g.generate_all() for g in self.generators)
 
-    def save(self):
+    def to_dict(self):
         return unstructure(self)
 
 
@@ -117,4 +117,4 @@ def replace_pattern_exhaustively(pattern: str, d: ReplacementDict) -> Iterable[s
 
 
 def suround_by_brackets(s: str) -> str:
-    return "{" + s + "}"
+    return f"{{{s}}}"
