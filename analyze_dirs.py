@@ -49,6 +49,9 @@ gender_dirs = {
 politics_dirs = {
     l: torch.load(path).to(device) for l, path in [(l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dpolitics.pt")) for l in range(80)] if path.exists()
 }
+imdb_dirs = {
+    l: torch.load(path).to(device) for l, path in [(l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dimdb_sentiments.pt")) for l in range(80)] if path.exists()
+}
 empty_dirs = list(gender_dirs.values())[0][0:0]
 
 #%%
@@ -112,6 +115,20 @@ plot_tests(gender_tests, label="gender")
 plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
 plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
 plot_tests(imdb_sentiments_tests, label="imdb sentiments")
+
+plt.xlabel("Layer")
+plt.ylabel("Swap success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.legend();
+# %%
+dirs_dict = imdb_dirs
+plot_tests(load("imdb_sentiments/test")[:20], label="imdb sentiments")
+plot_tests(politics_tests, label="politics")
+plot_tests(gender_tests, label="gender")
+plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
+plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
 
 plt.xlabel("Layer")
 plt.ylabel("Swap success rate")

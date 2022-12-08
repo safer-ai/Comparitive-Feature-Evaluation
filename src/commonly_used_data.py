@@ -32,7 +32,7 @@ boy_1tok_names = [
 
 @lru_cache
 def get_opt_fragments_df() -> pd.DataFrame:
-    return pd.read_csv("data/raw/open_text_fragments.csv", index_col=0)
+    return pd.read_csv("raw_data/open_text_fragments.csv", index_col=0)
 
 
 def get_opt_samples(only: Optional[str] = None) -> list[str]:

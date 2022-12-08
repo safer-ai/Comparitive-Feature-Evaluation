@@ -8,7 +8,7 @@ import json
 
 Path("data/imdb_sentiments").mkdir(parents=True, exist_ok=True)
 # %%
-df = pd.read_csv("data/raw/IMDB Dataset.csv")
+df = pd.read_csv("raw_data/IMDB Dataset.csv")
 df.head()
 # %%
 train_df, test_df = train_test_split(df, test_size=0.2, random_state=0)

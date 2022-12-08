@@ -5,7 +5,7 @@
   "generators": [
     {
       "pattern": "{She} is {huge}, but",
-      "tag": "pronoun repetition",
+      "tag": "X->X",
       "positive_replacements": {
         "She": ["She"]
       },
@@ -20,7 +20,7 @@
     },
     {
       "pattern": "{She} {took}",
-      "tag": "pronoun repetition",
+      "tag": "X->X",
       "positive_replacements": {
         "She": ["She"]
       },
@@ -35,7 +35,7 @@
     },
     {
       "pattern": "{Her} favorite color is",
-      "tag": "stereotype",
+      "tag": "X->Y",
       "positive_replacements": {
         "Her": ["Her"]
       },
@@ -47,7 +47,7 @@
     },
     {
       "pattern": "The favorite color of {girls} is",
-      "tag": "stereotype",
+      "tag": "X->Y",
       "positive_replacements": {
         "girls": ["girls"]
       },
@@ -59,7 +59,7 @@
     },
     {
       "pattern": "{She} {likes}",
-      "tag": "stereotype",
+      "tag": "X->Y",
       "positive_replacements": {
         "She": ["She"]
       },
@@ -74,7 +74,7 @@
     },
     {
       "pattern": "{Her} {name} is",
-      "tag": "knowledge",
+      "tag": "X->X",
       "positive_replacements": {
         "Her": ["Her"]
       },

@@ -5,7 +5,7 @@
   "generators": [
     {
       "pattern": "It is well known that {Trump} was a member of the",
-      "tag": "repetition",
+      "tag": "X->X",
       "positive_replacements": {
         "Trump": ["Trump", "Bush", "Reagan", "Nixon"]
       },
@@ -17,7 +17,7 @@
     },
     {
       "pattern": "American politics won't change, the {right} will always be the",
-      "tag": "repetition",
+      "tag": "X->X",
       "positive_replacements": {
         "right": ["right", "Republicans"]
       },
@@ -29,7 +29,7 @@
     },
     {
       "pattern": "In the US, the {Republicans} love",
-      "tag": "stereotype",
+      "tag": "X->Y",
       "positive_replacements": {
         "Republicans": ["Republicans"]
       },
@@ -40,8 +40,8 @@
       "negative_answers": [" culture"]
     },
     {
-      "pattern": "{Right} wing supporter like {priests} and hate the",
-      "tag": "stereotype",
+      "pattern": "{Right} wing supporter like {priests} and hate",
+      "tag": "X->Y",
       "positive_replacements": {
         "Right": ["Right"],
         "priests": ["priests"]
@@ -52,6 +52,30 @@
       },
       "positive_answers": [" professors"],
       "negative_answers": [" cops"]
+    },
+    {
+      "pattern": "A state which is {republican} is said to be",
+      "tag": "X->Y",
+      "positive_replacements": {
+        "republican": ["republican"]
+      },
+      "negative_replacements": {
+        "republican": ["democrat"]
+      },
+      "positive_answers": [" red"],
+      "negative_answers": [" blue"]
+    },
+    {
+      "pattern": "The US party which has the most {pro-life} supporters is the",
+      "tag": "X->X",
+      "positive_replacements": {
+        "pro-life": ["pro-life"]
+      },
+      "negative_replacements": {
+        "pro-life": ["pro-choice"]
+      },
+      "positive_answers": [" Republican"],
+      "negative_answers": [" Democrat"]
     }
   ]
 }
