@@ -90,14 +90,18 @@ def plot_tests(tests, label: str = ""):
     
     plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label)
 # %%
+# Increase plot size
+from matplotlib import rcParams
+rcParams['figure.figsize'] = (12, 12)
+
 gender_XY = [t for t in gender_tests if t.tag == "X->Y"]
 plot_tests(gender_XY, label="gender X->Y")
 gender_XX = [t for t in gender_tests if t.tag == "X->X"]
 plot_tests(gender_XX, label="gender X->X")
 gender_YX = [t for t in gender_tests if t.tag != "Y->X"]
-plot_tests(gender_YX, label="gender X->X")
+plot_tests(gender_YX, label="gender Y->X")
 gender_YY = [t for t in gender_tests if t.tag != "Y->Y"]
-plot_tests(gender_YY, label="gender X->X")
+plot_tests(gender_YY, label="gender Y->Y")
 plot_tests(politics_tests, label="politics")
 plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
 plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")

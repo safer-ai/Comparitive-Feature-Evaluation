@@ -29,7 +29,7 @@ class DirFinder:
     batch_size: int = 8
     iterations: int = 10_000
     projection_fn: ProjectionFunc = partial(project, strength=1)
-    roling_loss_window: int = 100
+    roling_loss_window: int = 200
 
     def find_dirs(self) -> torch.Tensor:
         torch.manual_seed(self.seed)
@@ -43,12 +43,12 @@ class DirFinder:
 
         g = trange(self.iterations // self.batch_size)
         losses: list[float] = []
+        last_loss = torch.inf
         for e in g:
             with torch.no_grad():
                 dirs[:] = normalize(dirs)
             optimizer.zero_grad()
             
-            loss: float = 0
             for t in islice(data_generator, self.batch_size):
                 model_with_grad = create_frankenstein(
                     normalize(dirs),
@@ -57,18 +57,23 @@ class DirFinder:
                     projection_fn=self.projection_fn,
                 )
                 s = measure_kl_confusions_grad(t, model_with_grad)
-                loss += s.item()
+                
+                losses.append(s.item())
+                
                 s.backward()
-
-            losses.append(loss)
 
             optimizer.step()
 
+            # early stopping if loss is not decreasing
+            rolling_loss = sum(losses[-self.roling_loss_window :]) / self.roling_loss_window
+            if rolling_loss > last_loss:
+                break
+            last_loss = rolling_loss
+            
             g.set_postfix(
                 {
-                    "batch": e,
-                    "loss": sum(losses[-self.roling_loss_window :])
-                    / self.roling_loss_window,
+                    "iteration": e * self.batch_size,
+                    "loss": rolling_loss,
                 }
             )
         d = dirs.detach()
