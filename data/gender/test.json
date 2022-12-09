@@ -86,6 +86,66 @@
       },
       "positive_answers": [" Rachel"],
       "negative_answers": [" Tyler"]
+    },
+    {
+      "pattern": "I never expected that {pink} would be",
+      "tag": "Y->X",
+      "positive_replacements": {
+        "pink": ["pink"]
+      },
+      "negative_replacements": {
+        "pink": ["blue"]
+      },
+      "positive_answers": [" her"],
+      "negative_answers": [" his"]
+    },
+    {
+      "pattern": "The one taking care of {children} has done an amazing job.",
+      "tag": "Y->X",
+      "positive_replacements": {
+        "children": ["children"]
+      },
+      "negative_replacements": {
+        "children": ["cars"]
+      },
+      "positive_answers": [" She"],
+      "negative_answers": [" He"]
+    },
+    {
+      "pattern": "Arden loves to {cook}, but",
+      "tag": "Y->X",
+      "positive_replacements": {
+        "cook": ["cook", "dance"]
+      },
+      "negative_replacements": {
+        "cook": ["fight", "compete"]
+      },
+      "positive_answers": [" she"],
+      "negative_answers": [" he"]
+    },
+    {
+      "pattern": "Arden loves to {cook} and prefers the color",
+      "tag": "Y->Y",
+      "positive_replacements": {
+        "cook": ["cook", "dance"]
+      },
+      "negative_replacements": {
+        "cook": ["fight", "compete"]
+      },
+      "positive_answers": [" pink"],
+      "negative_answers": [" blue"]
+    },
+    {
+      "pattern": " {Assistants} always wear nice",
+      "tag": "Y->Y",
+      "positive_replacements": {
+        "Assistants": ["Assistants", "Dancers"]
+      },
+      "negative_replacements": {
+        "Assistants": ["Technicians", "Comedians"]
+      },
+      "positive_answers": [" bras"],
+      "negative_answers": [" tanks"]
     }
   ]
 }

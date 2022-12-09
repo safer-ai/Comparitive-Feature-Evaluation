@@ -90,14 +90,18 @@ def plot_tests(tests, label: str = ""):
     
     plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label)
 # %%
-gender_stereotype = [t for t in gender_tests if t.tag == "stereotype"]
-plot_tests(gender_stereotype, label="gender stereotype")
-gender_incompetence = [t for t in gender_tests if t.tag != "stereotype"]
-plot_tests(gender_incompetence, label="gender incompetence")
+gender_XY = [t for t in gender_tests if t.tag == "X->Y"]
+plot_tests(gender_XY, label="gender X->Y")
+gender_XX = [t for t in gender_tests if t.tag == "X->X"]
+plot_tests(gender_XX, label="gender X->X")
+gender_YX = [t for t in gender_tests if t.tag != "Y->X"]
+plot_tests(gender_YX, label="gender X->X")
+gender_YY = [t for t in gender_tests if t.tag != "Y->Y"]
+plot_tests(gender_YY, label="gender X->X")
 plot_tests(politics_tests, label="politics")
 plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
 plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
-plot_tests(imdb_sentiments_tests, label="imdb sentiments")
+# plot_tests(imdb_sentiments_tests, label="imdb sentiments")
 
 plt.xlabel("Layer")
 plt.ylabel("Swap success rate")
@@ -107,14 +111,14 @@ plt.axhline(1, color="black", linestyle="--")
 plt.legend();
 # %%
 dirs_dict = politics_dirs
-politics_stereotype = [t for t in politics_tests if t.tag == "stereotype"]
-plot_tests(politics_stereotype, label="politics stereotype")
-politics_incompetence = [t for t in politics_tests if t.tag != "stereotype"]
-plot_tests(politics_incompetence, label="politics incompetence")
+politics_stereotype = [t for t in politics_tests if t.tag == "X->Y"]
+plot_tests(politics_stereotype, label="politics X->Y")
+politics_incompetence = [t for t in politics_tests if t.tag != "X->Y"]
+plot_tests(politics_incompetence, label="politics X->X")
 plot_tests(gender_tests, label="gender")
 plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
 plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
-plot_tests(imdb_sentiments_tests, label="imdb sentiments")
+# plot_tests(imdb_sentiments_tests, label="imdb sentiments")
 
 plt.xlabel("Layer")
 plt.ylabel("Swap success rate")
@@ -122,20 +126,20 @@ plt.ylim(-0.1, 1.1)
 plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.legend();
-# %%
-dirs_dict = imdb_dirs
-plot_tests(load("imdb_sentiments/test")[:20], label="imdb sentiments")
-plot_tests(politics_tests, label="politics")
-plot_tests(gender_tests, label="gender")
-plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
-plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
+# # %%
+# dirs_dict = imdb_dirs
+# plot_tests(load("imdb_sentiments/test")[:20], label="imdb sentiments")
+# plot_tests(politics_tests, label="politics")
+# plot_tests(gender_tests, label="gender")
+# plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
+# plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
 
-plt.xlabel("Layer")
-plt.ylabel("Swap success rate")
-plt.ylim(-0.1, 1.1)
-plt.axhline(0, color="black", linestyle="--")
-plt.axhline(1, color="black", linestyle="--")
-plt.legend();
+# plt.xlabel("Layer")
+# plt.ylabel("Swap success rate")
+# plt.ylim(-0.1, 1.1)
+# plt.axhline(0, color="black", linestyle="--")
+# plt.axhline(1, color="black", linestyle="--")
+# plt.legend();
 # %%
 single_dirs_it = sorted(list(gender_dirs.items()))
 keys = [k for k, _ in single_dirs_it]
