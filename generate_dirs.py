@@ -32,7 +32,7 @@ def run(
     model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     for param in model.parameters():
         param.requires_grad = False
-    h_size: int = model.lm_head.weight.shape[1]
+    h_size: int = model.lm_head.weight.shape[1] # type: ignore
 
     pair_generator = PairGeneratorDataset.from_dict(
         json.load(Path(f"./data/{data}/train.json").open("r"))

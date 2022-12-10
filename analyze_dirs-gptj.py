@@ -40,7 +40,7 @@ import json
 from src.data_generation import PairGeneratorDataset, Pair
 from src.dir_evaluator import DirEvaluator
 from attrs import evolve
-from tqdm import tqdm
+from tqdm import tqdm # type: ignore
 
 #%%
 model_name = "EleutherAI/gpt-j-6B"
@@ -88,9 +88,9 @@ dirs_dict = gender_dirs
 def plot_tests(tests, label: str = ""):
     evaluator = DirEvaluator(
         model,
-        None,
+        None, # type: ignore
         tests,
-        None,
+        None, # type: ignore
         confusion_fn=partial(measure_confusions_ratio, use_log_probs=True),
     )
     means = []
@@ -156,9 +156,9 @@ gptdumb: torch.nn.Module = AutoModelForCausalLM.from_pretrained("gpt2").to(devic
 for param in gptdumb.parameters():
     param.requires_grad = False
 # %%
-dumb_empty_dirs = torch.empty((0, gptdumb.lm_head.weight.shape[1])).to(device)
+dumb_empty_dirs = torch.empty((0, gptdumb.lm_head.weight.shape[1])).to(device) # type: ignore
 for tests in [gender_tests, politics_tests]:
-    evaluator = DirEvaluator(model, None, tests, None)
+    evaluator = DirEvaluator(model, None, tests, None) # type: ignore
     means = []
     stds = []
 

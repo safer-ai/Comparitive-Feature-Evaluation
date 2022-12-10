@@ -40,7 +40,7 @@ import json
 from src.data_generation import PairGeneratorDataset, Pair
 from src.dir_evaluator import DirEvaluator
 from attrs import evolve
-from tqdm import tqdm
+from tqdm import tqdm # type: ignore
 
 #%%
 model_name = "gpt2-xl"
@@ -103,9 +103,9 @@ dirs_dict = gender_dirs
 def plot_tests(tests, label: str = ""):
     evaluator = DirEvaluator(
         model,
-        None,
+        None, # type: ignore
         tests,
-        None,
+        None, # type: ignore
         confusion_fn=partial(measure_confusions_ratio, use_log_probs=True),
     )
     means = []

@@ -74,7 +74,7 @@ def test_imdb_sentiments_dataset_sound():
             check_generations_line_up(ds)
 
 
-def test_imdb_sentiments_dataset_sound():
+def test_facts_dataset_sound():
     for ds_path in (Path(".") / "data" / "facts").iterdir():
         with ds_path.open() as f:
             ds = PairGeneratorDataset.from_dict(json.load(f))
@@ -91,7 +91,6 @@ def check_dataset_sound(dataset: PairGeneratorDataset):
 
 
 def check_generations_line_up(dataset: PairGeneratorDataset, attempts: int = 100):
-    failures = []
     for pair in dataset.take(attempts):
         lp, ln = map(
             len, tokenizer([pair.positive.prompt, pair.negative.prompt]).input_ids

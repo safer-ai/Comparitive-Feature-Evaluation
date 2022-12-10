@@ -1,7 +1,7 @@
 #%%
 from pathlib import Path
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split # type: ignore
 from src.data_generation import PairGeneratorDataset, Pair, PairGenerator
 import numpy as np
 import json
