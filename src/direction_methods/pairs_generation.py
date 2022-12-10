@@ -8,6 +8,10 @@ from src.commonly_used_data import girl_1tok_names, boy_1tok_names
 class Question:
     prompt: str
     answer: str  # should be one token
+    
+    @property
+    def answers(self):
+        return [self.answer]
 
 
 @define

@@ -6,7 +6,7 @@ from typing import Optional
 import numpy as np
 import torch
 from attrs import define
-from transformers import GPT2LMHeadModel
+from transformers import AutoModelForCausalLM
 from src.direction_methods.pairs_generation import (
     get_train_tests,
     get_val_controls,
@@ -43,34 +43,19 @@ from attrs import evolve
 from tqdm import tqdm
 
 #%%
-model_name = "gpt2-xl"
+model_name = "EleutherAI/gpt-j-6B"
 
 gender_dirs = {
     l: torch.load(path).to(device)
     for l, path in [
-        (l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dgender.pt")) for l in range(80)
-    ]
-    if path.exists()
-}
-politics_dirs = {
-    l: torch.load(path).to(device)
-    for l, path in [
-        (l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dpolitics.pt")) for l in range(80)
-    ]
-    if path.exists()
-}
-imdb_dirs = {
-    l: torch.load(path).to(device)
-    for l, path in [
-        (l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dimdb_sentiments.pt"))
-        for l in range(80)
+        (l, Path(f"./saved_dirs/v2-{model_name}/l{l}-n1-dgender.pt")) for l in range(80)
     ]
     if path.exists()
 }
 facts_dirs = {
     l: torch.load(path).to(device)
     for l, path in [
-        (l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dfacts.pt"))
+        (l, Path(f"./saved_dirs/v2-{model_name}/l{l}-n1-dfacts.pt"))
         for l in range(80)
     ]
     if path.exists()
@@ -78,7 +63,7 @@ facts_dirs = {
 empty_dirs = list(gender_dirs.values())[0][0:0]
 
 #%%
-model: torch.nn.Module = GPT2LMHeadModel.from_pretrained(model_name).to(device)
+model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 for param in model.parameters():
     param.requires_grad = False
 #%%
@@ -113,6 +98,7 @@ def plot_tests(tests, label: str = ""):
         stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
     plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label)
 
+
 # %%
 # Increase plot size
 from matplotlib import rcParams
@@ -139,37 +125,6 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.legend()
 # %%
-dirs_dict = politics_dirs
-politics_stereotype = [t for t in politics_tests if t.tag == "X->Y"]
-plot_tests(politics_stereotype, label="politics X->Y")
-politics_incompetence = [t for t in politics_tests if t.tag != "X->Y"]
-plot_tests(politics_incompetence, label="politics X->X")
-plot_tests(gender_tests, label="gender")
-plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
-plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
-# plot_tests(imdb_sentiments_tests, label="imdb sentiments")
-
-plt.xlabel("Layer")
-plt.ylabel("Swap success rate")
-plt.ylim(-0.1, 1.1)
-plt.axhline(0, color="black", linestyle="--")
-plt.axhline(1, color="black", linestyle="--")
-plt.legend()
-# # %%
-# dirs_dict = imdb_dirs
-# plot_tests(load("imdb_sentiments/test")[:20], label="imdb sentiments")
-# plot_tests(politics_tests, label="politics")
-# plot_tests(gender_tests, label="gender")
-# plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
-# plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
-
-# plt.xlabel("Layer")
-# plt.ylabel("Swap success rate")
-# plt.ylim(-0.1, 1.1)
-# plt.axhline(0, color="black", linestyle="--")
-# plt.axhline(1, color="black", linestyle="--")
-# plt.legend();
-# %%
 dirs_dict = facts_dirs
 plot_tests(load("facts/test"), label="facts")
 plot_tests(politics_tests, label="politics")
@@ -191,4 +146,35 @@ plt.imshow(torch.einsum("n h, m h -> n m", all_dirs_t, all_dirs_t).abs().cpu())
 plt.xticks(list(range(len(single_dirs_it))), keys, rotation=45)
 plt.yticks(list(range(len(single_dirs_it))), keys)
 plt.colorbar()
+#%%
+gptdumb: torch.nn.Module = AutoModelForCausalLM.from_pretrained("gpt2").to(device)
+for param in gptdumb.parameters():
+    param.requires_grad = False
+# %%
+dumb_empty_dirs = torch.empty((0, gptdumb.lm_head.weight.shape[1])).to(device)
+for tests in [gender_tests, politics_tests]:
+    evaluator = DirEvaluator(model, None, tests, None)
+    means = []
+    stds = []
+
+    e = evolve(
+        evaluator, layer=model.get_submodule(f"transformer.h.{0}"), dirs=empty_dirs
+    )
+    baseline_confusions = e.evaluate()
+
+    confusions = (
+        1
+        - evolve(
+            evaluator,
+            model=gptdumb,
+            layer=gptdumb.get_submodule(f"transformer.h.{0}"),
+            dirs=dumb_empty_dirs,
+        ).evaluate()
+        / baseline_confusions
+    )
+
+    means.append(torch.mean(confusions).item())
+    stds.append(torch.std(confusions).item() / np.sqrt(len(confusions)))
+
+    print(means, stds)
 # %%

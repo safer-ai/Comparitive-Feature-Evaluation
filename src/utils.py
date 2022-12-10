@@ -1,6 +1,6 @@
 import gc
 from math import cos
-from typing import Callable
+from typing import Callable, Union
 
 import numpy as np
 import torch
@@ -232,65 +232,111 @@ def run_and_modify(tokens, model, modification_fns):
 # The first input is the correct one, but the activation of the second one is the distraction.
 FrankenSteinModel = Callable[[BatchEncoding, BatchEncoding], torch.Tensor]
 
-
-def measure_confusions_grad(test, model: FrankenSteinModel):
+def compute_tests_results(test, model: FrankenSteinModel) -> torch.Tensor:
+    """Return a line of results:
+    
+    [probs0, probs1, probs2, probs3]
+    where
+    probs1 is probs0 distracted
+    probs2 is probs3 distracted"""
     inps1 = []
     inps2 = []
-    for i, q1 in enumerate([test.positive, test.negative]):
-        for j, q2 in enumerate([test.positive, test.negative]):
+    for q1 in [test.positive, test.negative]:
+        for q2 in [test.positive, test.negative]:
             inps1.append(q1.prompt)
             inps2.append(q2.prompt)
     inps1t = tokenizer(inps1, return_tensors="pt").to(device)
     inps2t = tokenizer(inps2, return_tensors="pt").to(device)
-    outs_mixed_raw = torch.log_softmax(model(inps1t, inps2t)[:, -1], dim=-1)
+    r = torch.log_softmax(model(inps1t, inps2t)[:, -1], dim=-1)
+    # print(inps1t.input_ids, inps2t.input_ids, r[:, 2],"e")
+    return r
+
+def measure_confusions_grad(test: Union[Test, Pair], model: FrankenSteinModel):
+    outs_mixed_raw = compute_tests_results(test, model)
     outs_mixed = [
         [outs_mixed_raw[0], outs_mixed_raw[1]],
         [outs_mixed_raw[2], outs_mixed_raw[3]],
     ]
 
-    res = torch.empty(2, 2)
+    res = torch.empty(2, 2, device=device)
     for i, q1 in enumerate([test.positive, test.negative]):
-        if isinstance(test, Pair):
-            corrects = [tokenizer.encode(a)[0] for a in q1.answers]
-            wrongs = [tokenizer.encode(a)[0] for a in [test.positive, test.negative][1 - i].answers]
-            for j, q2 in enumerate([test.positive, test.negative]):
-                out_mixed = outs_mixed[i][j]
-                res[i, j] = out_mixed[corrects].sum() - out_mixed[wrongs].sum()
-        elif isinstance(test, Test):
-            correct = tokenizer.encode(q1.answer)[0]
-            wrong = tokenizer.encode([test.positive, test.negative][1 - i].answer)[0]
-            for j, q2 in enumerate([test.positive, test.negative]):
-                out_mixed = outs_mixed[i][j]
-                res[i, j] = out_mixed[correct] - out_mixed[wrong]
+        corrects = [tokenizer.encode(a)[0] for a in q1.answers]
+        wrongs = [tokenizer.encode(a)[0] for a in [test.positive, test.negative][1 - i].answers]
+        for j, q2 in enumerate([test.positive, test.negative]):
+            out_mixed = outs_mixed[i][j]
+            res[i, j] = out_mixed[corrects].sum() - out_mixed[wrongs].sum()
     return abs(res[0, 0] - res[0, 1]) + abs(
         res[1, 1] - res[1, 0]
     )  # Err on first + Err on second
 
 
-def measure_kl_confusions_grad(test, model: FrankenSteinModel):
-    inps1 = []
-    inps2 = []
-    for i, q1 in enumerate([test.positive, test.negative]):
-        for j, q2 in enumerate([test.positive, test.negative]):
-            inps1.append(q1.prompt)
-            inps2.append(q2.prompt)
-    inps1t = tokenizer(inps1, return_tensors="pt").to(device)
-    inps2t = tokenizer(inps2, return_tensors="pt").to(device)
-    outs_mixed_raw = torch.log_softmax(model(inps1t, inps2t)[:, -1], dim=-1)
-
-    # 1 is 0 distracted
-    # 3 is 2 distracted
-    return torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
-        outs_mixed_raw[[0, 2]], outs_mixed_raw[[1, 3]]
-    ) + torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
-        outs_mixed_raw[[1, 3]], outs_mixed_raw[[0, 2]]
-    )
 
 
 def measure_confusions(test, model: FrankenSteinModel):
     with torch.no_grad():
         return measure_confusions_grad(test, model).item()
 
+
+def measure_kl_confusions_grad(test, model: FrankenSteinModel):
+    outs_mixed_raw = compute_tests_results(test, model)
+
+    return torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
+        outs_mixed_raw[[0, 3]], outs_mixed_raw[[1, 2]]
+    ) + torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
+        outs_mixed_raw[[1, 2]], outs_mixed_raw[[0, 3]]
+    )
+
+
+def measure_kl_confusions(test, model: FrankenSteinModel):
+    with torch.no_grad():
+        return measure_kl_confusions_grad(test, model).item()
+
+def get_confusion_ratio(all_log_probs: torch.Tensor) -> torch.Tensor:
+    # all_log_probs[which_sequece][is_distracted][is_wrong]
+    
+    s = torch.zeros((), device=all_log_probs.device)
+    for seq in range(2):
+        for is_correct in range(2):
+            starting_lp = all_log_probs[seq, 0, is_correct]
+            worse_case_lp = all_log_probs[1 - seq, 0, 1 - is_correct]
+            res_lp = all_log_probs[seq, 1, is_correct]
+            s += torch.clip((starting_lp - res_lp) / (starting_lp - worse_case_lp), 0, 1)
+    return s / 4
+    
+    
+def measure_confusions_ratio_grad(test, model: FrankenSteinModel, use_log_probs: bool = True):
+    outs_mixed_raw = compute_tests_results(test, model)
+    
+    # log_probs = [probs0, probs1, probs2, probs3]
+    # where
+    # probs1 is probs0 distracted
+    # probs2 is probs3 distracted
+    outs_mixed = [
+        [outs_mixed_raw[0], outs_mixed_raw[1]],
+        [outs_mixed_raw[3], outs_mixed_raw[2]],
+    ] # outs_mixed[which_sequece][is_distracted]
+    
+    all_log_probs = torch.empty(2, 2, 2, device=device)
+    # all_log_probs[which_sequece][is_distracted][is_wrong]
+
+    for i, q1 in enumerate([test.positive, test.negative]):
+        corrects = [tokenizer.encode(a)[0] for a in q1.answers]
+        wrongs = [tokenizer.encode(a)[0] for a in [test.positive, test.negative][1 - i].answers]
+        for j, q2 in enumerate([test.positive, test.negative]):
+            all_log_probs[i,j,0] = outs_mixed[i][j][corrects].sum()
+            all_log_probs[i,j,1] =  outs_mixed[i][j][wrongs].sum()
+    # print(all_log_probs)
+    
+    if use_log_probs:
+        return get_confusion_ratio(all_log_probs)
+    else:
+        return get_confusion_ratio(torch.exp(all_log_probs))
+   
+
+
+def measure_confusions_ratio(test, model: FrankenSteinModel, use_log_probs: bool = True):
+    with torch.no_grad():
+        return measure_confusions_ratio_grad(test, model, use_log_probs).item()
 
 ProjectionFunc = Callable[
     [torch.Tensor, torch.Tensor], torch.Tensor
@@ -304,11 +350,16 @@ def create_frankenstein(
 
     The first input is the correct one, but the activation of the second one will be used everywhere but the dirs."""
 
+    assert len(dirs.shape) == 2
+    
     def frankenstein(inp1, inp2):
         """inp1 is the one which should be used, inp2 is the wrong one"""
-        act1 = get_activations(inp1, model, [layer_module], lambda x: x[0])[
+        act1 = get_activations(inp1, model, [layer_module])[
             layer_module
         ]
+        assert len(act1.shape) == 3
+        assert act1.shape[2] == dirs.shape[1]
+        
         proj_act1 = act1 - projection_fn(act1, dirs)
 
         def mix(module, input, output):
