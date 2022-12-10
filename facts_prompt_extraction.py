@@ -31,13 +31,13 @@ def generate_pairs(df: pd.DataFrame, n=10, n_few_shot=5):
             for start, answer, _ in lines[1:]
         )
         full_question = f"{prompt}\n{lines[0,0]}"
-        
+
         positive_replacements = {}
         negative_replacements = {}
         for _, answer, bad_answer in lines[1:]:
             positive_replacements[answer] = [answer]
             negative_replacements[answer] = [bad_answer]
-        
+
         pair_generators.append(
             PairGenerator(
                 full_question,
@@ -47,10 +47,14 @@ def generate_pairs(df: pd.DataFrame, n=10, n_few_shot=5):
                 negative_answers=[lines[0, 2]],
             )
         )
-    
-    return PairGeneratorDataset(version="1", positive="correct", negative="inverse", generators=pair_generators)
 
-json.dump(generate_pairs(train_df, n=1000).to_dict(), open("data/facts/train.json", "w"))
+    return PairGeneratorDataset(
+        version="1", positive="correct", negative="inverse", generators=pair_generators
+    )
+
+
+json.dump(
+    generate_pairs(train_df, n=1000).to_dict(), open("data/facts/train.json", "w")
+)
 json.dump(generate_pairs(test_df, n=100).to_dict(), open("data/facts/test.json", "w"))
 # %%
-

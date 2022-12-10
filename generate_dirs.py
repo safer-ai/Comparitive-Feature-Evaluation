@@ -47,7 +47,7 @@ def run(
         ).find_dirs()
 
         file_name = f"l{layer_nb}-n{n_dirs}-d{data}.pt"
-        dir_path = Path(".") / "saved_dirs" / f"v2-{model_name}{cone_suffix}"
+        dir_path = Path(".") / "saved_dirs" / f"v3-{model_name}{cone_suffix}"
         dir_path.mkdir(parents=True, exist_ok=True)
         path = dir_path / file_name
 

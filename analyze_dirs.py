@@ -70,8 +70,7 @@ imdb_dirs = {
 facts_dirs = {
     l: torch.load(path).to(device)
     for l, path in [
-        (l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dfacts.pt"))
-        for l in range(80)
+        (l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dfacts.pt")) for l in range(80)
     ]
     if path.exists()
 }
@@ -102,7 +101,13 @@ dirs_dict = gender_dirs
 
 
 def plot_tests(tests, label: str = ""):
-    evaluator = DirEvaluator(model, None, tests, None, confusion_fn = partial(measure_confusions_ratio, use_log_probs=True))
+    evaluator = DirEvaluator(
+        model,
+        None,
+        tests,
+        None,
+        confusion_fn=partial(measure_confusions_ratio, use_log_probs=True),
+    )
     means = []
     stds = []
 
@@ -112,6 +117,7 @@ def plot_tests(tests, label: str = ""):
         means.append(torch.mean(success_rate).item())
         stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
     plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label)
+
 
 # %%
 # Increase plot size
@@ -182,7 +188,7 @@ plt.ylabel("Swap success rate")
 plt.ylim(-0.1, 1.1)
 plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
-plt.legend();
+plt.legend()
 # %%
 single_dirs_it = sorted(list(gender_dirs.items()))
 keys = [k for k, _ in single_dirs_it]

@@ -43,14 +43,22 @@ def generate_pairs(df: pd.DataFrame, n=10, n_few_shot=5, review_max_len=200):
                 full_question,
                 positive_replacements=positive_replacements,
                 negative_replacements=negative_replacements,
-                positive_answers=[" "+lines[0, 1]],
-                negative_answers=[" "+inverse(lines[0, 1])],
+                positive_answers=[" " + lines[0, 1]],
+                negative_answers=[" " + inverse(lines[0, 1])],
             )
         )
-    
-    return PairGeneratorDataset(version="1", positive="correct", negative="inverse", generators=pair_generators)
 
-json.dump(generate_pairs(train_df, n=1000).to_dict(), open("data/imdb_sentiments/train.json", "w"))
-json.dump(generate_pairs(test_df, n=100).to_dict(), open("data/imdb_sentiments/test.json", "w"))
+    return PairGeneratorDataset(
+        version="1", positive="correct", negative="inverse", generators=pair_generators
+    )
+
+
+json.dump(
+    generate_pairs(train_df, n=1000).to_dict(),
+    open("data/imdb_sentiments/train.json", "w"),
+)
+json.dump(
+    generate_pairs(test_df, n=100).to_dict(),
+    open("data/imdb_sentiments/test.json", "w"),
+)
 # %%
-

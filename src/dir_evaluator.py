@@ -14,6 +14,7 @@ from src.utils import (
 
 ConfusionFn = Callable[[Pair, FrankenSteinModel], float]
 
+
 @define
 class DirEvaluator:
     model: torch.nn.Module

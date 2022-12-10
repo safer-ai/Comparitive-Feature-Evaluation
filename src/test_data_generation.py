@@ -65,6 +65,7 @@ def test_politics_dataset_sound():
             check_dataset_sound(ds)
             check_generations_line_up(ds)
 
+
 def test_imdb_sentiments_dataset_sound():
     for ds_path in (Path(".") / "data" / "imdb_sentiments").iterdir():
         with ds_path.open() as f:
@@ -72,13 +73,15 @@ def test_imdb_sentiments_dataset_sound():
             check_dataset_sound(ds)
             check_generations_line_up(ds)
 
+
 def test_imdb_sentiments_dataset_sound():
     for ds_path in (Path(".") / "data" / "facts").iterdir():
         with ds_path.open() as f:
             ds = PairGeneratorDataset.from_dict(json.load(f))
             check_dataset_sound(ds)
             check_generations_line_up(ds)
-            
+
+
 def check_dataset_sound(dataset: PairGeneratorDataset):
     for pair_gen in dataset.generators:
         answers = pair_gen.positive_answers + pair_gen.negative_answers
@@ -93,7 +96,10 @@ def check_generations_line_up(dataset: PairGeneratorDataset, attempts: int = 100
         lp, ln = map(
             len, tokenizer([pair.positive.prompt, pair.negative.prompt]).input_ids
         )
-        assert lp == ln, f"{lp}, {ln}, {repr_tokenized(pair.positive.prompt)}\nvs\n{repr_tokenized(pair.negative.prompt)}"
+        assert (
+            lp == ln
+        ), f"{lp}, {ln}, {repr_tokenized(pair.positive.prompt)}\nvs\n{repr_tokenized(pair.negative.prompt)}"
+
 
 def repr_tokenized(s: str):
     """Return the string where each token has been separated by a vertical bar."""
