@@ -1,0 +1,2107 @@
+{
+  "version": "1",
+  "positive": "correct",
+  "negative": "inverse",
+  "generators": [
+    {
+      "pattern": "The September 11 attack was done by the{ terrorists}\nThe brain is an{ organ}\n2 + 3 ={ 5}\nThe largest ocean is the{ Pacific}\nThe United States of America is a{ country}\nKoalas are native to",
+      "tag": "no tag",
+      "positive_replacements": {
+        " terrorists": [" terrorists"],
+        " organ": [" organ"],
+        " 5": [" 5"],
+        " Pacific": [" Pacific"],
+        " country": [" country"]
+      },
+      "negative_replacements": {
+        " terrorists": [" CIA"],
+        " organ": [" muscle"],
+        " 5": [" 7"],
+        " Pacific": [" Atlantic"],
+        " country": [" city"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Australia"],
+      "negative_answers": [" Canada"]
+    },
+    {
+      "pattern": "The largest ocean is the{ Pacific}\nThe brain is an{ organ}\nSpring follows{ winter}\nThe United States of America is a{ country}\nA kilogram is a unit of{ mass}\nThe Milky Way is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " Pacific": [" Pacific"],
+        " organ": [" organ"],
+        " winter": [" winter"],
+        " country": [" country"],
+        " mass": [" mass"]
+      },
+      "negative_replacements": {
+        " Pacific": [" Atlantic"],
+        " organ": [" muscle"],
+        " winter": [" summer"],
+        " country": [" city"],
+        " mass": [" distance"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" galaxy"],
+      "negative_answers": [" star"]
+    },
+    {
+      "pattern": "Gold is a{ metal}\nCoca-Cola sells{ drinks}\nSpring follows{ winter}\ndrinking bleach is{ dangerous}\nThe United States of America is a{ country}\nKoalas are native to",
+      "tag": "no tag",
+      "positive_replacements": {
+        " metal": [" metal"],
+        " drinks": [" drinks"],
+        " winter": [" winter"],
+        " dangerous": [" dangerous"],
+        " country": [" country"]
+      },
+      "negative_replacements": {
+        " metal": [" liquid"],
+        " drinks": [" burgers"],
+        " winter": [" summer"],
+        " dangerous": [" safe"],
+        " country": [" city"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Australia"],
+      "negative_answers": [" Canada"]
+    },
+    {
+      "pattern": "Gold is a{ metal}\nKoalas are native to{ Australia}\nThe United States of America is a{ country}\nThe September 11 attack was done by the{ terrorists}\nCoca-Cola sells{ drinks}\nElephants have large",
+      "tag": "no tag",
+      "positive_replacements": {
+        " metal": [" metal"],
+        " Australia": [" Australia"],
+        " country": [" country"],
+        " terrorists": [" terrorists"],
+        " drinks": [" drinks"]
+      },
+      "negative_replacements": {
+        " metal": [" liquid"],
+        " Australia": [" Canada"],
+        " country": [" city"],
+        " terrorists": [" CIA"],
+        " drinks": [" burgers"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" ears"],
+      "negative_answers": [" wings"]
+    },
+    {
+      "pattern": "A kilogram is a unit of{ mass}\ndrinking bleach is{ dangerous}\nKoalas are native to{ Australia}\nYou can drive on{ bridges}\nSpring follows{ winter}\nCoca-Cola sells",
+      "tag": "no tag",
+      "positive_replacements": {
+        " mass": [" mass"],
+        " dangerous": [" dangerous"],
+        " Australia": [" Australia"],
+        " bridges": [" bridges"],
+        " winter": [" winter"]
+      },
+      "negative_replacements": {
+        " mass": [" distance"],
+        " dangerous": [" safe"],
+        " Australia": [" Canada"],
+        " bridges": [" clouds"],
+        " winter": [" summer"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" drinks"],
+      "negative_answers": [" burgers"]
+    },
+    {
+      "pattern": "The United States of America is a{ country}\nYou can drive on{ bridges}\nA joule is a unit of{ energy}\nGold is a{ metal}\nThe atomic number of carbon is{ 6}\n2 + 3 =",
+      "tag": "no tag",
+      "positive_replacements": {
+        " country": [" country"],
+        " bridges": [" bridges"],
+        " energy": [" energy"],
+        " metal": [" metal"],
+        " 6": [" 6"]
+      },
+      "negative_replacements": {
+        " country": [" city"],
+        " bridges": [" clouds"],
+        " energy": [" speed"],
+        " metal": [" liquid"],
+        " 6": [" 8"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 5"],
+      "negative_answers": [" 7"]
+    },
+    {
+      "pattern": "Elephants have large{ ears}\nThe brain is an{ organ}\nA joule is a unit of{ energy}\nThe United States of America is a{ country}\nThe North Pole is in the{ Arctic}\n2 + 3 =",
+      "tag": "no tag",
+      "positive_replacements": {
+        " ears": [" ears"],
+        " organ": [" organ"],
+        " energy": [" energy"],
+        " country": [" country"],
+        " Arctic": [" Arctic"]
+      },
+      "negative_replacements": {
+        " ears": [" wings"],
+        " organ": [" muscle"],
+        " energy": [" speed"],
+        " country": [" city"],
+        " Arctic": [" Antarctic"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 5"],
+      "negative_answers": [" 7"]
+    },
+    {
+      "pattern": "drinking bleach is{ dangerous}\nA kilogram is a unit of{ mass}\nYou can drive on{ bridges}\nThe largest ocean is the{ Pacific}\nThe North Pole is in the{ Arctic}\nThe United States of America is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " dangerous": [" dangerous"],
+        " mass": [" mass"],
+        " bridges": [" bridges"],
+        " Pacific": [" Pacific"],
+        " Arctic": [" Arctic"]
+      },
+      "negative_replacements": {
+        " dangerous": [" safe"],
+        " mass": [" distance"],
+        " bridges": [" clouds"],
+        " Pacific": [" Atlantic"],
+        " Arctic": [" Antarctic"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" country"],
+      "negative_answers": [" city"]
+    },
+    {
+      "pattern": "Elephants have large{ ears}\nA joule is a unit of{ energy}\nA kilogram is a unit of{ mass}\nThe atomic number of carbon is{ 6}\nThe Milky Way is a{ galaxy}\nCoca-Cola sells",
+      "tag": "no tag",
+      "positive_replacements": {
+        " ears": [" ears"],
+        " energy": [" energy"],
+        " mass": [" mass"],
+        " 6": [" 6"],
+        " galaxy": [" galaxy"]
+      },
+      "negative_replacements": {
+        " ears": [" wings"],
+        " energy": [" speed"],
+        " mass": [" distance"],
+        " 6": [" 8"],
+        " galaxy": [" star"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" drinks"],
+      "negative_answers": [" burgers"]
+    },
+    {
+      "pattern": "The brain is an{ organ}\nSpring follows{ winter}\nElephants have large{ ears}\nThe North Pole is in the{ Arctic}\nA kilogram is a unit of{ mass}\nThe September 11 attack was done by the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " organ": [" organ"],
+        " winter": [" winter"],
+        " ears": [" ears"],
+        " Arctic": [" Arctic"],
+        " mass": [" mass"]
+      },
+      "negative_replacements": {
+        " organ": [" muscle"],
+        " winter": [" summer"],
+        " ears": [" wings"],
+        " Arctic": [" Antarctic"],
+        " mass": [" distance"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" terrorists"],
+      "negative_answers": [" CIA"]
+    },
+    {
+      "pattern": "Gold is a{ metal}\nElephants have large{ ears}\nThe North Pole is in the{ Arctic}\n2 + 3 ={ 5}\nThe Milky Way is a{ galaxy}\ndrinking bleach is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " metal": [" metal"],
+        " ears": [" ears"],
+        " Arctic": [" Arctic"],
+        " 5": [" 5"],
+        " galaxy": [" galaxy"]
+      },
+      "negative_replacements": {
+        " metal": [" liquid"],
+        " ears": [" wings"],
+        " Arctic": [" Antarctic"],
+        " 5": [" 7"],
+        " galaxy": [" star"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" dangerous"],
+      "negative_answers": [" safe"]
+    },
+    {
+      "pattern": "The brain is an{ organ}\nThe atomic number of carbon is{ 6}\nThe largest ocean is the{ Pacific}\nYou can drive on{ bridges}\nThe United States of America is a{ country}\nChlorophyll is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " organ": [" organ"],
+        " 6": [" 6"],
+        " Pacific": [" Pacific"],
+        " bridges": [" bridges"],
+        " country": [" country"]
+      },
+      "negative_replacements": {
+        " organ": [" muscle"],
+        " 6": [" 8"],
+        " Pacific": [" Atlantic"],
+        " bridges": [" clouds"],
+        " country": [" city"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" green"],
+      "negative_answers": [" purple"]
+    },
+    {
+      "pattern": "The United States of America is a{ country}\nThe largest ocean is the{ Pacific}\nKoalas are native to{ Australia}\nElephants have large{ ears}\nGold is a{ metal}\nThe North Pole is in the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " country": [" country"],
+        " Pacific": [" Pacific"],
+        " Australia": [" Australia"],
+        " ears": [" ears"],
+        " metal": [" metal"]
+      },
+      "negative_replacements": {
+        " country": [" city"],
+        " Pacific": [" Atlantic"],
+        " Australia": [" Canada"],
+        " ears": [" wings"],
+        " metal": [" liquid"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Arctic"],
+      "negative_answers": [" Antarctic"]
+    },
+    {
+      "pattern": "2 + 3 ={ 5}\nThe September 11 attack was done by the{ terrorists}\nCoca-Cola sells{ drinks}\nKoalas are native to{ Australia}\nA joule is a unit of{ energy}\nYou can drive on",
+      "tag": "no tag",
+      "positive_replacements": {
+        " 5": [" 5"],
+        " terrorists": [" terrorists"],
+        " drinks": [" drinks"],
+        " Australia": [" Australia"],
+        " energy": [" energy"]
+      },
+      "negative_replacements": {
+        " 5": [" 7"],
+        " terrorists": [" CIA"],
+        " drinks": [" burgers"],
+        " Australia": [" Canada"],
+        " energy": [" speed"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" bridges"],
+      "negative_answers": [" clouds"]
+    },
+    {
+      "pattern": "The United States of America is a{ country}\n2 + 3 ={ 5}\nA kilogram is a unit of{ mass}\nThe largest ocean is the{ Pacific}\nYou can drive on{ bridges}\nSpring follows",
+      "tag": "no tag",
+      "positive_replacements": {
+        " country": [" country"],
+        " 5": [" 5"],
+        " mass": [" mass"],
+        " Pacific": [" Pacific"],
+        " bridges": [" bridges"]
+      },
+      "negative_replacements": {
+        " country": [" city"],
+        " 5": [" 7"],
+        " mass": [" distance"],
+        " Pacific": [" Atlantic"],
+        " bridges": [" clouds"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" winter"],
+      "negative_answers": [" summer"]
+    },
+    {
+      "pattern": "The Milky Way is a{ galaxy}\nThe September 11 attack was done by the{ terrorists}\n2 + 3 ={ 5}\nCoca-Cola sells{ drinks}\ndrinking bleach is{ dangerous}\nThe atomic number of carbon is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " galaxy": [" galaxy"],
+        " terrorists": [" terrorists"],
+        " 5": [" 5"],
+        " drinks": [" drinks"],
+        " dangerous": [" dangerous"]
+      },
+      "negative_replacements": {
+        " galaxy": [" star"],
+        " terrorists": [" CIA"],
+        " 5": [" 7"],
+        " drinks": [" burgers"],
+        " dangerous": [" safe"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 6"],
+      "negative_answers": [" 8"]
+    },
+    {
+      "pattern": "A joule is a unit of{ energy}\nThe largest ocean is the{ Pacific}\nThe atomic number of carbon is{ 6}\nChlorophyll is{ green}\nCoca-Cola sells{ drinks}\nThe North Pole is in the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " energy": [" energy"],
+        " Pacific": [" Pacific"],
+        " 6": [" 6"],
+        " green": [" green"],
+        " drinks": [" drinks"]
+      },
+      "negative_replacements": {
+        " energy": [" speed"],
+        " Pacific": [" Atlantic"],
+        " 6": [" 8"],
+        " green": [" purple"],
+        " drinks": [" burgers"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Arctic"],
+      "negative_answers": [" Antarctic"]
+    },
+    {
+      "pattern": "A kilogram is a unit of{ mass}\ndrinking bleach is{ dangerous}\nA joule is a unit of{ energy}\nThe North Pole is in the{ Arctic}\nThe Milky Way is a{ galaxy}\nThe atomic number of carbon is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " mass": [" mass"],
+        " dangerous": [" dangerous"],
+        " energy": [" energy"],
+        " Arctic": [" Arctic"],
+        " galaxy": [" galaxy"]
+      },
+      "negative_replacements": {
+        " mass": [" distance"],
+        " dangerous": [" safe"],
+        " energy": [" speed"],
+        " Arctic": [" Antarctic"],
+        " galaxy": [" star"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 6"],
+      "negative_answers": [" 8"]
+    },
+    {
+      "pattern": "The Milky Way is a{ galaxy}\nCoca-Cola sells{ drinks}\nA kilogram is a unit of{ mass}\nElephants have large{ ears}\n2 + 3 ={ 5}\nThe North Pole is in the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " galaxy": [" galaxy"],
+        " drinks": [" drinks"],
+        " mass": [" mass"],
+        " ears": [" ears"],
+        " 5": [" 5"]
+      },
+      "negative_replacements": {
+        " galaxy": [" star"],
+        " drinks": [" burgers"],
+        " mass": [" distance"],
+        " ears": [" wings"],
+        " 5": [" 7"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Arctic"],
+      "negative_answers": [" Antarctic"]
+    },
+    {
+      "pattern": "The atomic number of carbon is{ 6}\nKoalas are native to{ Australia}\nElephants have large{ ears}\nThe Milky Way is a{ galaxy}\nThe United States of America is a{ country}\nThe North Pole is in the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " 6": [" 6"],
+        " Australia": [" Australia"],
+        " ears": [" ears"],
+        " galaxy": [" galaxy"],
+        " country": [" country"]
+      },
+      "negative_replacements": {
+        " 6": [" 8"],
+        " Australia": [" Canada"],
+        " ears": [" wings"],
+        " galaxy": [" star"],
+        " country": [" city"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Arctic"],
+      "negative_answers": [" Antarctic"]
+    },
+    {
+      "pattern": "The brain is an{ organ}\nThe North Pole is in the{ Arctic}\nThe atomic number of carbon is{ 6}\nKoalas are native to{ Australia}\nThe United States of America is a{ country}\nCoca-Cola sells",
+      "tag": "no tag",
+      "positive_replacements": {
+        " organ": [" organ"],
+        " Arctic": [" Arctic"],
+        " 6": [" 6"],
+        " Australia": [" Australia"],
+        " country": [" country"]
+      },
+      "negative_replacements": {
+        " organ": [" muscle"],
+        " Arctic": [" Antarctic"],
+        " 6": [" 8"],
+        " Australia": [" Canada"],
+        " country": [" city"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" drinks"],
+      "negative_answers": [" burgers"]
+    },
+    {
+      "pattern": "The North Pole is in the{ Arctic}\nCoca-Cola sells{ drinks}\nThe brain is an{ organ}\n2 + 3 ={ 5}\nSpring follows{ winter}\nThe atomic number of carbon is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " Arctic": [" Arctic"],
+        " drinks": [" drinks"],
+        " organ": [" organ"],
+        " 5": [" 5"],
+        " winter": [" winter"]
+      },
+      "negative_replacements": {
+        " Arctic": [" Antarctic"],
+        " drinks": [" burgers"],
+        " organ": [" muscle"],
+        " 5": [" 7"],
+        " winter": [" summer"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 6"],
+      "negative_answers": [" 8"]
+    },
+    {
+      "pattern": "The atomic number of carbon is{ 6}\ndrinking bleach is{ dangerous}\nYou can drive on{ bridges}\nA kilogram is a unit of{ mass}\nGold is a{ metal}\nA joule is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " 6": [" 6"],
+        " dangerous": [" dangerous"],
+        " bridges": [" bridges"],
+        " mass": [" mass"],
+        " metal": [" metal"]
+      },
+      "negative_replacements": {
+        " 6": [" 8"],
+        " dangerous": [" safe"],
+        " bridges": [" clouds"],
+        " mass": [" distance"],
+        " metal": [" liquid"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" energy"],
+      "negative_answers": [" speed"]
+    },
+    {
+      "pattern": "A joule is a unit of{ energy}\nElephants have large{ ears}\nSpring follows{ winter}\nThe Milky Way is a{ galaxy}\nYou can drive on{ bridges}\nThe United States of America is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " energy": [" energy"],
+        " ears": [" ears"],
+        " winter": [" winter"],
+        " galaxy": [" galaxy"],
+        " bridges": [" bridges"]
+      },
+      "negative_replacements": {
+        " energy": [" speed"],
+        " ears": [" wings"],
+        " winter": [" summer"],
+        " galaxy": [" star"],
+        " bridges": [" clouds"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" country"],
+      "negative_answers": [" city"]
+    },
+    {
+      "pattern": "drinking bleach is{ dangerous}\nA joule is a unit of{ energy}\nA kilogram is a unit of{ mass}\nThe brain is an{ organ}\nThe largest ocean is the{ Pacific}\nYou can drive on",
+      "tag": "no tag",
+      "positive_replacements": {
+        " dangerous": [" dangerous"],
+        " energy": [" energy"],
+        " mass": [" mass"],
+        " organ": [" organ"],
+        " Pacific": [" Pacific"]
+      },
+      "negative_replacements": {
+        " dangerous": [" safe"],
+        " energy": [" speed"],
+        " mass": [" distance"],
+        " organ": [" muscle"],
+        " Pacific": [" Atlantic"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" bridges"],
+      "negative_answers": [" clouds"]
+    },
+    {
+      "pattern": "A kilogram is a unit of{ mass}\nSpring follows{ winter}\nThe Milky Way is a{ galaxy}\nThe brain is an{ organ}\nA joule is a unit of{ energy}\nGold is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " mass": [" mass"],
+        " winter": [" winter"],
+        " galaxy": [" galaxy"],
+        " organ": [" organ"],
+        " energy": [" energy"]
+      },
+      "negative_replacements": {
+        " mass": [" distance"],
+        " winter": [" summer"],
+        " galaxy": [" star"],
+        " organ": [" muscle"],
+        " energy": [" speed"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" metal"],
+      "negative_answers": [" liquid"]
+    },
+    {
+      "pattern": "Chlorophyll is{ green}\ndrinking bleach is{ dangerous}\n2 + 3 ={ 5}\nThe Milky Way is a{ galaxy}\nThe atomic number of carbon is{ 6}\nA joule is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " green": [" green"],
+        " dangerous": [" dangerous"],
+        " 5": [" 5"],
+        " galaxy": [" galaxy"],
+        " 6": [" 6"]
+      },
+      "negative_replacements": {
+        " green": [" purple"],
+        " dangerous": [" safe"],
+        " 5": [" 7"],
+        " galaxy": [" star"],
+        " 6": [" 8"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" energy"],
+      "negative_answers": [" speed"]
+    },
+    {
+      "pattern": "The North Pole is in the{ Arctic}\nA kilogram is a unit of{ mass}\nThe September 11 attack was done by the{ terrorists}\nThe atomic number of carbon is{ 6}\nYou can drive on{ bridges}\nSpring follows",
+      "tag": "no tag",
+      "positive_replacements": {
+        " Arctic": [" Arctic"],
+        " mass": [" mass"],
+        " terrorists": [" terrorists"],
+        " 6": [" 6"],
+        " bridges": [" bridges"]
+      },
+      "negative_replacements": {
+        " Arctic": [" Antarctic"],
+        " mass": [" distance"],
+        " terrorists": [" CIA"],
+        " 6": [" 8"],
+        " bridges": [" clouds"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" winter"],
+      "negative_answers": [" summer"]
+    },
+    {
+      "pattern": "The United States of America is a{ country}\nA kilogram is a unit of{ mass}\nThe September 11 attack was done by the{ terrorists}\nCoca-Cola sells{ drinks}\nA joule is a unit of{ energy}\nKoalas are native to",
+      "tag": "no tag",
+      "positive_replacements": {
+        " country": [" country"],
+        " mass": [" mass"],
+        " terrorists": [" terrorists"],
+        " drinks": [" drinks"],
+        " energy": [" energy"]
+      },
+      "negative_replacements": {
+        " country": [" city"],
+        " mass": [" distance"],
+        " terrorists": [" CIA"],
+        " drinks": [" burgers"],
+        " energy": [" speed"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Australia"],
+      "negative_answers": [" Canada"]
+    },
+    {
+      "pattern": "The United States of America is a{ country}\nThe September 11 attack was done by the{ terrorists}\nThe brain is an{ organ}\nKoalas are native to{ Australia}\ndrinking bleach is{ dangerous}\nA kilogram is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " country": [" country"],
+        " terrorists": [" terrorists"],
+        " organ": [" organ"],
+        " Australia": [" Australia"],
+        " dangerous": [" dangerous"]
+      },
+      "negative_replacements": {
+        " country": [" city"],
+        " terrorists": [" CIA"],
+        " organ": [" muscle"],
+        " Australia": [" Canada"],
+        " dangerous": [" safe"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" mass"],
+      "negative_answers": [" distance"]
+    },
+    {
+      "pattern": "A kilogram is a unit of{ mass}\nYou can drive on{ bridges}\nThe United States of America is a{ country}\nThe largest ocean is the{ Pacific}\nCoca-Cola sells{ drinks}\nThe North Pole is in the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " mass": [" mass"],
+        " bridges": [" bridges"],
+        " country": [" country"],
+        " Pacific": [" Pacific"],
+        " drinks": [" drinks"]
+      },
+      "negative_replacements": {
+        " mass": [" distance"],
+        " bridges": [" clouds"],
+        " country": [" city"],
+        " Pacific": [" Atlantic"],
+        " drinks": [" burgers"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Arctic"],
+      "negative_answers": [" Antarctic"]
+    },
+    {
+      "pattern": "Coca-Cola sells{ drinks}\nElephants have large{ ears}\nThe North Pole is in the{ Arctic}\nThe largest ocean is the{ Pacific}\nThe September 11 attack was done by the{ terrorists}\nThe atomic number of carbon is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " drinks": [" drinks"],
+        " ears": [" ears"],
+        " Arctic": [" Arctic"],
+        " Pacific": [" Pacific"],
+        " terrorists": [" terrorists"]
+      },
+      "negative_replacements": {
+        " drinks": [" burgers"],
+        " ears": [" wings"],
+        " Arctic": [" Antarctic"],
+        " Pacific": [" Atlantic"],
+        " terrorists": [" CIA"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 6"],
+      "negative_answers": [" 8"]
+    },
+    {
+      "pattern": "drinking bleach is{ dangerous}\nThe United States of America is a{ country}\nThe atomic number of carbon is{ 6}\nThe North Pole is in the{ Arctic}\nA joule is a unit of{ energy}\nA kilogram is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " dangerous": [" dangerous"],
+        " country": [" country"],
+        " 6": [" 6"],
+        " Arctic": [" Arctic"],
+        " energy": [" energy"]
+      },
+      "negative_replacements": {
+        " dangerous": [" safe"],
+        " country": [" city"],
+        " 6": [" 8"],
+        " Arctic": [" Antarctic"],
+        " energy": [" speed"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" mass"],
+      "negative_answers": [" distance"]
+    },
+    {
+      "pattern": "The atomic number of carbon is{ 6}\nThe September 11 attack was done by the{ terrorists}\nSpring follows{ winter}\ndrinking bleach is{ dangerous}\nThe largest ocean is the{ Pacific}\nThe brain is an",
+      "tag": "no tag",
+      "positive_replacements": {
+        " 6": [" 6"],
+        " terrorists": [" terrorists"],
+        " winter": [" winter"],
+        " dangerous": [" dangerous"],
+        " Pacific": [" Pacific"]
+      },
+      "negative_replacements": {
+        " 6": [" 8"],
+        " terrorists": [" CIA"],
+        " winter": [" summer"],
+        " dangerous": [" safe"],
+        " Pacific": [" Atlantic"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" organ"],
+      "negative_answers": [" muscle"]
+    },
+    {
+      "pattern": "A joule is a unit of{ energy}\nSpring follows{ winter}\nCoca-Cola sells{ drinks}\nThe Milky Way is a{ galaxy}\ndrinking bleach is{ dangerous}\nThe atomic number of carbon is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " energy": [" energy"],
+        " winter": [" winter"],
+        " drinks": [" drinks"],
+        " galaxy": [" galaxy"],
+        " dangerous": [" dangerous"]
+      },
+      "negative_replacements": {
+        " energy": [" speed"],
+        " winter": [" summer"],
+        " drinks": [" burgers"],
+        " galaxy": [" star"],
+        " dangerous": [" safe"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 6"],
+      "negative_answers": [" 8"]
+    },
+    {
+      "pattern": "The Milky Way is a{ galaxy}\nYou can drive on{ bridges}\nThe atomic number of carbon is{ 6}\nElephants have large{ ears}\nA joule is a unit of{ energy}\ndrinking bleach is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " galaxy": [" galaxy"],
+        " bridges": [" bridges"],
+        " 6": [" 6"],
+        " ears": [" ears"],
+        " energy": [" energy"]
+      },
+      "negative_replacements": {
+        " galaxy": [" star"],
+        " bridges": [" clouds"],
+        " 6": [" 8"],
+        " ears": [" wings"],
+        " energy": [" speed"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" dangerous"],
+      "negative_answers": [" safe"]
+    },
+    {
+      "pattern": "You can drive on{ bridges}\nThe United States of America is a{ country}\nCoca-Cola sells{ drinks}\nThe largest ocean is the{ Pacific}\nThe North Pole is in the{ Arctic}\nGold is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " bridges": [" bridges"],
+        " country": [" country"],
+        " drinks": [" drinks"],
+        " Pacific": [" Pacific"],
+        " Arctic": [" Arctic"]
+      },
+      "negative_replacements": {
+        " bridges": [" clouds"],
+        " country": [" city"],
+        " drinks": [" burgers"],
+        " Pacific": [" Atlantic"],
+        " Arctic": [" Antarctic"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" metal"],
+      "negative_answers": [" liquid"]
+    },
+    {
+      "pattern": "Spring follows{ winter}\n2 + 3 ={ 5}\nThe September 11 attack was done by the{ terrorists}\nThe Milky Way is a{ galaxy}\nCoca-Cola sells{ drinks}\nThe largest ocean is the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " winter": [" winter"],
+        " 5": [" 5"],
+        " terrorists": [" terrorists"],
+        " galaxy": [" galaxy"],
+        " drinks": [" drinks"]
+      },
+      "negative_replacements": {
+        " winter": [" summer"],
+        " 5": [" 7"],
+        " terrorists": [" CIA"],
+        " galaxy": [" star"],
+        " drinks": [" burgers"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Pacific"],
+      "negative_answers": [" Atlantic"]
+    },
+    {
+      "pattern": "Spring follows{ winter}\nCoca-Cola sells{ drinks}\nThe North Pole is in the{ Arctic}\nGold is a{ metal}\ndrinking bleach is{ dangerous}\nYou can drive on",
+      "tag": "no tag",
+      "positive_replacements": {
+        " winter": [" winter"],
+        " drinks": [" drinks"],
+        " Arctic": [" Arctic"],
+        " metal": [" metal"],
+        " dangerous": [" dangerous"]
+      },
+      "negative_replacements": {
+        " winter": [" summer"],
+        " drinks": [" burgers"],
+        " Arctic": [" Antarctic"],
+        " metal": [" liquid"],
+        " dangerous": [" safe"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" bridges"],
+      "negative_answers": [" clouds"]
+    },
+    {
+      "pattern": "Chlorophyll is{ green}\nThe largest ocean is the{ Pacific}\nSpring follows{ winter}\nElephants have large{ ears}\nThe United States of America is a{ country}\nYou can drive on",
+      "tag": "no tag",
+      "positive_replacements": {
+        " green": [" green"],
+        " Pacific": [" Pacific"],
+        " winter": [" winter"],
+        " ears": [" ears"],
+        " country": [" country"]
+      },
+      "negative_replacements": {
+        " green": [" purple"],
+        " Pacific": [" Atlantic"],
+        " winter": [" summer"],
+        " ears": [" wings"],
+        " country": [" city"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" bridges"],
+      "negative_answers": [" clouds"]
+    },
+    {
+      "pattern": "A kilogram is a unit of{ mass}\nThe brain is an{ organ}\nThe September 11 attack was done by the{ terrorists}\nA joule is a unit of{ energy}\nElephants have large{ ears}\nThe North Pole is in the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " mass": [" mass"],
+        " organ": [" organ"],
+        " terrorists": [" terrorists"],
+        " energy": [" energy"],
+        " ears": [" ears"]
+      },
+      "negative_replacements": {
+        " mass": [" distance"],
+        " organ": [" muscle"],
+        " terrorists": [" CIA"],
+        " energy": [" speed"],
+        " ears": [" wings"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Arctic"],
+      "negative_answers": [" Antarctic"]
+    },
+    {
+      "pattern": "The brain is an{ organ}\nElephants have large{ ears}\nCoca-Cola sells{ drinks}\nSpring follows{ winter}\ndrinking bleach is{ dangerous}\nKoalas are native to",
+      "tag": "no tag",
+      "positive_replacements": {
+        " organ": [" organ"],
+        " ears": [" ears"],
+        " drinks": [" drinks"],
+        " winter": [" winter"],
+        " dangerous": [" dangerous"]
+      },
+      "negative_replacements": {
+        " organ": [" muscle"],
+        " ears": [" wings"],
+        " drinks": [" burgers"],
+        " winter": [" summer"],
+        " dangerous": [" safe"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Australia"],
+      "negative_answers": [" Canada"]
+    },
+    {
+      "pattern": "You can drive on{ bridges}\nThe Milky Way is a{ galaxy}\nKoalas are native to{ Australia}\nThe largest ocean is the{ Pacific}\nThe United States of America is a{ country}\nChlorophyll is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " bridges": [" bridges"],
+        " galaxy": [" galaxy"],
+        " Australia": [" Australia"],
+        " Pacific": [" Pacific"],
+        " country": [" country"]
+      },
+      "negative_replacements": {
+        " bridges": [" clouds"],
+        " galaxy": [" star"],
+        " Australia": [" Canada"],
+        " Pacific": [" Atlantic"],
+        " country": [" city"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" green"],
+      "negative_answers": [" purple"]
+    },
+    {
+      "pattern": "Spring follows{ winter}\nCoca-Cola sells{ drinks}\nThe North Pole is in the{ Arctic}\nChlorophyll is{ green}\nElephants have large{ ears}\nA joule is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " winter": [" winter"],
+        " drinks": [" drinks"],
+        " Arctic": [" Arctic"],
+        " green": [" green"],
+        " ears": [" ears"]
+      },
+      "negative_replacements": {
+        " winter": [" summer"],
+        " drinks": [" burgers"],
+        " Arctic": [" Antarctic"],
+        " green": [" purple"],
+        " ears": [" wings"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" energy"],
+      "negative_answers": [" speed"]
+    },
+    {
+      "pattern": "The atomic number of carbon is{ 6}\ndrinking bleach is{ dangerous}\nChlorophyll is{ green}\nThe brain is an{ organ}\nThe September 11 attack was done by the{ terrorists}\nGold is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " 6": [" 6"],
+        " dangerous": [" dangerous"],
+        " green": [" green"],
+        " organ": [" organ"],
+        " terrorists": [" terrorists"]
+      },
+      "negative_replacements": {
+        " 6": [" 8"],
+        " dangerous": [" safe"],
+        " green": [" purple"],
+        " organ": [" muscle"],
+        " terrorists": [" CIA"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" metal"],
+      "negative_answers": [" liquid"]
+    },
+    {
+      "pattern": "A joule is a unit of{ energy}\nThe Milky Way is a{ galaxy}\nKoalas are native to{ Australia}\nThe September 11 attack was done by the{ terrorists}\n2 + 3 ={ 5}\ndrinking bleach is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " energy": [" energy"],
+        " galaxy": [" galaxy"],
+        " Australia": [" Australia"],
+        " terrorists": [" terrorists"],
+        " 5": [" 5"]
+      },
+      "negative_replacements": {
+        " energy": [" speed"],
+        " galaxy": [" star"],
+        " Australia": [" Canada"],
+        " terrorists": [" CIA"],
+        " 5": [" 7"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" dangerous"],
+      "negative_answers": [" safe"]
+    },
+    {
+      "pattern": "The atomic number of carbon is{ 6}\nThe brain is an{ organ}\nThe largest ocean is the{ Pacific}\nThe Milky Way is a{ galaxy}\nElephants have large{ ears}\n2 + 3 =",
+      "tag": "no tag",
+      "positive_replacements": {
+        " 6": [" 6"],
+        " organ": [" organ"],
+        " Pacific": [" Pacific"],
+        " galaxy": [" galaxy"],
+        " ears": [" ears"]
+      },
+      "negative_replacements": {
+        " 6": [" 8"],
+        " organ": [" muscle"],
+        " Pacific": [" Atlantic"],
+        " galaxy": [" star"],
+        " ears": [" wings"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 5"],
+      "negative_answers": [" 7"]
+    },
+    {
+      "pattern": "Spring follows{ winter}\nA joule is a unit of{ energy}\nThe largest ocean is the{ Pacific}\nElephants have large{ ears}\nGold is a{ metal}\n2 + 3 =",
+      "tag": "no tag",
+      "positive_replacements": {
+        " winter": [" winter"],
+        " energy": [" energy"],
+        " Pacific": [" Pacific"],
+        " ears": [" ears"],
+        " metal": [" metal"]
+      },
+      "negative_replacements": {
+        " winter": [" summer"],
+        " energy": [" speed"],
+        " Pacific": [" Atlantic"],
+        " ears": [" wings"],
+        " metal": [" liquid"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 5"],
+      "negative_answers": [" 7"]
+    },
+    {
+      "pattern": "Elephants have large{ ears}\ndrinking bleach is{ dangerous}\nThe September 11 attack was done by the{ terrorists}\nKoalas are native to{ Australia}\nThe Milky Way is a{ galaxy}\nSpring follows",
+      "tag": "no tag",
+      "positive_replacements": {
+        " ears": [" ears"],
+        " dangerous": [" dangerous"],
+        " terrorists": [" terrorists"],
+        " Australia": [" Australia"],
+        " galaxy": [" galaxy"]
+      },
+      "negative_replacements": {
+        " ears": [" wings"],
+        " dangerous": [" safe"],
+        " terrorists": [" CIA"],
+        " Australia": [" Canada"],
+        " galaxy": [" star"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" winter"],
+      "negative_answers": [" summer"]
+    },
+    {
+      "pattern": "The brain is an{ organ}\nChlorophyll is{ green}\nA kilogram is a unit of{ mass}\nGold is a{ metal}\n2 + 3 ={ 5}\ndrinking bleach is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " organ": [" organ"],
+        " green": [" green"],
+        " mass": [" mass"],
+        " metal": [" metal"],
+        " 5": [" 5"]
+      },
+      "negative_replacements": {
+        " organ": [" muscle"],
+        " green": [" purple"],
+        " mass": [" distance"],
+        " metal": [" liquid"],
+        " 5": [" 7"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" dangerous"],
+      "negative_answers": [" safe"]
+    },
+    {
+      "pattern": "drinking bleach is{ dangerous}\nGold is a{ metal}\nThe largest ocean is the{ Pacific}\n2 + 3 ={ 5}\nCoca-Cola sells{ drinks}\nA kilogram is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " dangerous": [" dangerous"],
+        " metal": [" metal"],
+        " Pacific": [" Pacific"],
+        " 5": [" 5"],
+        " drinks": [" drinks"]
+      },
+      "negative_replacements": {
+        " dangerous": [" safe"],
+        " metal": [" liquid"],
+        " Pacific": [" Atlantic"],
+        " 5": [" 7"],
+        " drinks": [" burgers"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" mass"],
+      "negative_answers": [" distance"]
+    },
+    {
+      "pattern": "You can drive on{ bridges}\nThe September 11 attack was done by the{ terrorists}\nCoca-Cola sells{ drinks}\ndrinking bleach is{ dangerous}\nKoalas are native to{ Australia}\n2 + 3 =",
+      "tag": "no tag",
+      "positive_replacements": {
+        " bridges": [" bridges"],
+        " terrorists": [" terrorists"],
+        " drinks": [" drinks"],
+        " dangerous": [" dangerous"],
+        " Australia": [" Australia"]
+      },
+      "negative_replacements": {
+        " bridges": [" clouds"],
+        " terrorists": [" CIA"],
+        " drinks": [" burgers"],
+        " dangerous": [" safe"],
+        " Australia": [" Canada"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 5"],
+      "negative_answers": [" 7"]
+    },
+    {
+      "pattern": "Coca-Cola sells{ drinks}\nSpring follows{ winter}\nThe September 11 attack was done by the{ terrorists}\nYou can drive on{ bridges}\nGold is a{ metal}\nThe United States of America is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " drinks": [" drinks"],
+        " winter": [" winter"],
+        " terrorists": [" terrorists"],
+        " bridges": [" bridges"],
+        " metal": [" metal"]
+      },
+      "negative_replacements": {
+        " drinks": [" burgers"],
+        " winter": [" summer"],
+        " terrorists": [" CIA"],
+        " bridges": [" clouds"],
+        " metal": [" liquid"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" country"],
+      "negative_answers": [" city"]
+    },
+    {
+      "pattern": "drinking bleach is{ dangerous}\nThe September 11 attack was done by the{ terrorists}\nGold is a{ metal}\nThe atomic number of carbon is{ 6}\nThe Milky Way is a{ galaxy}\nA joule is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " dangerous": [" dangerous"],
+        " terrorists": [" terrorists"],
+        " metal": [" metal"],
+        " 6": [" 6"],
+        " galaxy": [" galaxy"]
+      },
+      "negative_replacements": {
+        " dangerous": [" safe"],
+        " terrorists": [" CIA"],
+        " metal": [" liquid"],
+        " 6": [" 8"],
+        " galaxy": [" star"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" energy"],
+      "negative_answers": [" speed"]
+    },
+    {
+      "pattern": "You can drive on{ bridges}\nThe brain is an{ organ}\nA kilogram is a unit of{ mass}\nChlorophyll is{ green}\nCoca-Cola sells{ drinks}\nKoalas are native to",
+      "tag": "no tag",
+      "positive_replacements": {
+        " bridges": [" bridges"],
+        " organ": [" organ"],
+        " mass": [" mass"],
+        " green": [" green"],
+        " drinks": [" drinks"]
+      },
+      "negative_replacements": {
+        " bridges": [" clouds"],
+        " organ": [" muscle"],
+        " mass": [" distance"],
+        " green": [" purple"],
+        " drinks": [" burgers"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Australia"],
+      "negative_answers": [" Canada"]
+    },
+    {
+      "pattern": "The brain is an{ organ}\nGold is a{ metal}\nCoca-Cola sells{ drinks}\nThe atomic number of carbon is{ 6}\nChlorophyll is{ green}\nKoalas are native to",
+      "tag": "no tag",
+      "positive_replacements": {
+        " organ": [" organ"],
+        " metal": [" metal"],
+        " drinks": [" drinks"],
+        " 6": [" 6"],
+        " green": [" green"]
+      },
+      "negative_replacements": {
+        " organ": [" muscle"],
+        " metal": [" liquid"],
+        " drinks": [" burgers"],
+        " 6": [" 8"],
+        " green": [" purple"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Australia"],
+      "negative_answers": [" Canada"]
+    },
+    {
+      "pattern": "The largest ocean is the{ Pacific}\nThe Milky Way is a{ galaxy}\nKoalas are native to{ Australia}\nThe brain is an{ organ}\nA kilogram is a unit of{ mass}\nElephants have large",
+      "tag": "no tag",
+      "positive_replacements": {
+        " Pacific": [" Pacific"],
+        " galaxy": [" galaxy"],
+        " Australia": [" Australia"],
+        " organ": [" organ"],
+        " mass": [" mass"]
+      },
+      "negative_replacements": {
+        " Pacific": [" Atlantic"],
+        " galaxy": [" star"],
+        " Australia": [" Canada"],
+        " organ": [" muscle"],
+        " mass": [" distance"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" ears"],
+      "negative_answers": [" wings"]
+    },
+    {
+      "pattern": "You can drive on{ bridges}\nA kilogram is a unit of{ mass}\nCoca-Cola sells{ drinks}\n2 + 3 ={ 5}\nThe United States of America is a{ country}\nThe North Pole is in the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " bridges": [" bridges"],
+        " mass": [" mass"],
+        " drinks": [" drinks"],
+        " 5": [" 5"],
+        " country": [" country"]
+      },
+      "negative_replacements": {
+        " bridges": [" clouds"],
+        " mass": [" distance"],
+        " drinks": [" burgers"],
+        " 5": [" 7"],
+        " country": [" city"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Arctic"],
+      "negative_answers": [" Antarctic"]
+    },
+    {
+      "pattern": "A kilogram is a unit of{ mass}\nSpring follows{ winter}\nThe atomic number of carbon is{ 6}\nGold is a{ metal}\nYou can drive on{ bridges}\nThe North Pole is in the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " mass": [" mass"],
+        " winter": [" winter"],
+        " 6": [" 6"],
+        " metal": [" metal"],
+        " bridges": [" bridges"]
+      },
+      "negative_replacements": {
+        " mass": [" distance"],
+        " winter": [" summer"],
+        " 6": [" 8"],
+        " metal": [" liquid"],
+        " bridges": [" clouds"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Arctic"],
+      "negative_answers": [" Antarctic"]
+    },
+    {
+      "pattern": "The atomic number of carbon is{ 6}\nThe September 11 attack was done by the{ terrorists}\nThe North Pole is in the{ Arctic}\nThe brain is an{ organ}\nYou can drive on{ bridges}\n2 + 3 =",
+      "tag": "no tag",
+      "positive_replacements": {
+        " 6": [" 6"],
+        " terrorists": [" terrorists"],
+        " Arctic": [" Arctic"],
+        " organ": [" organ"],
+        " bridges": [" bridges"]
+      },
+      "negative_replacements": {
+        " 6": [" 8"],
+        " terrorists": [" CIA"],
+        " Arctic": [" Antarctic"],
+        " organ": [" muscle"],
+        " bridges": [" clouds"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 5"],
+      "negative_answers": [" 7"]
+    },
+    {
+      "pattern": "The North Pole is in the{ Arctic}\nThe Milky Way is a{ galaxy}\nYou can drive on{ bridges}\nCoca-Cola sells{ drinks}\nThe brain is an{ organ}\nA joule is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " Arctic": [" Arctic"],
+        " galaxy": [" galaxy"],
+        " bridges": [" bridges"],
+        " drinks": [" drinks"],
+        " organ": [" organ"]
+      },
+      "negative_replacements": {
+        " Arctic": [" Antarctic"],
+        " galaxy": [" star"],
+        " bridges": [" clouds"],
+        " drinks": [" burgers"],
+        " organ": [" muscle"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" energy"],
+      "negative_answers": [" speed"]
+    },
+    {
+      "pattern": "Elephants have large{ ears}\nA joule is a unit of{ energy}\nCoca-Cola sells{ drinks}\nChlorophyll is{ green}\nSpring follows{ winter}\nThe Milky Way is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " ears": [" ears"],
+        " energy": [" energy"],
+        " drinks": [" drinks"],
+        " green": [" green"],
+        " winter": [" winter"]
+      },
+      "negative_replacements": {
+        " ears": [" wings"],
+        " energy": [" speed"],
+        " drinks": [" burgers"],
+        " green": [" purple"],
+        " winter": [" summer"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" galaxy"],
+      "negative_answers": [" star"]
+    },
+    {
+      "pattern": "The North Pole is in the{ Arctic}\nThe Milky Way is a{ galaxy}\nGold is a{ metal}\nThe largest ocean is the{ Pacific}\nElephants have large{ ears}\ndrinking bleach is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " Arctic": [" Arctic"],
+        " galaxy": [" galaxy"],
+        " metal": [" metal"],
+        " Pacific": [" Pacific"],
+        " ears": [" ears"]
+      },
+      "negative_replacements": {
+        " Arctic": [" Antarctic"],
+        " galaxy": [" star"],
+        " metal": [" liquid"],
+        " Pacific": [" Atlantic"],
+        " ears": [" wings"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" dangerous"],
+      "negative_answers": [" safe"]
+    },
+    {
+      "pattern": "Gold is a{ metal}\nElephants have large{ ears}\nThe atomic number of carbon is{ 6}\n2 + 3 ={ 5}\nA joule is a unit of{ energy}\nChlorophyll is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " metal": [" metal"],
+        " ears": [" ears"],
+        " 6": [" 6"],
+        " 5": [" 5"],
+        " energy": [" energy"]
+      },
+      "negative_replacements": {
+        " metal": [" liquid"],
+        " ears": [" wings"],
+        " 6": [" 8"],
+        " 5": [" 7"],
+        " energy": [" speed"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" green"],
+      "negative_answers": [" purple"]
+    },
+    {
+      "pattern": "2 + 3 ={ 5}\nGold is a{ metal}\nThe North Pole is in the{ Arctic}\nElephants have large{ ears}\nThe Milky Way is a{ galaxy}\nChlorophyll is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " 5": [" 5"],
+        " metal": [" metal"],
+        " Arctic": [" Arctic"],
+        " ears": [" ears"],
+        " galaxy": [" galaxy"]
+      },
+      "negative_replacements": {
+        " 5": [" 7"],
+        " metal": [" liquid"],
+        " Arctic": [" Antarctic"],
+        " ears": [" wings"],
+        " galaxy": [" star"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" green"],
+      "negative_answers": [" purple"]
+    },
+    {
+      "pattern": "A kilogram is a unit of{ mass}\nKoalas are native to{ Australia}\n2 + 3 ={ 5}\nElephants have large{ ears}\nCoca-Cola sells{ drinks}\nGold is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " mass": [" mass"],
+        " Australia": [" Australia"],
+        " 5": [" 5"],
+        " ears": [" ears"],
+        " drinks": [" drinks"]
+      },
+      "negative_replacements": {
+        " mass": [" distance"],
+        " Australia": [" Canada"],
+        " 5": [" 7"],
+        " ears": [" wings"],
+        " drinks": [" burgers"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" metal"],
+      "negative_answers": [" liquid"]
+    },
+    {
+      "pattern": "The North Pole is in the{ Arctic}\nThe brain is an{ organ}\nThe September 11 attack was done by the{ terrorists}\nThe atomic number of carbon is{ 6}\nKoalas are native to{ Australia}\nThe Milky Way is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " Arctic": [" Arctic"],
+        " organ": [" organ"],
+        " terrorists": [" terrorists"],
+        " 6": [" 6"],
+        " Australia": [" Australia"]
+      },
+      "negative_replacements": {
+        " Arctic": [" Antarctic"],
+        " organ": [" muscle"],
+        " terrorists": [" CIA"],
+        " 6": [" 8"],
+        " Australia": [" Canada"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" galaxy"],
+      "negative_answers": [" star"]
+    },
+    {
+      "pattern": "drinking bleach is{ dangerous}\nThe United States of America is a{ country}\nThe largest ocean is the{ Pacific}\nThe North Pole is in the{ Arctic}\nThe brain is an{ organ}\nA kilogram is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " dangerous": [" dangerous"],
+        " country": [" country"],
+        " Pacific": [" Pacific"],
+        " Arctic": [" Arctic"],
+        " organ": [" organ"]
+      },
+      "negative_replacements": {
+        " dangerous": [" safe"],
+        " country": [" city"],
+        " Pacific": [" Atlantic"],
+        " Arctic": [" Antarctic"],
+        " organ": [" muscle"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" mass"],
+      "negative_answers": [" distance"]
+    },
+    {
+      "pattern": "2 + 3 ={ 5}\nYou can drive on{ bridges}\nGold is a{ metal}\nThe United States of America is a{ country}\nElephants have large{ ears}\nKoalas are native to",
+      "tag": "no tag",
+      "positive_replacements": {
+        " 5": [" 5"],
+        " bridges": [" bridges"],
+        " metal": [" metal"],
+        " country": [" country"],
+        " ears": [" ears"]
+      },
+      "negative_replacements": {
+        " 5": [" 7"],
+        " bridges": [" clouds"],
+        " metal": [" liquid"],
+        " country": [" city"],
+        " ears": [" wings"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Australia"],
+      "negative_answers": [" Canada"]
+    },
+    {
+      "pattern": "Elephants have large{ ears}\nA kilogram is a unit of{ mass}\nThe United States of America is a{ country}\n2 + 3 ={ 5}\nA joule is a unit of{ energy}\nYou can drive on",
+      "tag": "no tag",
+      "positive_replacements": {
+        " ears": [" ears"],
+        " mass": [" mass"],
+        " country": [" country"],
+        " 5": [" 5"],
+        " energy": [" energy"]
+      },
+      "negative_replacements": {
+        " ears": [" wings"],
+        " mass": [" distance"],
+        " country": [" city"],
+        " 5": [" 7"],
+        " energy": [" speed"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" bridges"],
+      "negative_answers": [" clouds"]
+    },
+    {
+      "pattern": "Coca-Cola sells{ drinks}\nYou can drive on{ bridges}\nThe United States of America is a{ country}\nGold is a{ metal}\nChlorophyll is{ green}\nKoalas are native to",
+      "tag": "no tag",
+      "positive_replacements": {
+        " drinks": [" drinks"],
+        " bridges": [" bridges"],
+        " country": [" country"],
+        " metal": [" metal"],
+        " green": [" green"]
+      },
+      "negative_replacements": {
+        " drinks": [" burgers"],
+        " bridges": [" clouds"],
+        " country": [" city"],
+        " metal": [" liquid"],
+        " green": [" purple"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Australia"],
+      "negative_answers": [" Canada"]
+    },
+    {
+      "pattern": "The largest ocean is the{ Pacific}\nCoca-Cola sells{ drinks}\nYou can drive on{ bridges}\n2 + 3 ={ 5}\nThe Milky Way is a{ galaxy}\nThe brain is an",
+      "tag": "no tag",
+      "positive_replacements": {
+        " Pacific": [" Pacific"],
+        " drinks": [" drinks"],
+        " bridges": [" bridges"],
+        " 5": [" 5"],
+        " galaxy": [" galaxy"]
+      },
+      "negative_replacements": {
+        " Pacific": [" Atlantic"],
+        " drinks": [" burgers"],
+        " bridges": [" clouds"],
+        " 5": [" 7"],
+        " galaxy": [" star"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" organ"],
+      "negative_answers": [" muscle"]
+    },
+    {
+      "pattern": "A joule is a unit of{ energy}\nYou can drive on{ bridges}\nThe United States of America is a{ country}\nThe Milky Way is a{ galaxy}\nElephants have large{ ears}\nThe atomic number of carbon is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " energy": [" energy"],
+        " bridges": [" bridges"],
+        " country": [" country"],
+        " galaxy": [" galaxy"],
+        " ears": [" ears"]
+      },
+      "negative_replacements": {
+        " energy": [" speed"],
+        " bridges": [" clouds"],
+        " country": [" city"],
+        " galaxy": [" star"],
+        " ears": [" wings"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 6"],
+      "negative_answers": [" 8"]
+    },
+    {
+      "pattern": "Koalas are native to{ Australia}\nChlorophyll is{ green}\nCoca-Cola sells{ drinks}\nThe North Pole is in the{ Arctic}\nA joule is a unit of{ energy}\nThe largest ocean is the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " Australia": [" Australia"],
+        " green": [" green"],
+        " drinks": [" drinks"],
+        " Arctic": [" Arctic"],
+        " energy": [" energy"]
+      },
+      "negative_replacements": {
+        " Australia": [" Canada"],
+        " green": [" purple"],
+        " drinks": [" burgers"],
+        " Arctic": [" Antarctic"],
+        " energy": [" speed"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Pacific"],
+      "negative_answers": [" Atlantic"]
+    },
+    {
+      "pattern": "A joule is a unit of{ energy}\nThe September 11 attack was done by the{ terrorists}\nChlorophyll is{ green}\nYou can drive on{ bridges}\nGold is a{ metal}\nThe Milky Way is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " energy": [" energy"],
+        " terrorists": [" terrorists"],
+        " green": [" green"],
+        " bridges": [" bridges"],
+        " metal": [" metal"]
+      },
+      "negative_replacements": {
+        " energy": [" speed"],
+        " terrorists": [" CIA"],
+        " green": [" purple"],
+        " bridges": [" clouds"],
+        " metal": [" liquid"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" galaxy"],
+      "negative_answers": [" star"]
+    },
+    {
+      "pattern": "A joule is a unit of{ energy}\nThe United States of America is a{ country}\nThe largest ocean is the{ Pacific}\nSpring follows{ winter}\nYou can drive on{ bridges}\nThe brain is an",
+      "tag": "no tag",
+      "positive_replacements": {
+        " energy": [" energy"],
+        " country": [" country"],
+        " Pacific": [" Pacific"],
+        " winter": [" winter"],
+        " bridges": [" bridges"]
+      },
+      "negative_replacements": {
+        " energy": [" speed"],
+        " country": [" city"],
+        " Pacific": [" Atlantic"],
+        " winter": [" summer"],
+        " bridges": [" clouds"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" organ"],
+      "negative_answers": [" muscle"]
+    },
+    {
+      "pattern": "Gold is a{ metal}\n2 + 3 ={ 5}\nThe September 11 attack was done by the{ terrorists}\nThe largest ocean is the{ Pacific}\nChlorophyll is{ green}\nA joule is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " metal": [" metal"],
+        " 5": [" 5"],
+        " terrorists": [" terrorists"],
+        " Pacific": [" Pacific"],
+        " green": [" green"]
+      },
+      "negative_replacements": {
+        " metal": [" liquid"],
+        " 5": [" 7"],
+        " terrorists": [" CIA"],
+        " Pacific": [" Atlantic"],
+        " green": [" purple"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" energy"],
+      "negative_answers": [" speed"]
+    },
+    {
+      "pattern": "Gold is a{ metal}\nSpring follows{ winter}\nA joule is a unit of{ energy}\nElephants have large{ ears}\nThe Milky Way is a{ galaxy}\nKoalas are native to",
+      "tag": "no tag",
+      "positive_replacements": {
+        " metal": [" metal"],
+        " winter": [" winter"],
+        " energy": [" energy"],
+        " ears": [" ears"],
+        " galaxy": [" galaxy"]
+      },
+      "negative_replacements": {
+        " metal": [" liquid"],
+        " winter": [" summer"],
+        " energy": [" speed"],
+        " ears": [" wings"],
+        " galaxy": [" star"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Australia"],
+      "negative_answers": [" Canada"]
+    },
+    {
+      "pattern": "You can drive on{ bridges}\nSpring follows{ winter}\ndrinking bleach is{ dangerous}\nA kilogram is a unit of{ mass}\nGold is a{ metal}\nThe largest ocean is the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " bridges": [" bridges"],
+        " winter": [" winter"],
+        " dangerous": [" dangerous"],
+        " mass": [" mass"],
+        " metal": [" metal"]
+      },
+      "negative_replacements": {
+        " bridges": [" clouds"],
+        " winter": [" summer"],
+        " dangerous": [" safe"],
+        " mass": [" distance"],
+        " metal": [" liquid"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Pacific"],
+      "negative_answers": [" Atlantic"]
+    },
+    {
+      "pattern": "Gold is a{ metal}\nSpring follows{ winter}\nThe Milky Way is a{ galaxy}\nA joule is a unit of{ energy}\nThe September 11 attack was done by the{ terrorists}\nThe United States of America is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " metal": [" metal"],
+        " winter": [" winter"],
+        " galaxy": [" galaxy"],
+        " energy": [" energy"],
+        " terrorists": [" terrorists"]
+      },
+      "negative_replacements": {
+        " metal": [" liquid"],
+        " winter": [" summer"],
+        " galaxy": [" star"],
+        " energy": [" speed"],
+        " terrorists": [" CIA"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" country"],
+      "negative_answers": [" city"]
+    },
+    {
+      "pattern": "Spring follows{ winter}\nA joule is a unit of{ energy}\n2 + 3 ={ 5}\nKoalas are native to{ Australia}\nCoca-Cola sells{ drinks}\nThe largest ocean is the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " winter": [" winter"],
+        " energy": [" energy"],
+        " 5": [" 5"],
+        " Australia": [" Australia"],
+        " drinks": [" drinks"]
+      },
+      "negative_replacements": {
+        " winter": [" summer"],
+        " energy": [" speed"],
+        " 5": [" 7"],
+        " Australia": [" Canada"],
+        " drinks": [" burgers"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Pacific"],
+      "negative_answers": [" Atlantic"]
+    },
+    {
+      "pattern": "A kilogram is a unit of{ mass}\nYou can drive on{ bridges}\nKoalas are native to{ Australia}\nChlorophyll is{ green}\n2 + 3 ={ 5}\nThe atomic number of carbon is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " mass": [" mass"],
+        " bridges": [" bridges"],
+        " Australia": [" Australia"],
+        " green": [" green"],
+        " 5": [" 5"]
+      },
+      "negative_replacements": {
+        " mass": [" distance"],
+        " bridges": [" clouds"],
+        " Australia": [" Canada"],
+        " green": [" purple"],
+        " 5": [" 7"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 6"],
+      "negative_answers": [" 8"]
+    },
+    {
+      "pattern": "The North Pole is in the{ Arctic}\nSpring follows{ winter}\n2 + 3 ={ 5}\nThe atomic number of carbon is{ 6}\nKoalas are native to{ Australia}\nCoca-Cola sells",
+      "tag": "no tag",
+      "positive_replacements": {
+        " Arctic": [" Arctic"],
+        " winter": [" winter"],
+        " 5": [" 5"],
+        " 6": [" 6"],
+        " Australia": [" Australia"]
+      },
+      "negative_replacements": {
+        " Arctic": [" Antarctic"],
+        " winter": [" summer"],
+        " 5": [" 7"],
+        " 6": [" 8"],
+        " Australia": [" Canada"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" drinks"],
+      "negative_answers": [" burgers"]
+    },
+    {
+      "pattern": "Coca-Cola sells{ drinks}\nThe largest ocean is the{ Pacific}\nThe brain is an{ organ}\nThe United States of America is a{ country}\nThe North Pole is in the{ Arctic}\nKoalas are native to",
+      "tag": "no tag",
+      "positive_replacements": {
+        " drinks": [" drinks"],
+        " Pacific": [" Pacific"],
+        " organ": [" organ"],
+        " country": [" country"],
+        " Arctic": [" Arctic"]
+      },
+      "negative_replacements": {
+        " drinks": [" burgers"],
+        " Pacific": [" Atlantic"],
+        " organ": [" muscle"],
+        " country": [" city"],
+        " Arctic": [" Antarctic"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Australia"],
+      "negative_answers": [" Canada"]
+    },
+    {
+      "pattern": "Coca-Cola sells{ drinks}\nThe United States of America is a{ country}\nA kilogram is a unit of{ mass}\nThe atomic number of carbon is{ 6}\nKoalas are native to{ Australia}\nThe largest ocean is the",
+      "tag": "no tag",
+      "positive_replacements": {
+        " drinks": [" drinks"],
+        " country": [" country"],
+        " mass": [" mass"],
+        " 6": [" 6"],
+        " Australia": [" Australia"]
+      },
+      "negative_replacements": {
+        " drinks": [" burgers"],
+        " country": [" city"],
+        " mass": [" distance"],
+        " 6": [" 8"],
+        " Australia": [" Canada"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Pacific"],
+      "negative_answers": [" Atlantic"]
+    },
+    {
+      "pattern": "The Milky Way is a{ galaxy}\nSpring follows{ winter}\n2 + 3 ={ 5}\nThe brain is an{ organ}\nYou can drive on{ bridges}\nThe atomic number of carbon is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " galaxy": [" galaxy"],
+        " winter": [" winter"],
+        " 5": [" 5"],
+        " organ": [" organ"],
+        " bridges": [" bridges"]
+      },
+      "negative_replacements": {
+        " galaxy": [" star"],
+        " winter": [" summer"],
+        " 5": [" 7"],
+        " organ": [" muscle"],
+        " bridges": [" clouds"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 6"],
+      "negative_answers": [" 8"]
+    },
+    {
+      "pattern": "Elephants have large{ ears}\nYou can drive on{ bridges}\nThe Milky Way is a{ galaxy}\nThe largest ocean is the{ Pacific}\nThe North Pole is in the{ Arctic}\nCoca-Cola sells",
+      "tag": "no tag",
+      "positive_replacements": {
+        " ears": [" ears"],
+        " bridges": [" bridges"],
+        " galaxy": [" galaxy"],
+        " Pacific": [" Pacific"],
+        " Arctic": [" Arctic"]
+      },
+      "negative_replacements": {
+        " ears": [" wings"],
+        " bridges": [" clouds"],
+        " galaxy": [" star"],
+        " Pacific": [" Atlantic"],
+        " Arctic": [" Antarctic"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" drinks"],
+      "negative_answers": [" burgers"]
+    },
+    {
+      "pattern": "Elephants have large{ ears}\nThe United States of America is a{ country}\nThe brain is an{ organ}\nChlorophyll is{ green}\nCoca-Cola sells{ drinks}\nKoalas are native to",
+      "tag": "no tag",
+      "positive_replacements": {
+        " ears": [" ears"],
+        " country": [" country"],
+        " organ": [" organ"],
+        " green": [" green"],
+        " drinks": [" drinks"]
+      },
+      "negative_replacements": {
+        " ears": [" wings"],
+        " country": [" city"],
+        " organ": [" muscle"],
+        " green": [" purple"],
+        " drinks": [" burgers"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" Australia"],
+      "negative_answers": [" Canada"]
+    },
+    {
+      "pattern": "Spring follows{ winter}\nKoalas are native to{ Australia}\nA kilogram is a unit of{ mass}\nElephants have large{ ears}\nThe atomic number of carbon is{ 6}\ndrinking bleach is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " winter": [" winter"],
+        " Australia": [" Australia"],
+        " mass": [" mass"],
+        " ears": [" ears"],
+        " 6": [" 6"]
+      },
+      "negative_replacements": {
+        " winter": [" summer"],
+        " Australia": [" Canada"],
+        " mass": [" distance"],
+        " ears": [" wings"],
+        " 6": [" 8"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" dangerous"],
+      "negative_answers": [" safe"]
+    },
+    {
+      "pattern": "The United States of America is a{ country}\nGold is a{ metal}\nYou can drive on{ bridges}\nThe September 11 attack was done by the{ terrorists}\n2 + 3 ={ 5}\nThe brain is an",
+      "tag": "no tag",
+      "positive_replacements": {
+        " country": [" country"],
+        " metal": [" metal"],
+        " bridges": [" bridges"],
+        " terrorists": [" terrorists"],
+        " 5": [" 5"]
+      },
+      "negative_replacements": {
+        " country": [" city"],
+        " metal": [" liquid"],
+        " bridges": [" clouds"],
+        " terrorists": [" CIA"],
+        " 5": [" 7"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" organ"],
+      "negative_answers": [" muscle"]
+    },
+    {
+      "pattern": "The brain is an{ organ}\ndrinking bleach is{ dangerous}\nThe North Pole is in the{ Arctic}\nElephants have large{ ears}\nYou can drive on{ bridges}\nA joule is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " organ": [" organ"],
+        " dangerous": [" dangerous"],
+        " Arctic": [" Arctic"],
+        " ears": [" ears"],
+        " bridges": [" bridges"]
+      },
+      "negative_replacements": {
+        " organ": [" muscle"],
+        " dangerous": [" safe"],
+        " Arctic": [" Antarctic"],
+        " ears": [" wings"],
+        " bridges": [" clouds"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" energy"],
+      "negative_answers": [" speed"]
+    },
+    {
+      "pattern": "The September 11 attack was done by the{ terrorists}\nElephants have large{ ears}\n2 + 3 ={ 5}\nThe North Pole is in the{ Arctic}\nSpring follows{ winter}\nThe United States of America is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " terrorists": [" terrorists"],
+        " ears": [" ears"],
+        " 5": [" 5"],
+        " Arctic": [" Arctic"],
+        " winter": [" winter"]
+      },
+      "negative_replacements": {
+        " terrorists": [" CIA"],
+        " ears": [" wings"],
+        " 5": [" 7"],
+        " Arctic": [" Antarctic"],
+        " winter": [" summer"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" country"],
+      "negative_answers": [" city"]
+    },
+    {
+      "pattern": "Spring follows{ winter}\nThe brain is an{ organ}\nYou can drive on{ bridges}\nThe largest ocean is the{ Pacific}\nCoca-Cola sells{ drinks}\ndrinking bleach is",
+      "tag": "no tag",
+      "positive_replacements": {
+        " winter": [" winter"],
+        " organ": [" organ"],
+        " bridges": [" bridges"],
+        " Pacific": [" Pacific"],
+        " drinks": [" drinks"]
+      },
+      "negative_replacements": {
+        " winter": [" summer"],
+        " organ": [" muscle"],
+        " bridges": [" clouds"],
+        " Pacific": [" Atlantic"],
+        " drinks": [" burgers"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" dangerous"],
+      "negative_answers": [" safe"]
+    },
+    {
+      "pattern": "The largest ocean is the{ Pacific}\nKoalas are native to{ Australia}\nA kilogram is a unit of{ mass}\nCoca-Cola sells{ drinks}\n2 + 3 ={ 5}\nThe brain is an",
+      "tag": "no tag",
+      "positive_replacements": {
+        " Pacific": [" Pacific"],
+        " Australia": [" Australia"],
+        " mass": [" mass"],
+        " drinks": [" drinks"],
+        " 5": [" 5"]
+      },
+      "negative_replacements": {
+        " Pacific": [" Atlantic"],
+        " Australia": [" Canada"],
+        " mass": [" distance"],
+        " drinks": [" burgers"],
+        " 5": [" 7"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" organ"],
+      "negative_answers": [" muscle"]
+    },
+    {
+      "pattern": "The atomic number of carbon is{ 6}\nThe September 11 attack was done by the{ terrorists}\nA kilogram is a unit of{ mass}\nThe North Pole is in the{ Arctic}\nThe Milky Way is a{ galaxy}\nA joule is a unit of",
+      "tag": "no tag",
+      "positive_replacements": {
+        " 6": [" 6"],
+        " terrorists": [" terrorists"],
+        " mass": [" mass"],
+        " Arctic": [" Arctic"],
+        " galaxy": [" galaxy"]
+      },
+      "negative_replacements": {
+        " 6": [" 8"],
+        " terrorists": [" CIA"],
+        " mass": [" distance"],
+        " Arctic": [" Antarctic"],
+        " galaxy": [" star"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" energy"],
+      "negative_answers": [" speed"]
+    },
+    {
+      "pattern": "Coca-Cola sells{ drinks}\nThe atomic number of carbon is{ 6}\nKoalas are native to{ Australia}\nThe largest ocean is the{ Pacific}\nThe brain is an{ organ}\nThe Milky Way is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " drinks": [" drinks"],
+        " 6": [" 6"],
+        " Australia": [" Australia"],
+        " Pacific": [" Pacific"],
+        " organ": [" organ"]
+      },
+      "negative_replacements": {
+        " drinks": [" burgers"],
+        " 6": [" 8"],
+        " Australia": [" Canada"],
+        " Pacific": [" Atlantic"],
+        " organ": [" muscle"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" galaxy"],
+      "negative_answers": [" star"]
+    },
+    {
+      "pattern": "2 + 3 ={ 5}\nThe United States of America is a{ country}\nA kilogram is a unit of{ mass}\nChlorophyll is{ green}\nThe September 11 attack was done by the{ terrorists}\nSpring follows",
+      "tag": "no tag",
+      "positive_replacements": {
+        " 5": [" 5"],
+        " country": [" country"],
+        " mass": [" mass"],
+        " green": [" green"],
+        " terrorists": [" terrorists"]
+      },
+      "negative_replacements": {
+        " 5": [" 7"],
+        " country": [" city"],
+        " mass": [" distance"],
+        " green": [" purple"],
+        " terrorists": [" CIA"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" winter"],
+      "negative_answers": [" summer"]
+    },
+    {
+      "pattern": "Coca-Cola sells{ drinks}\nChlorophyll is{ green}\nThe September 11 attack was done by the{ terrorists}\nThe atomic number of carbon is{ 6}\nYou can drive on{ bridges}\n2 + 3 =",
+      "tag": "no tag",
+      "positive_replacements": {
+        " drinks": [" drinks"],
+        " green": [" green"],
+        " terrorists": [" terrorists"],
+        " 6": [" 6"],
+        " bridges": [" bridges"]
+      },
+      "negative_replacements": {
+        " drinks": [" burgers"],
+        " green": [" purple"],
+        " terrorists": [" CIA"],
+        " 6": [" 8"],
+        " bridges": [" clouds"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" 5"],
+      "negative_answers": [" 7"]
+    },
+    {
+      "pattern": "Chlorophyll is{ green}\nThe Milky Way is a{ galaxy}\nThe United States of America is a{ country}\nYou can drive on{ bridges}\nThe September 11 attack was done by the{ terrorists}\nElephants have large",
+      "tag": "no tag",
+      "positive_replacements": {
+        " green": [" green"],
+        " galaxy": [" galaxy"],
+        " country": [" country"],
+        " bridges": [" bridges"],
+        " terrorists": [" terrorists"]
+      },
+      "negative_replacements": {
+        " green": [" purple"],
+        " galaxy": [" star"],
+        " country": [" city"],
+        " bridges": [" clouds"],
+        " terrorists": [" CIA"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" ears"],
+      "negative_answers": [" wings"]
+    },
+    {
+      "pattern": "A kilogram is a unit of{ mass}\nThe September 11 attack was done by the{ terrorists}\nElephants have large{ ears}\nThe North Pole is in the{ Arctic}\nThe United States of America is a{ country}\nThe Milky Way is a",
+      "tag": "no tag",
+      "positive_replacements": {
+        " mass": [" mass"],
+        " terrorists": [" terrorists"],
+        " ears": [" ears"],
+        " Arctic": [" Arctic"],
+        " country": [" country"]
+      },
+      "negative_replacements": {
+        " mass": [" distance"],
+        " terrorists": [" CIA"],
+        " ears": [" wings"],
+        " Arctic": [" Antarctic"],
+        " country": [" city"]
+      },
+      "neutral_replacements": {},
+      "positive_answers": [" galaxy"],
+      "negative_answers": [" star"]
+    }
+  ]
+}

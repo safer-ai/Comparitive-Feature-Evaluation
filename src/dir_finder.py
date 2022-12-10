@@ -29,7 +29,7 @@ class DirFinder:
     batch_size: int = 8
     iterations: int = 10_000
     projection_fn: ProjectionFunc = partial(project, strength=1)
-    roling_loss_window: int = 200
+    rolling_window_size: int = 400
 
     def find_dirs(self) -> torch.Tensor:
         torch.manual_seed(self.seed)
@@ -48,7 +48,7 @@ class DirFinder:
             with torch.no_grad():
                 dirs[:] = normalize(dirs)
             optimizer.zero_grad()
-            
+
             for t in islice(data_generator, self.batch_size):
                 model_with_grad = create_frankenstein(
                     normalize(dirs),
@@ -57,24 +57,32 @@ class DirFinder:
                     projection_fn=self.projection_fn,
                 )
                 s = measure_kl_confusions_grad(t, model_with_grad)
-                
+
                 losses.append(s.item())
-                
+
                 s.backward()
 
             optimizer.step()
 
-            # early stopping if loss is not decreasing
-            rolling_loss = sum(losses[-self.roling_loss_window :]) / self.roling_loss_window
-            if rolling_loss > last_loss:
-                break
-            last_loss = rolling_loss
-            
+            rolling_loss = sum(losses[-self.rolling_window_size :]) / len(losses)
+
             g.set_postfix(
                 {
-                    "iteration": e * self.batch_size,
+                    "iteration": (e + 1) * self.batch_size,
                     "loss": rolling_loss,
+                    "last_loss": last_loss,
                 }
             )
+
+            # early stopping if loss is not decreasing
+            batchs_per_rolling_window = self.rolling_window_size // self.batch_size
+            if (
+                e % batchs_per_rolling_window == 0
+                and len(losses) > self.rolling_window_size
+            ):
+                if rolling_loss > last_loss:
+                    break
+                last_loss = rolling_loss
+
         d = dirs.detach()
         return normalize(d)

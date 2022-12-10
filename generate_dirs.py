@@ -1,6 +1,6 @@
 from functools import partial
 import torch
-from transformers import GPT2LMHeadModel
+from transformers import AutoModelForCausalLM
 from src.data_generation import PairGeneratorDataset
 
 from src.constants import device
@@ -29,7 +29,7 @@ def run(
     )
     cone_suffix = "-cone" if use_cone else ""
 
-    model: torch.nn.Module = GPT2LMHeadModel.from_pretrained(model_name).to(device)
+    model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     for param in model.parameters():
         param.requires_grad = False
     h_size: int = model.lm_head.weight.shape[1]
@@ -58,4 +58,6 @@ if __name__ == "__main__":
     # python generate_dirs.py --layer_nbs 6, --n_dirs 1 --model_name gpt2
     # python generate_dirs.py --layer_nbs 0,1,4,8,12,16,20,24,28,32,36,40,44,46,47, --n_dirs 1 --model_name gpt2-xl
     # python generate_dirs.py --layer_nbs 0,12,24,36,47, --n_dirs 1 --model_name gpt2-xl --data imdb_sentiments
+    # python generate_dirs.py --layer_nbs 0,12,24,36,47, --n_dirs 1 --model_name gpt2-xl --data facts
+    # python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --data gender; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --data facts
     fire.Fire(run)
