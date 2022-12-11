@@ -352,12 +352,12 @@ def measure_confusions_ratio(
 
 
 ProjectionFunc = Callable[
-    [torch.Tensor, torch.Tensor], torch.Tensor
+    [BatchEncoding, BatchEncoding], torch.Tensor
 ]  # project first along second
 
 
 def create_frankenstein(
-    dirs, model: torch.nn.Module, layer_module, additional=0, projection_fn=project
+    dirs, model: torch.nn.Module, layer_module, additional: Union[int, torch.Tensor]=0, projection_fn=project
 ) -> FrankenSteinModel:
     """Return a frankenstein model taking two inputs.
 
@@ -396,6 +396,7 @@ def measure_performance(test: SingleTest, model):
 def zero_out(x_along_dirs, dirs):
     return 0
 
+HandicapedModel = Callable[[BatchEncoding], torch.Tensor] # takes one input and returns the logits
 
 def create_handicaped(
     dirs,
@@ -423,6 +424,19 @@ def create_handicaped(
 
     return handicaped
 
+def measure_ablation_success(test: Pair, model, handicaped_model: HandicapedModel):
+    inpt = tokenizer([test.positive.prompt, test.negative.prompt], return_tensors="pt").to(device)
+    
+    with torch.no_grad():
+        outs = torch.log_softmax(model(**inpt)[:, -1], dim=-1)
+        handicaped_outs = torch.log_softmax(handicaped_model(inpt)[:, -1], dim=-1)
+    
+    r = 0
+    for a in test.positive.answers + test.negative.answers:
+        t = tokenizer.encode(a)[0]
+        r += (handicaped_outs[0, t].sum() - handicaped_outs[1, t]).item() / (outs[0, t].sum() - outs[1, t]).item() 
+    
+    return r / len(test.positive.answers + test.negative.answers)
 
 def get_act_ds(model, tests: list[Union[Test, Pair]], layer):
     positives = [t.positive.prompt for t in tests]
@@ -482,3 +496,8 @@ def get_act_ds_with_controls(
 
 def normalize(x: torch.Tensor) -> torch.Tensor:
     return x / x.norm(dim=-1, keepdim=True)
+
+def get_unembed(model, word: str) -> torch.Tensor:
+    unembed = model.lm_head
+    inp = tokenizer(word, return_tensors="pt").input_ids[0, 0].item()
+    return unembed.weight[inp][None, :].detach()
