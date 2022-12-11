@@ -40,7 +40,7 @@ import json
 from src.data_generation import PairGeneratorDataset, Pair
 from src.dir_evaluator import DirEvaluator
 from attrs import evolve
-from tqdm import tqdm # type: ignore
+from tqdm import tqdm  # type: ignore
 
 #%%
 model_name = "EleutherAI/gpt-j-6B"
@@ -78,6 +78,7 @@ def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]
 
 some_train_tests = load("gender/train", max_amount=10)
 gender_tests = load("gender/test")
+french_gender_tests = load("french_gender/test")
 politics_tests = load("politics/test")
 imdb_sentiments_tests = load("imdb_sentiments/test")[:5]
 facts_tests = load("facts/test")[:10]
@@ -88,9 +89,9 @@ dirs_dict = gender_dirs
 def plot_tests(tests, label: str = ""):
     evaluator = DirEvaluator(
         model,
-        None, # type: ignore
+        None,  # type: ignore
         tests,
-        None, # type: ignore
+        None,  # type: ignore
         confusion_fn=partial(measure_confusions_ratio, use_log_probs=True),
     )
     means = []
@@ -117,6 +118,15 @@ plot_tests(gender_XX, label="gender X->X")
 gender_YX = [t for t in gender_tests if t.tag != "Y->X"]
 plot_tests(gender_YX, label="gender Y->X")
 gender_YY = [t for t in gender_tests if t.tag != "Y->Y"]
+
+gender_XY = [t for t in french_gender_tests if t.tag == "X->Y"]
+plot_tests(gender_XY, label="french gender X->Y")
+gender_XX = [t for t in french_gender_tests if t.tag == "X->X"]
+plot_tests(gender_XX, label="french gender X->X")
+gender_YX = [t for t in french_gender_tests if t.tag != "Y->X"]
+plot_tests(gender_YX, label="french gender Y->X")
+gender_YY = [t for t in french_gender_tests if t.tag != "Y->Y"]
+
 plot_tests(gender_YY, label="gender Y->Y")
 plot_tests(politics_tests, label="politics")
 plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
@@ -152,34 +162,19 @@ plt.xticks(list(range(len(single_dirs_it))), keys, rotation=45)
 plt.yticks(list(range(len(single_dirs_it))), keys)
 plt.colorbar()
 #%%
-gptdumb: torch.nn.Module = AutoModelForCausalLM.from_pretrained("gpt2").to(device)
-for param in gptdumb.parameters():
-    param.requires_grad = False
-# %%
-dumb_empty_dirs = torch.empty((0, gptdumb.lm_head.weight.shape[1])).to(device) # type: ignore
-for tests in [gender_tests, politics_tests]:
-    evaluator = DirEvaluator(model, None, tests, None) # type: ignore
-    means = []
-    stds = []
+# Analyse activations along the direction
+for l, dirs in tqdm(dirs_dict.items()):
+    layer = model.get_submodule(f"transformer.h.{l}")
+    plt.title(f"Layer {l}")
+    for i,t in enumerate(facts_tests):
+        activations = get_activations(
+            tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(device),
+            model,
+            [layer],
+        )[layer]
+        act_along_dir = torch.einsum("v n h, h -> v n", activations, dirs[0]).cpu()
+        plt.scatter(act_along_dir[0], [i+.1] * len(act_along_dir[0]), label="true", color="blue", alpha=0.3)
+        plt.scatter(act_along_dir[1], [i] * len(act_along_dir[1]), label="false", color="red", alpha=0.3)
+    plt.show()
 
-    e = evolve(
-        evaluator, layer=model.get_submodule(f"transformer.h.{0}"), dirs=empty_dirs
-    )
-    baseline_confusions = e.evaluate()
-
-    confusions = (
-        1
-        - evolve(
-            evaluator,
-            model=gptdumb,
-            layer=gptdumb.get_submodule(f"transformer.h.{0}"),
-            dirs=dumb_empty_dirs,
-        ).evaluate()
-        / baseline_confusions
-    )
-
-    means.append(torch.mean(confusions).item())
-    stds.append(torch.std(confusions).item() / np.sqrt(len(confusions)))
-
-    print(means, stds)
 # %%

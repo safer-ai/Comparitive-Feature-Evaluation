@@ -1,0 +1,121 @@
+{
+  "version": "1",
+  "positive": "female",
+  "negative": "male",
+  "generators": [
+    {
+      "pattern": "{elle} est {immense}, mais",
+      "tag": "X->X",
+      "positive_replacements": {
+        "elle": ["elle"]
+      },
+      "negative_replacements": {
+        "elle": ["il"]
+      },
+      "neutral_replacements": {
+        "immense": ["immense", "minuscule", "colérique", "adorable"]
+      },
+      "positive_answers": [" elle"],
+      "negative_answers": [" il"]
+    },
+    {
+      "pattern": "{elle} a pour couleur préférée le",
+      "tag": "X->Y",
+      "positive_replacements": {
+        "elle": ["elle"]
+      },
+      "negative_replacements": {
+        "elle": ["il"]
+      },
+      "positive_answers": [" rose"],
+      "negative_answers": [" ble"]
+    },
+    {
+      "pattern": "La couleur préférée des {filles} est le",
+      "tag": "X->Y",
+      "positive_replacements": {
+        "filles": ["filles"]
+      },
+      "negative_replacements": {
+        "filles": ["mecs"]
+      },
+      "positive_answers": [" rose"],
+      "negative_answers": [" ble"]
+    },
+    {
+      "pattern": "{elle} {aime} les",
+      "tag": "X->Y",
+      "positive_replacements": {
+        "elle": ["elle"]
+      },
+      "negative_replacements": {
+        "elle": ["il"]
+      },
+      "neutral_replacements": {
+        "aime": ["aime", "adore"]
+      },
+      "positive_answers": [" fleurs"],
+      "negative_answers": [" voitures"]
+    },
+    {
+      "pattern": "{elle} s'appelle",
+      "tag": "X->X",
+      "positive_replacements": {
+        "elle": ["elle"]
+      },
+      "negative_replacements": {
+        "elle": ["il"]
+      },
+      "positive_answers": [" Jeanne"],
+      "negative_answers": [" Jean"]
+    },
+    {
+      "pattern": "Je n'aurais jamais deviné que le {rose} est la couleur qu'",
+      "tag": "Y->X",
+      "positive_replacements": {
+        "rose": ["rose"]
+      },
+      "negative_replacements": {
+        "rose": ["ble"]
+      },
+      "positive_answers": ["elle"],
+      "negative_answers": ["il"]
+    },
+    {
+      "pattern": "La personne qui s'est occupée des {enfants} a fait un super travail.",
+      "tag": "Y->X",
+      "positive_replacements": {
+        "enfants": ["enfants"]
+      },
+      "negative_replacements": {
+        "enfants": ["engrenages"]
+      },
+      "positive_answers": [" elle"],
+      "negative_answers": [" il"]
+    },
+    {
+      "pattern": "Camille adore {cuisiner}, mais",
+      "tag": "Y->X",
+      "positive_replacements": {
+        "cuisiner": ["cuisiner"]
+      },
+      "negative_replacements": {
+        "cuisiner": ["se battre"]
+      },
+      "positive_answers": [" elle"],
+      "negative_answers": [" il"]
+    },
+    {
+      "pattern": "Camille adore {cuisiner} et sa couleur préférée est le",
+      "tag": "Y->Y",
+      "positive_replacements": {
+        "cuisiner": ["cuisiner"]
+      },
+      "negative_replacements": {
+        "cuisiner": ["se battre"]
+      },
+      "positive_answers": [" rose"],
+      "negative_answers": [" ble"]
+    }
+  ]
+}

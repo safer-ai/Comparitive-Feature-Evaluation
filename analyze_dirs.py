@@ -93,6 +93,7 @@ def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]
 
 some_train_tests = load("gender/train", max_amount=10)
 gender_tests = load("gender/test")
+french_gender_tests = load("french_gender/test")
 politics_tests = load("politics/test")
 imdb_sentiments_tests = load("imdb_sentiments/test")[:5]
 facts_tests = load("facts/test")[:10]
@@ -132,6 +133,15 @@ plot_tests(gender_XX, label="gender X->X")
 gender_YX = [t for t in gender_tests if t.tag != "Y->X"]
 plot_tests(gender_YX, label="gender Y->X")
 gender_YY = [t for t in gender_tests if t.tag != "Y->Y"]
+
+gender_XY = [t for t in french_gender_tests if t.tag == "X->Y"]
+plot_tests(gender_XY, label="french gender X->Y")
+gender_XX = [t for t in french_gender_tests if t.tag == "X->X"]
+plot_tests(gender_XX, label="french gender X->X")
+gender_YX = [t for t in french_gender_tests if t.tag != "Y->X"]
+plot_tests(gender_YX, label="french gender Y->X")
+gender_YY = [t for t in french_gender_tests if t.tag != "Y->Y"]
+
 plot_tests(gender_YY, label="gender Y->Y")
 plot_tests(politics_tests, label="politics")
 plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")

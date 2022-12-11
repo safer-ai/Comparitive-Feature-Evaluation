@@ -424,7 +424,7 @@ def create_handicaped(
     return handicaped
 
 
-def get_act_ds(model, tests: list[Test], layer):
+def get_act_ds(model, tests: list[Union[Test, Pair]], layer):
     positives = [t.positive.prompt for t in tests]
     negatives = [t.negative.prompt for t in tests]
     positive_acts = [
