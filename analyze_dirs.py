@@ -53,6 +53,7 @@ model_name = "EleutherAI/gpt-j-6B"
 model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 for param in model.parameters():
     param.requires_grad = False
+figure_folder = f"figures/{model_name}"
 #%%
 
 def load_dirs(name: str, method: str = ""):
@@ -108,7 +109,7 @@ from matplotlib import rcParams
 
 rcParams["figure.figsize"] = (10, 8)
 
-Path("figures").mkdir(exist_ok=True)
+Path(figure_folder).mkdir(parents=True,exist_ok=True)
 #%%
 plot_tests(easy_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe")
 plot_tests(easy_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE")
@@ -122,7 +123,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("Probe performance on easy gender tests")
 plt.legend()
-plt.savefig("figures/easy_probes.png")
+plt.savefig(f"{figure_folder}/easy_probes.png")
 #%%
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe")
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE")
@@ -136,7 +137,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("Probe performance on hard gender tests")
 plt.legend()
-plt.savefig("figures/hard_probes.png")
+plt.savefig(f"{figure_folder}/hard_probes.png")
 #%%
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe")
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE")
@@ -150,7 +151,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("Probe performance on French gender tests")
 plt.legend()
-plt.savefig("figures/french_probes.png")
+plt.savefig(f"{figure_folder}/french_probes.png")
 #%%
 
 plot_tests(easy_gender_tests, load_dirs("n1-dgender"), "CDE")
@@ -166,7 +167,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("CDE performance on easy gender tests")
 plt.legend()
-plt.savefig("figures/easy_cde.png")
+plt.savefig(f"{figure_folder}/easy_cde.png")
 #%%
 
 cde_dirs = load_dirs("n1-dgender")
@@ -191,7 +192,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("CDE & RLACE performance with gender direction")
 plt.legend()
-plt.savefig("figures/hard_cde.png")
+plt.savefig(f"{figure_folder}/hard_cde.png")
 # %%
 
 cde_dirs = load_dirs("n1-dpolitics")
@@ -209,7 +210,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("CDE performance with politics direction")
 plt.legend()
-plt.savefig("figures/politics_cde.png")
+plt.savefig(f"{figure_folder}/politics_cde.png")
 # %%
 
 cde_dirs = load_dirs("n1-dfacts")
@@ -227,7 +228,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("CDE performance with facts direction")
 plt.legend()
-plt.savefig("figures/facts_cde.png")
+plt.savefig(f"{figure_folder}/facts_cde.png")
 #%%
 def plot_ablation_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
     means = []
@@ -267,7 +268,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("Ablation performance on easy gender tests")
 plt.legend()
-plt.savefig("figures/easy_ablations.png")
+plt.savefig(f"{figure_folder}/easy_ablations.png")
 #%%
 
 cde_dirs = load_dirs("n1-dgender")
@@ -292,7 +293,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("CDE & RLACE performance with gender direction")
 plt.legend()
-plt.savefig("figures/hard_ablation.png")
+plt.savefig(f"{figure_folder}/hard_ablation.png")
 #%%
 
 layer_nb = 7
@@ -331,7 +332,7 @@ for label, cosine, mean in zip(labels, cosines, means):
 plt.title(f"Performance vs Cosine similarity with CDE on easy gender tests at layer {layer_nb}")
 plt.xlabel("Cosine similarity")
 plt.ylabel("Success rate")
-plt.savefig("figures/cosine_v_perf.png")
+plt.savefig(f"{figure_folder}/cosine_v_perf.png")
 # %%
 single_dirs_it = sorted(list(load_dirs("n1-dgender").items()))
 keys = [k for k, _ in single_dirs_it]
@@ -341,7 +342,7 @@ plt.xticks(list(range(len(single_dirs_it))), keys, rotation=45)
 plt.yticks(list(range(len(single_dirs_it))), keys)
 plt.colorbar()
 plt.title("Cosine similarities between CDE's gender directions")
-plt.savefig("figures/similarities.png")
+plt.savefig(f"{figure_folder}/similarities.png")
 #%%
 
 #%%
@@ -368,7 +369,7 @@ def shorten(s):
 
 plt.xlabel("Activation")
 plt.yticks(list(range(len(tests))), [shorten(t.positive.prompt) for t in tests])
-plt.savefig("figures/gender_activations.png")
+plt.savefig(f"{figure_folder}/gender_activations.png")
 
 # %%
 
@@ -395,7 +396,7 @@ def shorten(s):
 
 plt.xlabel("Activation")
 plt.yticks(list(range(len(tests))), [shorten(t.positive.prompt) for t in tests])
-plt.savefig("figures/facts_activations.png")
+plt.savefig(f"{figure_folder}/facts_activations.png")
 # %%
 cde_dirs = load_dirs("n1-dgender")
 cde_dirs2 = load_dirs("n2-dgender")
@@ -419,7 +420,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("CDE performance with 2 gender directions")
 plt.legend()
-plt.savefig("figures/2d_gender_cde.png")
+plt.savefig(f"{figure_folder}/2d_gender_cde.png")
 # %%
 cde_dirs = load_dirs("n1-dfacts")
 cde_dirs2 = load_dirs("n2-dfacts")
@@ -443,7 +444,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("CDE performance with 2 facts direction")
 plt.legend()
-plt.savefig("figures/2d_facts_cde.png")
+plt.savefig(f"{figure_folder}/2d_facts_cde.png")
 # %%
 # 2D activations
 layer_nb = 7
@@ -472,7 +473,7 @@ plt.scatter(torch.cat(activations_X_n).cpu(), torch.cat(activations_Y_n).cpu(), 
 
 plt.xlabel("Activation in dim 1")
 plt.ylabel("Activation in dim 2")
-plt.savefig("figures/gender_activations_2D.png")
+plt.savefig(f"{figure_folder}/gender_activations_2D.png")
 # %%
 # 2D activations
 layer_nb = 7
@@ -501,4 +502,4 @@ plt.scatter(torch.cat(activations_X_n).cpu(), torch.cat(activations_Y_n).cpu(), 
 
 plt.xlabel("Activation in dim 1")
 plt.ylabel("Activation in dim 2")
-plt.savefig("figures/facts_activations_2D.png")
+plt.savefig(f"{figure_folder}/facts_activations_2D.png")
