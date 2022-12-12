@@ -20,7 +20,7 @@ def run(
     n_dirs: int = 1,
     use_cone: bool = False,
     data: str = "gender",
-    method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad"] = "sgd"
+    method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad"] = "sgd",
 ):
     print(model_name, layer_nbs, n_dirs, data, use_cone, method)
 
@@ -35,7 +35,7 @@ def run(
     model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     for param in model.parameters():
         param.requires_grad = False
-    h_size: int = model.lm_head.weight.shape[1] # type: ignore
+    h_size: int = model.lm_head.weight.shape[1]  # type: ignore
 
     pair_generator = PairGeneratorDataset.from_dict(
         json.load(Path(f"./data/{data}/train.json").open("r"))
@@ -46,11 +46,19 @@ def run(
         layer = model.get_submodule(module_name)
 
         dirs = DirFinder(
-            model, layer, pair_generator, h_size, n_dirs, projection_fn=projection_fn, method=method
+            model,
+            layer,
+            pair_generator,
+            h_size,
+            n_dirs,
+            projection_fn=projection_fn,
+            method=method,
         ).find_dirs()
 
         file_name = f"l{layer_nb}-n{n_dirs}-d{data}.pt"
-        dir_path = Path(".") / "saved_dirs" / f"v3-{model_name}{cone_suffix}{method_suffix}"
+        dir_path = (
+            Path(".") / "saved_dirs" / f"v3-{model_name}{cone_suffix}{method_suffix}"
+        )
         dir_path.mkdir(parents=True, exist_ok=True)
         path = dir_path / file_name
 

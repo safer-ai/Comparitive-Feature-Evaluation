@@ -81,12 +81,14 @@ def test_facts_dataset_sound():
             check_dataset_sound(ds)
             check_generations_line_up(ds)
 
+
 def test_french_gender_dataset_sound():
     for ds_path in (Path(".") / "data" / "french_gender").iterdir():
         with ds_path.open() as f:
             ds = PairGeneratorDataset.from_dict(json.load(f))
             check_dataset_sound(ds)
             check_generations_line_up(ds)
+
 
 def check_dataset_sound(dataset: PairGeneratorDataset):
     for pair_gen in dataset.generators:
