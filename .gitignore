@@ -2,4 +2,4 @@
 *.pt
 .vscode
 .mypy_cache
-!v3*
+!**/v3*/**/**.pt
