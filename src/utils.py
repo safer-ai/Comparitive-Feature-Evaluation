@@ -428,13 +428,13 @@ def measure_ablation_success(test: Pair, model, handicaped_model: HandicapedMode
     inpt = tokenizer([test.positive.prompt, test.negative.prompt], return_tensors="pt").to(device)
     
     with torch.no_grad():
-        outs = torch.log_softmax(model(**inpt)[:, -1], dim=-1)
+        outs = torch.log_softmax(model(**inpt).logits[:, -1], dim=-1)
         handicaped_outs = torch.log_softmax(handicaped_model(inpt)[:, -1], dim=-1)
     
     r = 0
     for a in test.positive.answers + test.negative.answers:
         t = tokenizer.encode(a)[0]
-        r += (handicaped_outs[0, t].sum() - handicaped_outs[1, t]).item() / (outs[0, t].sum() - outs[1, t]).item() 
+        r += torch.clip((handicaped_outs[0, t].sum() - handicaped_outs[1, t]) / (outs[0, t].sum() - outs[1, t]), 0, 1).item()
     
     return r / len(test.positive.answers + test.negative.answers)
 

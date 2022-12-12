@@ -1,3 +1,7 @@
+# #%%
+# %load_ext autoreload
+# %autoreload 2
+
 #%%
 from functools import partial
 import random
@@ -6,7 +10,7 @@ from typing import Optional
 import numpy as np
 import torch
 from attrs import define
-from transformers import GPT2LMHeadModel
+from transformers import AutoModelForCausalLM
 from src.direction_methods.pairs_generation import (
     get_train_tests,
     get_val_controls,
@@ -18,11 +22,13 @@ from src.direction_methods.inlp import inlp
 from src.direction_methods.rlace import rlace
 from src.utils import (
     ActivationsDataset,
+    create_handicaped,
     get_act_ds,
     edit_model_inplace,
     gen,
     gen_and_print,
     get_activations,
+    measure_ablation_success,
     project,
     project_cone,
     recover_model_inplace,
@@ -40,46 +46,25 @@ import json
 from src.data_generation import PairGeneratorDataset, Pair
 from src.dir_evaluator import DirEvaluator
 from attrs import evolve
-from tqdm import tqdm # type: ignore
+from tqdm import tqdm  # type: ignore
 
 #%%
-model_name = "gpt2-xl"
-
-gender_dirs = {
-    l: torch.load(path).to(device)
-    for l, path in [
-        (l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dgender.pt")) for l in range(80)
-    ]
-    if path.exists()
-}
-politics_dirs = {
-    l: torch.load(path).to(device)
-    for l, path in [
-        (l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dpolitics.pt")) for l in range(80)
-    ]
-    if path.exists()
-}
-imdb_dirs = {
-    l: torch.load(path).to(device)
-    for l, path in [
-        (l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dimdb_sentiments.pt"))
-        for l in range(80)
-    ]
-    if path.exists()
-}
-facts_dirs = {
-    l: torch.load(path).to(device)
-    for l, path in [
-        (l, Path(f"./saved_dirs/v2-gpt2-xl/l{l}-n1-dfacts.pt")) for l in range(80)
-    ]
-    if path.exists()
-}
-empty_dirs = list(gender_dirs.values())[0][0:0]
-
-#%%
-model: torch.nn.Module = GPT2LMHeadModel.from_pretrained(model_name).to(device)
+model_name = "EleutherAI/gpt-j-6B"
+model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 for param in model.parameters():
     param.requires_grad = False
+#%%
+
+def load_dirs(name: str, method: str = ""):
+    method_suffix = "" if method == "sgd" or method == "" else f"-{method}"
+
+    return {
+        l: torch.load(path).to(device)
+        for l, path in [
+            (l, Path(f"./saved_dirs/v3-{model_name}{method_suffix}/l{l}-{name}.pt")) for l in range(80)
+        ]
+        if path.exists()
+    }
 #%%
 def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]:
     g = PairGeneratorDataset.from_dict(json.load(Path(f"./data/{ds}.json").open("r")))
@@ -93,20 +78,19 @@ def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]
 
 some_train_tests = load("gender/train", max_amount=10)
 gender_tests = load("gender/test")
+easy_gender_tests = [t for t in gender_tests if t.tag == "X->X"]
+hard_gender_tests = [t for t in gender_tests if t.tag in {"X->Y","Y->X"}]
 french_gender_tests = load("french_gender/test")
 politics_tests = load("politics/test")
-imdb_sentiments_tests = load("imdb_sentiments/test")[:5]
 facts_tests = load("facts/test")[:10]
 #%%
-dirs_dict = gender_dirs
 
-
-def plot_tests(tests, label: str = ""):
+def plot_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
     evaluator = DirEvaluator(
         model,
-        None, # type: ignore
+        None,  # type: ignore
         tests,
-        None, # type: ignore
+        None,  # type: ignore
         confusion_fn=partial(measure_confusions_ratio, use_log_probs=True),
     )
     means = []
@@ -117,94 +101,404 @@ def plot_tests(tests, label: str = ""):
         success_rate = 1 - evolve(evaluator, layer=layer, dirs=dirs).evaluate()
         means.append(torch.mean(success_rate).item())
         stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
-    plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label)
+    plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label, **plot_kwargs)
 
-
-# %%
-# Increase plot size
+#%%
 from matplotlib import rcParams
 
-rcParams["figure.figsize"] = (12, 12)
+rcParams["figure.figsize"] = (10, 8)
 
-gender_XY = [t for t in gender_tests if t.tag == "X->Y"]
-plot_tests(gender_XY, label="gender X->Y")
-gender_XX = [t for t in gender_tests if t.tag == "X->X"]
-plot_tests(gender_XX, label="gender X->X")
-gender_YX = [t for t in gender_tests if t.tag != "Y->X"]
-plot_tests(gender_YX, label="gender Y->X")
-gender_YY = [t for t in gender_tests if t.tag != "Y->Y"]
-
-gender_XY = [t for t in french_gender_tests if t.tag == "X->Y"]
-plot_tests(gender_XY, label="french gender X->Y")
-gender_XX = [t for t in french_gender_tests if t.tag == "X->X"]
-plot_tests(gender_XX, label="french gender X->X")
-gender_YX = [t for t in french_gender_tests if t.tag != "Y->X"]
-plot_tests(gender_YX, label="french gender Y->X")
-gender_YY = [t for t in french_gender_tests if t.tag != "Y->Y"]
-
-plot_tests(gender_YY, label="gender Y->Y")
-plot_tests(politics_tests, label="politics")
-plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
-plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
-plot_tests(facts_tests, label="facts")
+Path("figures").mkdir(exist_ok=True)
+#%%
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe")
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE")
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he")
 
 plt.xlabel("Layer")
-plt.ylabel("Swap success rate")
+plt.ylabel("Success rate")
 plt.ylim(-0.1, 1.1)
 plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
+plt.title("Probe performance on easy gender tests")
 plt.legend()
-# %%
-dirs_dict = politics_dirs
-politics_stereotype = [t for t in politics_tests if t.tag == "X->Y"]
-plot_tests(politics_stereotype, label="politics X->Y")
-politics_incompetence = [t for t in politics_tests if t.tag != "X->Y"]
-plot_tests(politics_incompetence, label="politics X->X")
-plot_tests(gender_tests, label="gender")
-plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
-plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
-# plot_tests(imdb_sentiments_tests, label="imdb sentiments")
+plt.savefig("figures/easy_probes.png")
+#%%
+plot_tests(hard_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe")
+plot_tests(hard_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE")
+plot_tests(hard_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
+plot_tests(hard_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he")
 
 plt.xlabel("Layer")
-plt.ylabel("Swap success rate")
+plt.ylabel("Success rate")
 plt.ylim(-0.1, 1.1)
 plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
+plt.title("Probe performance on hard gender tests")
 plt.legend()
-# # %%
-# dirs_dict = imdb_dirs
-# plot_tests(load("imdb_sentiments/test")[:20], label="imdb sentiments")
-# plot_tests(politics_tests, label="politics")
-# plot_tests(gender_tests, label="gender")
-# plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
-# plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
-
-# plt.xlabel("Layer")
-# plt.ylabel("Swap success rate")
-# plt.ylim(-0.1, 1.1)
-# plt.axhline(0, color="black", linestyle="--")
-# plt.axhline(1, color="black", linestyle="--")
-# plt.legend();
-# %%
-dirs_dict = facts_dirs
-plot_tests(load("facts/test"), label="facts")
-plot_tests(politics_tests, label="politics")
-plot_tests(gender_tests, label="gender")
-plot_tests(load("misc/pronouns"), label="gender-neutral pronouns")
-plot_tests(load("misc/repetitions"), label="gender-neutral repetitions")
+plt.savefig("figures/hard_probes.png")
+#%%
+plot_tests(french_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe")
+plot_tests(french_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE")
+plot_tests(french_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
+plot_tests(french_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he")
 
 plt.xlabel("Layer")
-plt.ylabel("Swap success rate")
+plt.ylabel("Success rate")
 plt.ylim(-0.1, 1.1)
 plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
+plt.title("Probe performance on French gender tests")
 plt.legend()
+plt.savefig("figures/french_probes.png")
+#%%
+
+plot_tests(easy_gender_tests, load_dirs("n1-dgender"), "CDE")
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe", alpha=0.3)
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE", alpha=0.3)
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he", alpha=0.3)
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he", alpha=0.3)
+
+plt.xlabel("Layer")
+plt.ylabel("Success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("CDE performance on easy gender tests")
+plt.legend()
+plt.savefig("figures/easy_cde.png")
+#%%
+
+cde_dirs = load_dirs("n1-dgender")
+rlace_dirs = load_dirs("n1-dgender", "rlace")
+
+plot_tests(easy_gender_tests, cde_dirs, "easy gender CDE", color="green")
+plot_tests(hard_gender_tests, cde_dirs, "hard gender CDE", color="red")
+plot_tests(french_gender_tests, cde_dirs, "French gender CDE", color="blue")
+plot_tests(politics_tests, cde_dirs, "politics CDE", alpha=0.3, color="purple")
+plot_tests(facts_tests, cde_dirs, "facts CDE", alpha=0.3, color="orange")
+
+plot_tests(easy_gender_tests, rlace_dirs, "easy gender RLACE", color="green", linestyle='dashed')
+plot_tests(hard_gender_tests, rlace_dirs, "hard gender RLACE", color="red", linestyle='dashed')
+plot_tests(french_gender_tests, rlace_dirs, "French gender RLACE", color="blue", linestyle='dashed')
+plot_tests(politics_tests, rlace_dirs, "politics RLACE", alpha=0.3, color="purple", linestyle='dashed')
+plot_tests(facts_tests, rlace_dirs, "facts RLACE", alpha=0.3, color="orange", linestyle='dashed')
+
+plt.xlabel("Layer")
+plt.ylabel("Success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("CDE & RLACE performance with gender direction")
+plt.legend()
+plt.savefig("figures/hard_cde.png")
 # %%
-single_dirs_it = sorted(list(gender_dirs.items()))
+
+cde_dirs = load_dirs("n1-dpolitics")
+
+plot_tests(easy_gender_tests, cde_dirs, "easy gender", alpha=0.3, color="green")
+plot_tests(hard_gender_tests, cde_dirs, "hard gender", alpha=0.3, color="red")
+plot_tests(french_gender_tests, cde_dirs, "French gender", alpha=0.3, color="blue")
+plot_tests(politics_tests, cde_dirs, "politics", color="purple")
+plot_tests(facts_tests, cde_dirs, "facts", alpha=0.3, color="orange")
+
+plt.xlabel("Layer")
+plt.ylabel("Success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("CDE performance with politics direction")
+plt.legend()
+plt.savefig("figures/politics_cde.png")
+# %%
+
+cde_dirs = load_dirs("n1-dfacts")
+
+plot_tests(easy_gender_tests, cde_dirs, "easy gender", alpha=0.3, color="green")
+plot_tests(hard_gender_tests, cde_dirs, "hard gender", alpha=0.3, color="red")
+plot_tests(french_gender_tests, cde_dirs, "French gender", alpha=0.3, color="blue")
+plot_tests(politics_tests, cde_dirs, "politics", alpha=0.3, color="purple")
+plot_tests(facts_tests, cde_dirs, "facts", color="orange")
+
+plt.xlabel("Layer")
+plt.ylabel("Success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("CDE performance with facts direction")
+plt.legend()
+plt.savefig("figures/facts_cde.png")
+#%%
+def plot_ablation_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
+    means = []
+    stds = []
+
+    for l, dirs in tqdm(dirs_dict.items()):
+        layer = model.get_submodule(f"transformer.h.{l}")
+        
+        success_rate = 1 - torch.Tensor([
+            measure_ablation_success(
+                t,
+                model,
+                create_handicaped(
+                    dirs,
+                    model,
+                    layer
+                ),
+            )
+            for t in tests
+        ])
+        means.append(torch.mean(success_rate).item())
+        stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
+    plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label, **plot_kwargs)
+
+#%%
+
+plot_ablation_tests(easy_gender_tests, load_dirs("n1-dgender"), "CDE")
+plot_ablation_tests(easy_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe", alpha=0.3)
+plot_ablation_tests(easy_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE", alpha=0.3)
+plot_ablation_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he", alpha=0.3)
+plot_ablation_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he", alpha=0.3)
+
+plt.xlabel("Layer")
+plt.ylabel("Success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("Ablation performance on easy gender tests")
+plt.legend()
+plt.savefig("figures/easy_ablations.png")
+#%%
+
+cde_dirs = load_dirs("n1-dgender")
+rlace_dirs = load_dirs("n1-dgender", "rlace")
+
+plot_ablation_tests(easy_gender_tests, cde_dirs, "easy gender CDE", color="green")
+plot_ablation_tests(hard_gender_tests, cde_dirs, "hard gender CDE", color="red")
+plot_ablation_tests(french_gender_tests, cde_dirs, "French gender CDE", color="blue")
+plot_ablation_tests(politics_tests, cde_dirs, "politics CDE", alpha=0.3, color="purple")
+plot_ablation_tests(facts_tests, cde_dirs, "facts CDE", alpha=0.3, color="orange")
+
+plot_ablation_tests(easy_gender_tests, rlace_dirs, "easy gender RLACE", color="green", linestyle='dashed')
+plot_ablation_tests(hard_gender_tests, rlace_dirs, "hard gender RLACE", color="red", linestyle='dashed')
+plot_ablation_tests(french_gender_tests, rlace_dirs, "French gender RLACE", color="blue", linestyle='dashed')
+plot_ablation_tests(politics_tests, rlace_dirs, "politics RLACE", alpha=0.3, color="purple", linestyle='dashed')
+plot_ablation_tests(facts_tests, rlace_dirs, "facts RLACE", alpha=0.3, color="orange", linestyle='dashed')
+
+plt.xlabel("Layer")
+plt.ylabel("Ablation success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("CDE & RLACE performance with gender direction")
+plt.legend()
+plt.savefig("figures/hard_ablation.png")
+#%%
+
+layer_nb = 7
+
+candidates_dirs = {
+    "CDE": load_dirs("n1-dgender")[layer_nb],
+    "RLACE": load_dirs("n1-dgender", "rlace")[layer_nb],
+    "naive probe": load_dirs("n1-dgender", "inlp")[layer_nb],
+    "she-he": load_dirs("n1-dgender", "she-he")[layer_nb],
+    "she-he-grad": load_dirs("n1-dgender", "she-he-grad")[layer_nb],
+}
+ref = load_dirs("n1-dgender")[layer_nb]
+
+layer = model.get_submodule(f"transformer.h.{layer_nb}")
+means = []
+stds = []
+cosines = []
+labels = []
+for name, dirs in candidates_dirs.items():
+    evaluator = DirEvaluator(
+        model,
+        layer,
+        easy_gender_tests,
+        dirs,
+        confusion_fn=partial(measure_confusions_ratio, use_log_probs=True),
+    )
+    success_rate = 1 - evolve(evaluator, layer=layer, dirs=dirs).evaluate()
+    means.append(torch.mean(success_rate).item())
+    stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
+    cosines.append(torch.einsum("h, h -> ", dirs[0], ref[0]).abs().item())
+    labels.append(name)
+_, ax = plt.subplots()
+plt.errorbar(cosines, means, yerr=stds, capsize=3, linestyle="None", marker="x")
+for label, cosine, mean in zip(labels, cosines, means):
+    ax.annotate(label, (cosine+0.01,mean))
+plt.title(f"Performance vs Cosine similarity with CDE on easy gender tests at layer {layer_nb}")
+plt.xlabel("Cosine similarity")
+plt.ylabel("Success rate")
+plt.savefig("figures/cosine_v_perf.png")
+# %%
+single_dirs_it = sorted(list(load_dirs("n1-dgender").items()))
 keys = [k for k, _ in single_dirs_it]
 all_dirs_t = torch.cat([d for _, d in single_dirs_it])
-plt.imshow(torch.einsum("n h, m h -> n m", all_dirs_t, all_dirs_t).abs().cpu())
+plt.imshow(torch.einsum("n h, m h -> n m", all_dirs_t, all_dirs_t).abs().cpu(), cmap="hot")
 plt.xticks(list(range(len(single_dirs_it))), keys, rotation=45)
 plt.yticks(list(range(len(single_dirs_it))), keys)
 plt.colorbar()
+plt.title("Cosine similarities between CDE's gender directions")
+plt.savefig("figures/similarities.png")
+#%%
+
+#%%
+# Analyse activations along the direction
+layer_nb = 7
+layer = model.get_submodule(f"transformer.h.{layer_nb}")
+plt.title(f"Activations at {layer_nb} along CDE's gender direction")
+dirs = load_dirs("n1-dgender")[layer_nb]
+tests = easy_gender_tests + hard_gender_tests
+for i,t in enumerate(tests):
+    activations = get_activations(
+        tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(device),
+        model,
+        [layer],
+    )[layer]
+    act_along_dir = torch.einsum("v n h, h -> v n", activations, dirs[0]).cpu()
+    plt.scatter(act_along_dir[0], [i+.2] * len(act_along_dir[0]), label="true", color="blue", alpha=0.3)
+    plt.scatter(act_along_dir[1], [i] * len(act_along_dir[1]), label="false", color="red", alpha=0.3)
+
+def shorten(s):
+    if len(s) > 20:
+        return s[:20] + "..."
+    return s
+
+plt.xlabel("Activation")
+plt.yticks(list(range(len(tests))), [shorten(t.positive.prompt) for t in tests])
+plt.savefig("figures/gender_activations.png")
+
 # %%
+
+# Analyse activations along the direction
+layer_nb = 7
+layer = model.get_submodule(f"transformer.h.{layer_nb}")
+dirs = load_dirs("n1-dfacts")[layer_nb]
+plt.title(f"Activations at {layer_nb} along CDE's facts direction")
+tests = facts_tests
+for i,t in enumerate(tests):
+    activations = get_activations(
+        tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(device),
+        model,
+        [layer],
+    )[layer]
+    act_along_dir = torch.einsum("v n h, h -> v n", activations, dirs[0]).cpu()
+    plt.scatter(act_along_dir[0], [i+.2] * len(act_along_dir[0]), label="true", color="blue", alpha=0.1)
+    plt.scatter(act_along_dir[1], [i] * len(act_along_dir[1]), label="false", color="red", alpha=0.1)
+
+def shorten(s):
+    if len(s) > 20:
+        return s[:20] + "..."
+    return s
+
+plt.xlabel("Activation")
+plt.yticks(list(range(len(tests))), [shorten(t.positive.prompt) for t in tests])
+plt.savefig("figures/facts_activations.png")
+# %%
+cde_dirs = load_dirs("n1-dgender")
+cde_dirs2 = load_dirs("n2-dgender")
+
+plot_tests(easy_gender_tests, cde_dirs, "easy gender", color="green")
+plot_tests(hard_gender_tests, cde_dirs, "hard gender", color="red")
+plot_tests(french_gender_tests, cde_dirs, "French gender", color="blue")
+plot_tests(politics_tests, cde_dirs, "politics", alpha=0.3, color="purple")
+plot_tests(facts_tests, cde_dirs, "facts", alpha=0.3, color="orange")
+
+plot_tests(easy_gender_tests, cde_dirs2, "easy gender 2d", color="green", linestyle="dashed")
+plot_tests(hard_gender_tests, cde_dirs2, "hard gender 2d", color="red", linestyle="dashed")
+plot_tests(french_gender_tests, cde_dirs2, "French gender 2d", color="blue", linestyle="dashed")
+plot_tests(politics_tests, cde_dirs2, "politics 2d", alpha=0.3, color="purple", linestyle="dashed")
+plot_tests(facts_tests, cde_dirs2, "facts 2d", alpha=0.3, color="orange", linestyle="dashed")
+
+plt.xlabel("Layer")
+plt.ylabel("Success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("CDE performance with 2 gender directions")
+plt.legend()
+plt.savefig("figures/2d_gender_cde.png")
+# %%
+cde_dirs = load_dirs("n1-dfacts")
+cde_dirs2 = load_dirs("n2-dfacts")
+
+plot_tests(easy_gender_tests, cde_dirs, "easy gender", alpha=0.3, color="green")
+plot_tests(hard_gender_tests, cde_dirs, "hard gender", alpha=0.3, color="red")
+plot_tests(french_gender_tests, cde_dirs, "French gender", alpha=0.3, color="blue")
+plot_tests(politics_tests, cde_dirs, "politics", alpha=0.3, color="purple")
+plot_tests(facts_tests, cde_dirs, "facts", color="orange")
+
+plot_tests(easy_gender_tests, cde_dirs2, "easy gender 2D", alpha=0.3, color="green", linestyle="dashed")
+plot_tests(hard_gender_tests, cde_dirs2, "hard gender 2D", alpha=0.3, color="red", linestyle="dashed")
+plot_tests(french_gender_tests, cde_dirs2, "French gender 2D", alpha=0.3, color="blue", linestyle="dashed")
+plot_tests(politics_tests, cde_dirs2, "politics 2D", alpha=0.3, color="purple", linestyle="dashed")
+plot_tests(facts_tests, cde_dirs2, "facts 2D", color="orange", linestyle="dashed")
+
+plt.xlabel("Layer")
+plt.ylabel("Success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("CDE performance with 2 facts direction")
+plt.legend()
+plt.savefig("figures/2d_facts_cde.png")
+# %%
+# 2D activations
+layer_nb = 7
+layer = model.get_submodule(f"transformer.h.{layer_nb}")
+dirs = load_dirs("n2-dgender")[layer_nb]
+plt.title(f"Activations at {layer_nb} along CDE's facts directions")
+tests = gender_tests
+activations_X_p = []
+activations_Y_p = []
+activations_X_n = []
+activations_Y_n = []
+for i,t in enumerate(tests):
+    activations = get_activations(
+        tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(device),
+        model,
+        [layer],
+    )[layer]
+    act_along_dir = torch.einsum("v n h, d h -> d v n", activations, dirs)
+    activations_X_p.append(torch.flatten(act_along_dir[0,0]))
+    activations_X_n.append(torch.flatten(act_along_dir[0,1]))
+    activations_Y_p.append(torch.flatten(act_along_dir[1,0]))
+    activations_Y_n.append(torch.flatten(act_along_dir[1,1]))
+
+plt.scatter(torch.cat(activations_X_p).cpu(), torch.cat(activations_Y_p).cpu(), color="blue", alpha=0.1)
+plt.scatter(torch.cat(activations_X_n).cpu(), torch.cat(activations_Y_n).cpu(), color="red", alpha=0.1)
+
+plt.xlabel("Activation in dim 1")
+plt.ylabel("Activation in dim 2")
+plt.savefig("figures/gender_activations_2D.png")
+# %%
+# 2D activations
+layer_nb = 7
+layer = model.get_submodule(f"transformer.h.{layer_nb}")
+dirs = load_dirs("n2-dfacts")[layer_nb]
+plt.title(f"Activations at {layer_nb} along CDE's facts directions")
+tests = facts_tests
+activations_X_p = []
+activations_Y_p = []
+activations_X_n = []
+activations_Y_n = []
+for i,t in enumerate(tests):
+    activations = get_activations(
+        tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(device),
+        model,
+        [layer],
+    )[layer]
+    act_along_dir = torch.einsum("v n h, d h -> d v n", activations, dirs)
+    activations_X_p.append(torch.flatten(act_along_dir[0,0]))
+    activations_X_n.append(torch.flatten(act_along_dir[0,1]))
+    activations_Y_p.append(torch.flatten(act_along_dir[1,0]))
+    activations_Y_n.append(torch.flatten(act_along_dir[1,1]))
+
+plt.scatter(torch.cat(activations_X_p).cpu(), torch.cat(activations_Y_p).cpu(), color="blue", alpha=0.02)
+plt.scatter(torch.cat(activations_X_n).cpu(), torch.cat(activations_Y_n).cpu(), color="red", alpha=0.02)
+
+plt.xlabel("Activation in dim 1")
+plt.ylabel("Activation in dim 2")
+plt.savefig("figures/facts_activations_2D.png")

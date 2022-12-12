@@ -2,3 +2,4 @@
 *.pt
 .vscode
 .mypy_cache
+!v3*

@@ -58,10 +58,14 @@ def run(
 
 
 if __name__ == "__main__":
-    # python generate_dirs.py --layer_nbs 6, --n_dirs 1 --model_name gpt2
-    # python generate_dirs.py --layer_nbs 0,1,4,8,12,16,20,24,28,32,36,40,44,46,47, --n_dirs 1 --model_name gpt2-xl
-    # python generate_dirs.py --layer_nbs 0,12,24,36,47, --n_dirs 1 --model_name gpt2-xl --data imdb_sentiments
-    # python generate_dirs.py --layer_nbs 0,12,24,36,47, --n_dirs 1 --model_name gpt2-xl --data facts
-    # python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --data gender; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --data facts
-    # python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method she-he; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method she-he-grad; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method inlp; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method rlace;
     fire.Fire(run)
+
+# python generate_dirs.py --layer_nbs 6, --n_dirs 1 --model_name gpt2
+# python generate_dirs.py --layer_nbs 0,1,4,8,12,16,20,24,28,32,36,40,44,46,47, --n_dirs 1 --model_name gpt2-xl
+# python generate_dirs.py --layer_nbs 0,12,24,36,47, --n_dirs 1 --model_name gpt2-xl --data facts
+
+# python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --data gender; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --data facts
+
+# python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method she-he; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method she-he-grad; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method inlp; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method rlace;
+
+# python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method she-he; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method she-he-grad; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method inlp; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method rlace; python generate_dirs.py --layer_nbs 27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method rlace;

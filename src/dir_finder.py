@@ -4,7 +4,7 @@ from typing import Callable, Iterable, Literal
 from attrs import define
 import numpy as np
 import torch
-from tqdm import trange  # type: ignore
+from tqdm import tqdm, trange  # type: ignore
 import random
 
 from src.data_generation import Pair
@@ -141,17 +141,24 @@ class DirFinder:
         
         she_id, he_id = tokenizer.encode([" she", " he"])
 
-        for t in tokenized:
-            model_with_append = create_frankenstein(
+        g = tqdm(tokenized)
+        for t in g:
+            model_with_grad_pt = create_frankenstein(
                 torch.empty((0, self.h_size), device=self.device), self.model, self.layer, grad_point
             ) # Just add a point where gradient is measured
             
-            out = torch.log_softmax(model_with_append(t, t), dim=-1)
+            out = torch.log_softmax(model_with_grad_pt(t, t), dim=-1)
             out_she = out[..., she_id].mean()
             out_he = out[..., he_id].mean()
             s = out_she - out_he
             s.backward()
-        return normalize(grad_point.detach())
+            
+            g.set_postfix(
+                {
+                    "loss": s.item(),
+                }
+            )
+        return normalize(grad_point.grad.detach())
     
     def _get_train_ds(self) -> ActivationsDataset:
         return get_act_ds(self.model, list(islice(self.pairs_generator, self.dataset_size)), self.layer)
