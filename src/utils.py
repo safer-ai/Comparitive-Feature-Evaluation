@@ -1,6 +1,6 @@
 import gc
 from math import cos
-from typing import Callable, Union
+from typing import Callable, Sequence, Union
 
 import numpy as np
 import torch
@@ -352,7 +352,7 @@ def measure_confusions_ratio(
 
 
 ProjectionFunc = Callable[
-    [BatchEncoding, BatchEncoding], torch.Tensor
+    [torch.Tensor, torch.Tensor], torch.Tensor
 ]  # project first along second
 
 
@@ -442,7 +442,7 @@ def measure_ablation_success(test: Pair, model, handicaped_model: HandicapedMode
         outs = torch.log_softmax(model(**inpt).logits[:, -1], dim=-1)
         handicaped_outs = torch.log_softmax(handicaped_model(inpt)[:, -1], dim=-1)
 
-    r = 0
+    r = 0.0
     for a in test.positive.answers + test.negative.answers:
         t = tokenizer.encode(a)[0]
         r += torch.clip(
@@ -455,7 +455,7 @@ def measure_ablation_success(test: Pair, model, handicaped_model: HandicapedMode
     return r / len(test.positive.answers + test.negative.answers)
 
 
-def get_act_ds(model, tests: list[Union[Test, Pair]], layer):
+def get_act_ds(model, tests: Sequence[Union[Test, Pair]], layer):
     positives = [t.positive.prompt for t in tests]
     negatives = [t.negative.prompt for t in tests]
     positive_acts = [

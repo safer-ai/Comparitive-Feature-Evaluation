@@ -511,12 +511,6 @@ for i, t in enumerate(tests):
     )
 
 
-def shorten(s):
-    if len(s) > 20:
-        return s[:20] + "..."
-    return s
-
-
 plt.xlabel("Activation")
 plt.yticks(list(range(len(tests))), [shorten(t.positive.prompt) for t in tests])
 plt.savefig(f"{figure_folder}/facts_activations.png")
