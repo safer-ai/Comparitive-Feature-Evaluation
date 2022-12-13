@@ -629,7 +629,7 @@ dirs_dict = load_dirs("n2-dgender")
 if dirs_dict:
 
     dirs = dirs_dict[layer_nb]
-    plt.title(f"Activations at {layer_nb} along CDE's facts directions")
+    plt.title(f"Activations at {layer_nb} along CDE's gender directions")
     tests = gender_tests
     activations_X_p = []
     activations_Y_p = []
