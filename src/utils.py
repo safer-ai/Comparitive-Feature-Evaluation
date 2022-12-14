@@ -102,7 +102,7 @@ class ProjectionWrapper(torch.nn.Module):
         has_leftover: bool = False,
     ):
         super().__init__()
-        self.wrapped_module = wrapped_module.wrapped_module
+        self.wrapped_module = wrapped_module
         self.projection = projection
         self.has_leftover = has_leftover
 
