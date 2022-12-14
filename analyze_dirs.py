@@ -49,8 +49,8 @@ from attrs import evolve
 from tqdm import tqdm  # type: ignore
 
 #%%
-# model_name = "gpt2-xl"
-model_name = "EleutherAI/gpt-j-6B"
+model_name = "gpt2-xl"
+# model_name = "EleutherAI/gpt-j-6B"
 
 model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 for param in model.parameters():
