@@ -18,6 +18,7 @@ from src.utils import (
     get_unembed,
     measure_kl_confusions_grad,
     normalize,
+    orthonormalize,
     project,
     ProjectionFunc,
 )
@@ -69,12 +70,12 @@ class DirFinder:
         last_loss = torch.inf
         for e in g:
             with torch.no_grad():
-                dirs[:] = normalize(dirs)
+                dirs[:] = orthonormalize(dirs)
             optimizer.zero_grad()
 
             for t in islice(data_generator, self.batch_size):
                 model_with_grad = create_frankenstein(
-                    normalize(dirs),
+                    orthonormalize(dirs),
                     self.model,
                     self.layer,
                     projection_fn=self.projection_fn,
@@ -108,7 +109,7 @@ class DirFinder:
                 last_loss = rolling_loss
 
         d = dirs.detach()
-        return normalize(d).to(self.device)
+        return orthonormalize(d).to(self.device)
 
     def find_dirs_using_rlace(self) -> torch.Tensor:
         return rlace(

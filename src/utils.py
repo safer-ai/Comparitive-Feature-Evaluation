@@ -511,6 +511,20 @@ def get_act_ds_with_controls(
     return ActivationsDataset(x_data, y_data)
 
 
+
+def orthonormalize(dirs: torch.Tensor) -> torch.Tensor:
+    """Apply the Gram-Schmidt algorithm to make dirs orthonormal
+    
+    Assumes that the number of dimensions and dirs is > 0."""
+    n, _ = dirs.shape
+
+    dirs[0] /= torch.linalg.norm(dirs[0])
+    for i in range(1, n):
+        dirs[i] = project(dirs[i], dirs[:i])
+        dirs[i] /= torch.linalg.norm(dirs[i])
+    
+    return dirs
+
 def normalize(x: torch.Tensor) -> torch.Tensor:
     return x / x.norm(dim=-1, keepdim=True)
 
