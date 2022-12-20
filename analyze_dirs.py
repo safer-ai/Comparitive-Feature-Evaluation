@@ -49,8 +49,8 @@ from attrs import evolve
 from tqdm import tqdm  # type: ignore
 
 #%%
-model_name = "gpt2-xl"
-# model_name = "EleutherAI/gpt-j-6B"
+# model_name = "gpt2-xl"
+model_name = "EleutherAI/gpt-j-6B"
 
 model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 for param in model.parameters():
@@ -135,7 +135,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("Probe performance on easy gender tests")
 plt.legend()
-plt.savefig(f"{figure_folder}/easy_probes.png", bbox_inches='tight')
+plt.savefig(f"{figure_folder}/easy_probes.png", bbox_inches="tight")
 #%%
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe")
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE")
@@ -151,7 +151,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("Probe performance on hard gender tests")
 plt.legend()
-plt.savefig(f"{figure_folder}/hard_probes.png", bbox_inches='tight')
+plt.savefig(f"{figure_folder}/hard_probes.png", bbox_inches="tight")
 #%%
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe")
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE")
@@ -167,7 +167,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("Probe performance on French gender tests")
 plt.legend()
-plt.savefig(f"{figure_folder}/french_probes.png", bbox_inches='tight')
+plt.savefig(f"{figure_folder}/french_probes.png", bbox_inches="tight")
 #%%
 
 plot_tests(easy_gender_tests, load_dirs("n1-dgender"), "CDE")
@@ -188,7 +188,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("CDE performance on easy gender tests")
 plt.legend()
-plt.savefig(f"{figure_folder}/easy_cde.png", bbox_inches='tight')
+plt.savefig(f"{figure_folder}/easy_cde.png", bbox_inches="tight")
 #%%
 
 cde_dirs = load_dirs("n1-dgender")
@@ -241,7 +241,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("CDE & RLACE performance with gender direction")
 plt.legend()
-plt.savefig(f"{figure_folder}/hard_cde.png", bbox_inches='tight')
+plt.savefig(f"{figure_folder}/hard_cde.png", bbox_inches="tight")
 # %%
 
 cde_dirs = load_dirs("n1-dpolitics")
@@ -261,7 +261,7 @@ if cde_dirs:
     plt.axhline(1, color="black", linestyle="--")
     plt.title("CDE performance with politics direction")
     plt.legend()
-    plt.savefig(f"{figure_folder}/politics_cde.png", bbox_inches='tight')
+    plt.savefig(f"{figure_folder}/politics_cde.png", bbox_inches="tight")
 # %%
 
 cde_dirs = load_dirs("n1-dfacts")
@@ -280,7 +280,7 @@ if cde_dirs:
     plt.axhline(1, color="black", linestyle="--")
     plt.title("CDE performance with facts direction")
     plt.legend()
-    plt.savefig(f"{figure_folder}/facts_cde.png", bbox_inches='tight')
+    plt.savefig(f"{figure_folder}/facts_cde.png", bbox_inches="tight")
 #%%
 def plot_ablation_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
     means = []
@@ -332,7 +332,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("Ablation performance on easy gender tests")
 plt.legend()
-plt.savefig(f"{figure_folder}/easy_ablations.png", bbox_inches='tight')
+plt.savefig(f"{figure_folder}/easy_ablations.png", bbox_inches="tight")
 #%%
 
 cde_dirs = load_dirs("n1-dgender")
@@ -385,7 +385,7 @@ plt.axhline(0, color="black", linestyle="--")
 plt.axhline(1, color="black", linestyle="--")
 plt.title("CDE & RLACE performance with gender direction")
 plt.legend()
-plt.savefig(f"{figure_folder}/hard_ablation.png", bbox_inches='tight')
+plt.savefig(f"{figure_folder}/hard_ablation.png", bbox_inches="tight")
 #%%
 
 layer_nb = 7 if model_name == "EleutherAI/gpt-j-6B" else 23
@@ -426,7 +426,7 @@ plt.title(
 )
 plt.xlabel("Cosine similarity")
 plt.ylabel("Success rate")
-plt.savefig(f"{figure_folder}/cosine_v_perf.png", bbox_inches='tight')
+plt.savefig(f"{figure_folder}/cosine_v_perf.png", bbox_inches="tight")
 # %%
 single_dirs_it = sorted(list(load_dirs("n1-dgender").items()))
 keys = [k for k, _ in single_dirs_it]
@@ -438,7 +438,7 @@ plt.xticks(list(range(len(single_dirs_it))), keys, rotation=45)
 plt.yticks(list(range(len(single_dirs_it))), keys)
 plt.colorbar()
 plt.title("Cosine similarities between CDE's gender directions")
-plt.savefig(f"{figure_folder}/similarities.png", bbox_inches='tight')
+plt.savefig(f"{figure_folder}/similarities.png", bbox_inches="tight")
 #%%
 
 #%%
@@ -457,32 +457,33 @@ for i, t in enumerate(tests):
         [layer],
     )[layer]
     act_along_dir = torch.einsum("v n h, h -> v n", activations, dirs[0]).cpu()
-    
-    
+
     plt.scatter(
         act_along_dir[0],
         [i + 0.2] * len(act_along_dir[0]),
         color="blue",
         alpha=0.3,
-        label = "female" if i == 0 else None
+        label="female" if i == 0 else None,
     )
     plt.scatter(
         act_along_dir[1],
         [i] * len(act_along_dir[1]),
         color="red",
         alpha=0.3,
-        label = "male" if i == 0 else None
+        label="male" if i == 0 else None,
     )
+
 
 def shorten(s):
     if len(s) > 20:
         return s[:20] + "..."
     return s
 
+
 plt.legend()
 plt.xlabel("Activation")
 plt.yticks(list(range(len(tests))), [shorten(t.positive.prompt) for t in tests])
-plt.savefig(f"{figure_folder}/gender_activations.png", bbox_inches='tight')
+plt.savefig(f"{figure_folder}/gender_activations.png", bbox_inches="tight")
 
 # %%
 
@@ -524,7 +525,7 @@ if dirs_dict:
     plt.legend()
     plt.xlabel("Activation")
     plt.yticks(list(range(len(tests))), [shorten(t.positive.prompt) for t in tests])
-    plt.savefig(f"{figure_folder}/facts_activations.png", bbox_inches='tight')
+    plt.savefig(f"{figure_folder}/facts_activations.png", bbox_inches="tight")
 # %%
 cde_dirs = load_dirs("n1-dgender")
 cde_dirs2 = load_dirs("n2-dgender")
@@ -538,13 +539,21 @@ if cde_dirs2 and cde_dirs:
     plot_tests(facts_tests, cde_dirs, "facts", alpha=0.3, color="orange")
 
     plot_tests(
-        easy_gender_tests, cde_dirs2, "easy gender 2d", color="green", linestyle="dashed"
+        easy_gender_tests,
+        cde_dirs2,
+        "easy gender 2d",
+        color="green",
+        linestyle="dashed",
     )
     plot_tests(
         hard_gender_tests, cde_dirs2, "hard gender 2d", color="red", linestyle="dashed"
     )
     plot_tests(
-        french_gender_tests, cde_dirs2, "French gender 2d", color="blue", linestyle="dashed"
+        french_gender_tests,
+        cde_dirs2,
+        "French gender 2d",
+        color="blue",
+        linestyle="dashed",
     )
     plot_tests(
         politics_tests,
@@ -555,7 +564,12 @@ if cde_dirs2 and cde_dirs:
         linestyle="dashed",
     )
     plot_tests(
-        facts_tests, cde_dirs2, "facts 2d", alpha=0.3, color="orange", linestyle="dashed"
+        facts_tests,
+        cde_dirs2,
+        "facts 2d",
+        alpha=0.3,
+        color="orange",
+        linestyle="dashed",
     )
 
     plt.xlabel("Layer")
@@ -565,7 +579,7 @@ if cde_dirs2 and cde_dirs:
     plt.axhline(1, color="black", linestyle="--")
     plt.title("CDE performance with 2 gender directions")
     plt.legend()
-    plt.savefig(f"{figure_folder}/2d_gender_cde.png", bbox_inches='tight')
+    plt.savefig(f"{figure_folder}/2d_gender_cde.png", bbox_inches="tight")
 # %%
 cde_dirs = load_dirs("n1-dfacts")
 cde_dirs2 = load_dirs("n2-dfacts")
@@ -619,7 +633,67 @@ if cde_dirs and cde_dirs2:
     plt.axhline(1, color="black", linestyle="--")
     plt.title("CDE performance with 2 facts direction")
     plt.legend()
-    plt.savefig(f"{figure_folder}/2d_facts_cde.png", bbox_inches='tight')
+    plt.savefig(f"{figure_folder}/2d_facts_cde.png", bbox_inches="tight")
+# %%
+cde_dirs = load_dirs("n1-dpolitics")
+cde_dirs2 = load_dirs("n2-dpolitics")
+
+if cde_dirs and cde_dirs2:
+
+    plot_tests(easy_gender_tests, cde_dirs, "easy gender", alpha=0.3, color="green")
+    plot_tests(hard_gender_tests, cde_dirs, "hard gender", alpha=0.3, color="red")
+    plot_tests(french_gender_tests, cde_dirs, "French gender", alpha=0.3, color="blue")
+    plot_tests(politics_tests, cde_dirs, "politics", color="purple")
+    plot_tests(facts_tests, cde_dirs, "facts", alpha=0.3, color="orange")
+
+    plot_tests(
+        easy_gender_tests,
+        cde_dirs2,
+        "easy gender 2D",
+        alpha=0.3,
+        color="green",
+        linestyle="dashed",
+    )
+    plot_tests(
+        hard_gender_tests,
+        cde_dirs2,
+        "hard gender 2D",
+        alpha=0.3,
+        color="red",
+        linestyle="dashed",
+    )
+    plot_tests(
+        french_gender_tests,
+        cde_dirs2,
+        "French gender 2D",
+        alpha=0.3,
+        color="blue",
+        linestyle="dashed",
+    )
+    plot_tests(
+        politics_tests,
+        cde_dirs2,
+        "politics 2D",
+        color="purple",
+        linestyle="dashed",
+    )
+    plot_tests(
+        facts_tests,
+        cde_dirs2,
+        "facts 2D",
+        alpha=0.3,
+        color="orange",
+        linestyle="dashed",
+    )
+
+    plt.xlabel("Layer")
+    plt.ylabel("Success rate")
+    plt.ylim(-0.1, 1.1)
+    plt.axhline(0, color="black", linestyle="--")
+    plt.axhline(1, color="black", linestyle="--")
+    plt.title("CDE performance with 2 politics direction")
+    plt.legend()
+    plt.savefig(f"{figure_folder}/2d_politics_cde.png", bbox_inches="tight")
 # %%
 # 2D activations
 layer_nb = 7 if model_name == "EleutherAI/gpt-j-6B" else 23
@@ -654,20 +728,20 @@ if dirs_dict:
         torch.cat(activations_Y_p).cpu(),
         color="blue",
         alpha=0.1,
-        label = "female"
+        label="female",
     )
     plt.scatter(
         torch.cat(activations_X_n).cpu(),
         torch.cat(activations_Y_n).cpu(),
         color="red",
         alpha=0.1,
-        label = "male"
+        label="male",
     )
 
     plt.legend()
     plt.xlabel("Activation in dim 1")
     plt.ylabel("Activation in dim 2")
-    plt.savefig(f"{figure_folder}/gender_activations_2D.png", bbox_inches='tight')
+    plt.savefig(f"{figure_folder}/gender_activations_2D.png", bbox_inches="tight")
 # %%
 # 2D activations
 layer_nb = 7 if model_name == "EleutherAI/gpt-j-6B" else 23
@@ -710,15 +784,17 @@ if dirs_dict:
         color="red",
         alpha=0.02,
     )
-    
+
     # For legends
     plt.scatter(
-        [],[],
+        [],
+        [],
         color="blue",
         label="true",
     )
     plt.scatter(
-        [],[],
+        [],
+        [],
         color="red",
         label="false",
     )
@@ -726,6 +802,6 @@ if dirs_dict:
     plt.legend()
     plt.xlabel("Activation in dim 1")
     plt.ylabel("Activation in dim 2")
-    plt.savefig(f"{figure_folder}/facts_activations_2D.png", bbox_inches='tight')
+    plt.savefig(f"{figure_folder}/facts_activations_2D.png", bbox_inches="tight")
 
 # %%
