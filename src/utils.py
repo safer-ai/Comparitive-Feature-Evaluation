@@ -309,9 +309,28 @@ def get_confusion_ratio(all_log_probs: torch.Tensor) -> torch.Tensor:
             )
     return s / 4
 
+def get_bi_confusion_ratio(all_log_probs: torch.Tensor) -> torch.Tensor:
+    """Return the loss in two category: those aimed at positive seq and those aimed at negative seq."""
+    
+    # all_log_probs[which_sequece][is_distracted][is_wrong]
+
+    def compute(seq, is_correct):
+        starting_lp = all_log_probs[seq, 0, is_correct]
+        worse_case_lp = all_log_probs[1 - seq, 0, 1 - is_correct]
+        res_lp = all_log_probs[seq, 1, is_correct]
+        return torch.clip(
+            (starting_lp - res_lp) / (starting_lp - worse_case_lp), 0, 1
+        ) 
+    
+    s = torch.tensor([
+        compute(seq, 0) + compute(seq, 1) for seq in range(2)
+    ])
+    
+    return s / 2
+
 
 def measure_confusions_ratio_grad(
-    test, model: FrankenSteinModel, use_log_probs: bool = True
+    test, model: FrankenSteinModel, use_log_probs: bool = True, use_bi: bool = False
 ):
     outs_mixed_raw = compute_tests_results(test, model)
 
@@ -338,10 +357,9 @@ def measure_confusions_ratio_grad(
             all_log_probs[i, j, 1] = outs_mixed[i][j][wrongs].sum()
     # print(all_log_probs)
 
-    if use_log_probs:
-        return get_confusion_ratio(all_log_probs)
-    else:
-        return get_confusion_ratio(torch.exp(all_log_probs))
+    p = all_log_probs if use_log_probs else torch.exp(all_log_probs)
+    
+    return get_bi_confusion_ratio(p) if use_bi else get_confusion_ratio(p)
 
 
 def measure_confusions_ratio(
@@ -349,6 +367,11 @@ def measure_confusions_ratio(
 ):
     with torch.no_grad():
         return measure_confusions_ratio_grad(test, model, use_log_probs).item()
+
+
+def measure_bi_confusion_ratio(test, model: FrankenSteinModel, use_log_probs: bool = True):
+    with torch.no_grad():
+        return measure_confusions_ratio_grad(test, model, use_log_probs, use_bi = True)
 
 
 ProjectionFunc = Callable[

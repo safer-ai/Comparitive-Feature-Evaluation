@@ -1,4 +1,4 @@
-# #%%
+#%%
 # %load_ext autoreload
 # %autoreload 2
 
@@ -29,6 +29,7 @@ from src.utils import (
     gen_and_print,
     get_activations,
     measure_ablation_success,
+    measure_bi_confusion_ratio,
     project,
     project_cone,
     recover_model_inplace,
@@ -113,6 +114,41 @@ def plot_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
         dirs_dict.keys(), means, yerr=stds, capsize=3, label=label, **plot_kwargs
     )
 
+def plot_bi_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
+    means_p = []
+    stds_p = []
+    means_n = []
+    stds_n = []
+
+    for l, dirs in tqdm(dirs_dict.items()):
+        layer = model.get_submodule(f"transformer.h.{l}")
+        confusions = torch.stack(
+            [
+                measure_bi_confusion_ratio(
+                    t,
+                    create_frankenstein(
+                        dirs,
+                        model,
+                        layer,
+                    ),
+                    use_log_probs=False,
+                )
+                for t in tests
+            ]
+        )
+        success_rate = 1 - confusions
+        success_rate_p = success_rate[:, 0]
+        success_rate_n = success_rate[:, 1]
+        means_p.append(torch.mean(success_rate_p).item())
+        stds_p.append(torch.std(success_rate_p).item() / np.sqrt(len(success_rate_p)))
+        means_n.append(torch.mean(success_rate_n).item())
+        stds_n.append(torch.std(success_rate_n).item() / np.sqrt(len(success_rate_n)))
+    plt.errorbar(
+        dirs_dict.keys(), means_p, yerr=stds_p, capsize=3, label=label+" positive", marker="o", **plot_kwargs
+    )
+    plt.errorbar(
+        dirs_dict.keys(), means_n, yerr=stds_n, capsize=3, label=label+" negative", marker="x", **plot_kwargs
+    )
 
 #%%
 from matplotlib import rcParams
@@ -804,4 +840,23 @@ if dirs_dict:
     plt.ylabel("Activation in dim 2")
     plt.savefig(f"{figure_folder}/facts_activations_2D.png", bbox_inches="tight")
 
+# %%
+
+cde_dirs = load_dirs("n1-dfacts")
+
+if cde_dirs:
+    plot_bi_tests(easy_gender_tests, cde_dirs, "easy gender", alpha=0.3, color="green")
+    plot_bi_tests(hard_gender_tests, cde_dirs, "hard gender", alpha=0.3, color="red")
+    plot_bi_tests(french_gender_tests, cde_dirs, "French gender", alpha=0.3, color="blue")
+    plot_bi_tests(politics_tests, cde_dirs, "politics", alpha=0.3, color="purple")
+    plot_bi_tests(facts_tests, cde_dirs, "facts", color="orange")
+
+    plt.xlabel("Layer")
+    plt.ylabel("Success rate")
+    plt.ylim(-0.1, 1.1)
+    plt.axhline(0, color="black", linestyle="--")
+    plt.axhline(1, color="black", linestyle="--")
+    plt.title("CDE performance with facts direction")
+    plt.legend()
+    plt.savefig(f"{figure_folder}/bi_facts_cde.png", bbox_inches="tight")
 # %%
