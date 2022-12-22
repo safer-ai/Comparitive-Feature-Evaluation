@@ -20,7 +20,7 @@ def run(
     n_dirs: int = 1,
     use_cone: bool = False,
     data: str = "gender",
-    method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad"] = "sgd",
+    method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe"] = "sgd",
 ):
     print(model_name, layer_nbs, n_dirs, data, use_cone, method)
 
@@ -74,9 +74,9 @@ if __name__ == "__main__":
 
 # python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --data gender; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --data facts
 
-# python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method she-he; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method she-he-grad; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method inlp; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method rlace;
+# python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method she-he; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method she-he-grad; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method inlp; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method rlace; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 1 --model_name EleutherAI/gpt-j-6B --method dropout-probe;
 
-# python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method she-he; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method she-he-grad; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method inlp; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method rlace;
+# python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method she-he; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method she-he-grad; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method inlp; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method rlace; python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --method dropout-probe;
 
 # python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --data facts
 

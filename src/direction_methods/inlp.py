@@ -1,6 +1,7 @@
 from src.utils import ActivationsDataset
 from tqdm import tqdm  # type: ignore
 import torch
+from torch import nn
 from src.constants import device
 from src.utils import project
 
@@ -11,6 +12,7 @@ def inlp(
     n_training_iters: int = 400,
     weight_decay: float = 1e-4,
     learning_rate: float = 1e-4,
+    dropout: float = 0.0,
 ) -> torch.Tensor:
     """Compute directions using INLP.
 
@@ -23,7 +25,14 @@ def inlp(
     dirs: list[torch.Tensor] = []
 
     for i in tqdm(range(n_dim)):
-        model = torch.nn.Linear(tot_n_dims, 1).to(device)
+        model = (
+            nn.Linear(tot_n_dims, 1)
+            if dropout == 0.0
+            else nn.Sequential(
+                nn.Dropout(dropout),
+                nn.Linear(tot_n_dims, 1),
+            )
+        ).to(device)
 
         optimizer = torch.optim.Adam(
             model.parameters(), lr=learning_rate, weight_decay=weight_decay
@@ -31,7 +40,7 @@ def inlp(
         dataloader = torch.utils.data.DataLoader(
             working_ds, batch_size=256, shuffle=True
         )
-        loss_fn = torch.nn.BCEWithLogitsLoss()
+        loss_fn = nn.BCEWithLogitsLoss()
 
         for _ in range(n_training_iters):
             for x, y in dataloader:
@@ -41,7 +50,7 @@ def inlp(
                 loss_val.backward()
                 optimizer.step()
 
-        dir = model.weight.detach()[0]
+        dir = model.weight.detach()[0] if dropout == 0.0 else model[1].weight.detach()[0]
 
         if dirs:
             dir = project(dir, torch.stack(dirs))
