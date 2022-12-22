@@ -1,3 +1,5 @@
+# Move this to the main folder before running
+
 #%%
 from pathlib import Path
 import pandas as pd

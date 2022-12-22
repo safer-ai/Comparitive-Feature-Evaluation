@@ -1,9 +1,12 @@
+# Move this to the main folder before running
+
 #%%
-# THIS WAS RUN ON THE REDWOOD CODE BASE
+# The four lines below require Redwood's codebase to work
 # from interp.tools.data_loading import get_val_seqs
 # from interp.tools.interpretability_tools import toks_to_string_list
 # v = get_val_seqs(n_files=1)
 # s = toks_to_string_list(v[:, 1:]) # Exclude begin token
+
 s: list[str] = []
 
 from tqdm import tqdm  # type: ignore
