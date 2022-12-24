@@ -15,6 +15,14 @@ from src.direction_methods.pairs_generation import Test
 from src.direction_methods.singles_generations import SingleTest
 
 
+SimpleModel = Callable[
+    [BatchEncoding], torch.Tensor
+]  # takes one input and returns the logits
+
+
+# The first input is the correct one, but the activation of the second one is the distraction.
+FrankenSteinModel = Callable[[BatchEncoding, BatchEncoding], torch.Tensor]
+
 @define
 class ActivationsDataset(torch.utils.data.Dataset):
     """Dataset of activations with utilities to compute activations and project them."""
@@ -229,9 +237,6 @@ def run_and_modify(tokens, model, modification_fns):
             handle.remove()
 
 
-# The first input is the correct one, but the activation of the second one is the distraction.
-FrankenSteinModel = Callable[[BatchEncoding, BatchEncoding], torch.Tensor]
-
 
 def compute_tests_results(test, model: FrankenSteinModel) -> torch.Tensor:
     """Return a line of results:
@@ -373,6 +378,19 @@ def measure_bi_confusion_ratio(test, model: FrankenSteinModel, use_log_probs: bo
     with torch.no_grad():
         return measure_confusions_ratio_grad(test, model, use_log_probs, use_bi = True)
 
+def measure_top1_success(test: Pair, model: SimpleModel, adverserial: bool = False) -> float:
+    # Mostly makes sens on datasets like imdb_0_shot or imdb_1_shot
+    good_answers = [tokenizer.encode(a)[0] for a in test.positive.answers]
+    bad_answers = [tokenizer.encode(a)[0] for a in test.negative.answers]
+    
+    with torch.no_grad():
+        p = test.negative.prompt if adverserial else test.positive.prompt
+        inpt = tokenizer(p, return_tensors="pt").to(device)
+        r = model(inpt)[0, -1]
+        r_correct = r[good_answers].sum()
+        r_incorrect = r[bad_answers].sum()
+        return 1. if (r_correct > r_incorrect) ^ adverserial else 0.
+
 
 ProjectionFunc = Callable[
     [torch.Tensor, torch.Tensor], torch.Tensor
@@ -424,10 +442,6 @@ def zero_out(x_along_dirs, dirs):
     return 0
 
 
-HandicapedModel = Callable[
-    [BatchEncoding], torch.Tensor
-]  # takes one input and returns the logits
-
 
 def create_handicaped(
     dirs,
@@ -456,7 +470,7 @@ def create_handicaped(
     return handicaped
 
 
-def measure_ablation_success(test: Pair, model, handicaped_model: HandicapedModel):
+def measure_ablation_success(test: Pair, model, handicaped_model: SimpleModel):
     inpt = tokenizer(
         [test.positive.prompt, test.negative.prompt], return_tensors="pt"
     ).to(device)
