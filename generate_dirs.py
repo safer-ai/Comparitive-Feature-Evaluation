@@ -1,12 +1,12 @@
 from functools import partial
-from typing import Literal
+from typing import Literal, Optional
 import torch
 from transformers import AutoModelForCausalLM
 from src.data_generation import PairGeneratorDataset
 
 from src.constants import device
 from src.dir_finder import DirFinder
-from src.utils import project_cone, project
+from src.utils import project_cone, project, get_embed_dim, get_layer, get_number_of_layers
 from math import pi
 
 import fire  # type: ignore
@@ -16,7 +16,7 @@ import json
 
 def run(
     model_name: str = "gpt2-xl",
-    layer_nbs: tuple[int, ...] = (0,),
+    layer_nbs: Optional[tuple[int, ...]] = None,
     n_dirs: int = 1,
     use_cone: bool = False,
     data: str = "gender",
@@ -35,15 +35,17 @@ def run(
     model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     for param in model.parameters():
         param.requires_grad = False
-    h_size: int = model.lm_head.weight.shape[1]  # type: ignore
+    h_size: int = get_embed_dim(model)
+    
+    number_of_layers = get_number_of_layers(model)
+    layer_nbs = layer_nbs or [0, number_of_layers * 1 // 4 - 1, number_of_layers * 2 // 4 - 1, number_of_layers * 3 // 4 - 1, number_of_layers - 1]
 
     pair_generator = PairGeneratorDataset.from_dict(
         json.load(Path(f"./data/{data}/train.json").open("r"))
     )
 
     for layer_nb in layer_nbs:
-        module_name = f"transformer.h.{layer_nb}"
-        layer = model.get_submodule(module_name)
+        layer = get_layer(model, layer_nb)
 
         dirs = DirFinder(
             model,
@@ -81,3 +83,6 @@ if __name__ == "__main__":
 # python generate_dirs.py --layer_nbs 0,12,23,35,47, --n_dirs 1 --model_name gpt2-xl --data facts
 
 # python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 2 --model_name EleutherAI/gpt-j-6B --data gender; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 2 --model_name EleutherAI/gpt-j-6B --data facts; python generate_dirs.py --layer_nbs 0,7,13,20,27, --n_dirs 2 --model_name EleutherAI/gpt-j-6B --data politics
+
+# gender on pythia
+# python generate_dirs.py --model_name EleutherAI/pythia-19m; python generate_dirs.py --model_name EleutherAI/pythia-125m; python generate_dirs.py --model_name EleutherAI/pythia-350m; python generate_dirs.py --model_name EleutherAI/pythia-800m; python generate_dirs.py --model_name EleutherAI/pythia-1.3b; python generate_dirs.py --model_name EleutherAI/pythia-2.7b; python generate_dirs.py --model_name EleutherAI/pythia-6.7b; python generate_dirs.py --model_name EleutherAI/pythia-13b; 

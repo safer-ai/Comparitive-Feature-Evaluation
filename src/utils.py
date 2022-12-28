@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import transformers
 from attrs import define
-from transformers import BatchEncoding
+from transformers import BatchEncoding, GPT2Model, GPTJForCausalLM, GPTNeoXForCausalLM
 
 from src.constants import device, tokenizer
 from src.data_generation import Pair
@@ -568,6 +568,29 @@ def normalize(x: torch.Tensor) -> torch.Tensor:
 
 
 def get_unembed(model, word: str) -> torch.Tensor:
-    unembed = model.lm_head
     inp = tokenizer(word, return_tensors="pt").input_ids[0, 0].item()
-    return unembed.weight[inp][None, :].detach()
+    return get_unembed_matrix(model)[inp][None, :].detach()
+
+def get_unembed_matrix(model) -> torch.Tensor:
+    if isinstance(model, GPTJForCausalLM) or isinstance(model, GPT2Model):
+        return model.lm_head.weight
+    if isinstance(model, GPTNeoXForCausalLM):
+        return model.embed_out.weight
+    raise NotImplementedError
+
+def get_layer(model, layer: int) -> torch.nn.Module:
+    if isinstance(model, GPTJForCausalLM) or isinstance(model, GPT2Model):
+        return model.transformer.h[layer]
+    if isinstance(model, GPTNeoXForCausalLM):
+        return model.gpt_neox.layers[layer]
+    raise NotImplementedError
+
+def get_number_of_layers(model) -> int:
+    if isinstance(model, GPTJForCausalLM) or isinstance(model, GPT2Model):
+        return len(model.transformer.h)
+    if isinstance(model, GPTNeoXForCausalLM):
+        return len(model.gpt_neox.layers)
+    raise NotImplementedError
+
+def get_embed_dim(model) -> int:
+    return get_unembed_matrix(model).shape[1]
