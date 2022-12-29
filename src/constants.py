@@ -6,12 +6,25 @@ device = "cuda:0" if torch.cuda.is_available() else "cpu"
 gpt2_tokenizer: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained("gpt2")
 gptneox_tokenizer: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
 all_tokenizers = [gpt2_tokenizer, gptneox_tokenizer]
-tokenizer = gpt2_tokenizer
+_tokenizer = gpt2_tokenizer
 
+# this behaves like an attribute of the module
+class _Tokenizer:
+    def __call__(self, *args, **kwargs):
+        return _tokenizer(*args, **kwargs)
+    def encode(self, *args, **kwargs):
+        return _tokenizer.encode(*args, **kwargs)
+    def decode(self, *args, **kwargs):
+        return _tokenizer.decode(*args, **kwargs)
+    def __str__(self):
+        return str(_tokenizer)
+    def __repr__(self) -> str:
+        return repr(_tokenizer)
+tokenizer: AutoTokenizer = _Tokenizer() # type: ignore
 
 def get_tokenizer(model):
     if isinstance(model, GPTJForCausalLM) or isinstance(model, GPT2LMHeadModel):
         return gpt2_tokenizer
     if isinstance(model, GPTNeoXForCausalLM):
-        return len(model.gpt_neox.layers)
+        return gptneox_tokenizer
     raise NotImplementedError(f"Model of type {type(model)} not supported yet")

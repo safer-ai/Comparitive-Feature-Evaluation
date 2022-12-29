@@ -1,12 +1,19 @@
+import json
 from functools import partial
-from typing import Literal, Optional
-import torch
-from transformers import AutoModelForCausalLM
 from math import pi
+from pathlib import Path
+from typing import Literal, Optional
 
 import fire  # type: ignore
-from pathlib import Path
-import json
+import torch
+from transformers import AutoModelForCausalLM
+
+import src.constants
+from src.constants import device
+from src.data_generation import PairGeneratorDataset
+from src.dir_finder import DirFinder
+from src.utils import (get_embed_dim, get_layer, get_number_of_layers, project,
+                       project_cone)
 
 
 def run(
@@ -21,13 +28,7 @@ def run(
     for param in model.parameters():
         param.requires_grad = False
     
-    import src.constants
-    src.constants.tokenizer = src.constants.get_tokenizer(model)
-    
-    from src.data_generation import PairGeneratorDataset
-    from src.constants import device
-    from src.dir_finder import DirFinder
-    from src.utils import project_cone, project, get_embed_dim, get_layer, get_number_of_layers
+    src.constants._tokenizer = src.constants.get_tokenizer(model)
     
     print(model_name, layer_nbs, n_dirs, data, use_cone, method)
 

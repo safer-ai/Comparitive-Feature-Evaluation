@@ -12,8 +12,8 @@ import torch
 from attrs import define
 from transformers import AutoModelForCausalLM
 import src.constants
-from src.constants import device, gpt2_tokenizer as tokenizer
-src.constants.tokenizer = tokenizer
+from src.constants import device, gpt2_tokenizer, tokenizer
+src.constants._tokenizer = gpt2_tokenizer
 from src.direction_methods.pairs_generation import (
     get_train_tests,
     get_val_controls,
