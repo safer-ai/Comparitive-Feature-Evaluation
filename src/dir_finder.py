@@ -184,6 +184,7 @@ class DirFinder:
     def find_dirs_using_mean_diff(self) -> torch.Tensor:
         act_ds = self._get_train_ds()
         mean_diff = torch.mean(act_ds.x_data[act_ds.y_data == 0], dim=0, keepdim=True) - torch.mean(act_ds.x_data[act_ds.y_data == 1], dim=0, keepdim=True)
+        print("found mean diff of norm", mean_diff[0].norm().item())
         return normalize(mean_diff).to(self.device)
 
     def _get_train_ds(self) -> ActivationsDataset:

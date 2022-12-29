@@ -39,6 +39,7 @@ from src.utils import (
     measure_confusions_grad,
     measure_kl_confusions_grad,
     measure_confusions_ratio,
+    get_layer,
 )
 from collections import defaultdict
 from pathlib import Path
@@ -51,7 +52,8 @@ from tqdm import tqdm  # type: ignore
 
 #%%
 # model_name = "gpt2-xl"
-model_name = "EleutherAI/gpt-j-6B"
+# model_name = "EleutherAI/gpt-j-6B"
+model_name = "EleutherAI/pythia-800m"
 #%%
 model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 for param in model.parameters():
@@ -106,7 +108,7 @@ def plot_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
     stds = []
 
     for l, dirs in tqdm(dirs_dict.items()):
-        layer = model.get_submodule(f"transformer.h.{l}")
+        layer = get_layer(model,l)
         success_rate = 1 - evolve(evaluator, layer=layer, dirs=dirs).evaluate()
         means.append(torch.mean(success_rate).item())
         stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
@@ -163,6 +165,8 @@ plot_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
 plot_tests(
     easy_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he"
 )
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "dropout-probe"), "dropout-probe")
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "mean-diff"), "mean-diff")
 
 plt.xlabel("Layer")
 plt.ylabel("Success rate")
@@ -179,6 +183,8 @@ plot_tests(hard_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
 plot_tests(
     hard_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he"
 )
+plot_tests(hard_gender_tests, load_dirs("n1-dgender", "dropout-probe"), "dropout-probe")
+plot_tests(hard_gender_tests, load_dirs("n1-dgender", "mean-diff"), "mean-diff")
 
 plt.xlabel("Layer")
 plt.ylabel("Success rate")
@@ -195,6 +201,8 @@ plot_tests(french_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
 plot_tests(
     french_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he"
 )
+plot_tests(french_gender_tests, load_dirs("n1-dgender", "dropout-probe"), "dropout-probe")
+plot_tests(french_gender_tests, load_dirs("n1-dgender", "mean-diff"), "mean-diff")
 
 plt.xlabel("Layer")
 plt.ylabel("Success rate")
@@ -360,6 +368,8 @@ plot_ablation_tests(
     "opt for she vs he",
     alpha=0.3,
 )
+plot_ablation_tests(easy_gender_tests, load_dirs("n1-dgender", "dropout-probe"), "dropout-probe")
+plot_ablation_tests(easy_gender_tests, load_dirs("n1-dgender", "mean-diff"), "mean-diff")
 
 plt.xlabel("Layer")
 plt.ylabel("Success rate")
@@ -369,6 +379,7 @@ plt.axhline(1, color="black", linestyle="--")
 plt.title("Ablation performance on easy gender tests")
 plt.legend()
 plt.savefig(f"{figure_folder}/easy_ablations.png", bbox_inches="tight")
+
 #%%
 
 cde_dirs = load_dirs("n1-dgender")
