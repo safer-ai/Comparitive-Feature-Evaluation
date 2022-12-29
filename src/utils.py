@@ -9,7 +9,7 @@ import transformers
 from attrs import define
 from transformers import BatchEncoding, GPT2LMHeadModel, GPTJForCausalLM, GPTNeoXForCausalLM
 
-from src.constants import device, tokenizer
+from src.constants import device, gpt2_tokenizer, gptneox_tokenizer, tokenizer
 from src.data_generation import Pair
 from src.direction_methods.pairs_generation import Test
 from src.direction_methods.singles_generations import SingleTest
@@ -586,11 +586,12 @@ def get_layer(model, layer: int) -> torch.nn.Module:
     raise NotImplementedError(f"Model of type {type(model)} not supported yet")
 
 def get_number_of_layers(model) -> int:
-    if isinstance(model, GPTJForCausalLM) or isinstance(model, GPT2LMHeadModel) or isinstance(model, GPT2LMHeadModel):
+    if isinstance(model, GPTJForCausalLM) or isinstance(model, GPT2LMHeadModel):
         return len(model.transformer.h)
     if isinstance(model, GPTNeoXForCausalLM):
         return len(model.gpt_neox.layers)
     raise NotImplementedError(f"Model of type {type(model)} not supported yet")
+
 
 def get_embed_dim(model) -> int:
     return get_unembed_matrix(model).shape[1]

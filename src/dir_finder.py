@@ -8,7 +8,7 @@ from tqdm import tqdm, trange  # type: ignore
 import random
 
 from src.data_generation import Pair
-from src.constants import device as _device
+from src.constants import device as _device, get_tokenizer
 from src.direction_methods.inlp import inlp
 from src.direction_methods.rlace import rlace
 from src.utils import (
@@ -22,7 +22,6 @@ from src.utils import (
     project,
     ProjectionFunc,
 )
-from src.constants import tokenizer
 
 
 @define
@@ -146,6 +145,8 @@ class DirFinder:
 
     def find_dirs_using_she_he_grad(self) -> torch.Tensor:
         grad_point = torch.zeros(1, self.h_size, device=self.device, requires_grad=True)
+        
+        tokenizer = get_tokenizer(self.model)
 
         tokenized = [
             tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(

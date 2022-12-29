@@ -14,7 +14,7 @@ from src.direction_methods.pairs_generation import (
     get_val_tests,
 )
 
-from src.constants import device, tokenizer
+from src.constants import device, gpt2_tokenizer as tokenizer
 #%%
 # model_name = "gpt2-xl"
 model_name = "EleutherAI/gpt-j-6B"

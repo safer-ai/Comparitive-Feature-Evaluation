@@ -2,29 +2,29 @@
   "version": "1",
   "generators": [
     {
-      "pattern": "If you're {thirsty},{ just}",
-      "positive_replacements": {
-        "thirsty": ["thirsty"]
-      },
-      "negative_replacements": {
-        "thirsty": ["hungry"]
-      },
-      "neutral_replacements": {
-        " just": [" just", ""]
-      },
-      "positive_answers": [" drink"],
-      "negative_answers": [" eat"]
-    },
-    {
       "pattern": " {Apples} are",
       "positive_replacements": {
-        "Apples": ["Apples", "Bananas", "Strawberries"]
+        "Apples": ["Apples", "Bananas"]
       },
       "negative_replacements": {
         "Apples": ["Broccoli", "Peppers"]
       },
       "positive_answers": [" fruits"],
       "negative_answers": [" vegetables"]
+    },
+    {
+      "pattern": "If you want {water},{ just}",
+      "positive_replacements": {
+        "water": ["water"]
+      },
+      "negative_replacements": {
+        "water": ["apples"]
+      },
+      "neutral_replacements": {
+        " just": [" just", ""]
+      },
+      "positive_answers": [" drink"],
+      "negative_answers": [" eat"]
     }
   ]
 }

@@ -54,13 +54,13 @@
       "negative_answers": [" cops"]
     },
     {
-      "pattern": "A state which is {republican} is said to be",
+      "pattern": "A state which is {Republican} is said to be",
       "tag": "X->Y",
       "positive_replacements": {
-        "republican": ["republican"]
+        "Republican": ["Republican"]
       },
       "negative_replacements": {
-        "republican": ["democrat"]
+        "Republican": ["Democrat"]
       },
       "positive_answers": [" red"],
       "negative_answers": [" blue"]

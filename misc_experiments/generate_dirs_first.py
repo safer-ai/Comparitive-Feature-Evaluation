@@ -2,7 +2,7 @@ import torch
 from transformers import GPT2LMHeadModel
 from src.direction_methods.pairs_generation import get_train_tests
 
-from src.constants import device, tokenizer
+from src.constants import device, gpt2_tokenizer as tokenizer
 from src.direction_methods.inlp import inlp
 from src.direction_methods.rlace import rlace
 from src.direction_methods.direction_methods import (

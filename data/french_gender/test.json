@@ -82,18 +82,6 @@
       "negative_answers": ["il"]
     },
     {
-      "pattern": "La personne qui s'est occupée des {enfants} a fait un super travail.",
-      "tag": "Y->X",
-      "positive_replacements": {
-        "enfants": ["enfants"]
-      },
-      "negative_replacements": {
-        "enfants": ["engrenages"]
-      },
-      "positive_answers": [" elle"],
-      "negative_answers": [" il"]
-    },
-    {
       "pattern": "Camille adore {cuisiner}, mais",
       "tag": "Y->X",
       "positive_replacements": {

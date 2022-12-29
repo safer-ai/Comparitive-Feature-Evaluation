@@ -51,17 +51,7 @@
     {
       "pattern": "Does {Sarah} {like riding motocross}?",
       "positive_replacements": {
-        "Sarah": [
-          "Sarah",
-          "Eva",
-          "Jessica",
-          "Amy",
-          "Kate",
-          "Lisa",
-          "April",
-          "Anna",
-          "Laura"
-        ]
+        "Sarah": ["Sarah", "Kate", "April", "Anna"]
       },
       "negative_replacements": {
         "Sarah": [
@@ -88,17 +78,7 @@
     {
       "pattern": "{Sarah} {likes using the money of others}.",
       "positive_replacements": {
-        "Sarah": [
-          "Sarah",
-          "Eva",
-          "Jessica",
-          "Amy",
-          "Kate",
-          "Lisa",
-          "April",
-          "Anna",
-          "Laura"
-        ]
+        "Sarah": ["Sarah", "Kate", "April", "Anna"]
       },
       "negative_replacements": {
         "Sarah": [

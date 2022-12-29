@@ -11,13 +11,14 @@ import numpy as np
 import torch
 from attrs import define
 from transformers import AutoModelForCausalLM
+import src.constants
+from src.constants import device, gpt2_tokenizer as tokenizer
+src.constants.tokenizer = tokenizer
 from src.direction_methods.pairs_generation import (
     get_train_tests,
     get_val_controls,
     get_val_tests,
 )
-
-from src.constants import device, tokenizer
 from src.direction_methods.inlp import inlp
 from src.direction_methods.rlace import rlace
 from src.utils import (
@@ -51,9 +52,8 @@ from attrs import evolve
 from tqdm import tqdm  # type: ignore
 
 #%%
-# model_name = "gpt2-xl"
+model_name = "gpt2-xl"
 # model_name = "EleutherAI/gpt-j-6B"
-model_name = "EleutherAI/pythia-800m"
 #%%
 model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 for param in model.parameters():

@@ -2,11 +2,6 @@ from functools import partial
 from typing import Literal, Optional
 import torch
 from transformers import AutoModelForCausalLM
-from src.data_generation import PairGeneratorDataset
-
-from src.constants import device
-from src.dir_finder import DirFinder
-from src.utils import project_cone, project, get_embed_dim, get_layer, get_number_of_layers
 from math import pi
 
 import fire  # type: ignore
@@ -22,6 +17,18 @@ def run(
     data: str = "gender",
     method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff"] = "sgd",
 ):
+    model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
+    for param in model.parameters():
+        param.requires_grad = False
+    
+    import src.constants
+    src.constants.tokenizer = src.constants.get_tokenizer(model)
+    
+    from src.data_generation import PairGeneratorDataset
+    from src.constants import device
+    from src.dir_finder import DirFinder
+    from src.utils import project_cone, project, get_embed_dim, get_layer, get_number_of_layers
+    
     print(model_name, layer_nbs, n_dirs, data, use_cone, method)
 
     projection_fn = (
@@ -32,9 +39,6 @@ def run(
     cone_suffix = "-cone" if use_cone else ""
     method_suffix = f"-{method}" if method != "sgd" else ""
 
-    model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
-    for param in model.parameters():
-        param.requires_grad = False
     h_size: int = get_embed_dim(model)
     
     number_of_layers = get_number_of_layers(model)

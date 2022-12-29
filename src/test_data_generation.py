@@ -1,5 +1,5 @@
 from src.data_generation import PairGeneratorDataset, PairGenerator, Pair, Question
-from src.constants import tokenizer
+from src.constants import all_tokenizers
 from pathlib import Path
 import json
 
@@ -91,24 +91,26 @@ def test_french_gender_dataset_sound():
 
 
 def check_dataset_sound(dataset: PairGeneratorDataset):
-    for pair_gen in dataset.generators:
-        answers = pair_gen.positive_answers + pair_gen.negative_answers
-        if answers:
-            lengths = [(len(t), t) for t in tokenizer(answers)]
-            assert all(l for l, t in lengths), lengths
+    for tokenizer in all_tokenizers:
+        for pair_gen in dataset.generators:
+            answers = pair_gen.positive_answers + pair_gen.negative_answers
+            if answers:
+                lengths = [(len(t), t) for t in tokenizer(answers)]
+                assert all(l for l, t in lengths), lengths
 
 
 def check_generations_line_up(dataset: PairGeneratorDataset, attempts: int = 100):
-    for pair in dataset.take(attempts):
-        lp, ln = map(
-            len, tokenizer([pair.positive.prompt, pair.negative.prompt]).input_ids
-        )
-        assert (
-            lp == ln
-        ), f"{lp}, {ln}, {repr_tokenized(pair.positive.prompt)}\nvs\n{repr_tokenized(pair.negative.prompt)}"
+    for tokenizer in all_tokenizers:
+        for pair in dataset.take(attempts):
+            lp, ln = map(
+                len, tokenizer([pair.positive.prompt, pair.negative.prompt]).input_ids
+            )
+            assert (
+                lp == ln
+            ), f"{lp}, {ln}, {repr_tokenized(pair.positive.prompt, tokenizer)}\nvs\n{repr_tokenized(pair.negative.prompt, tokenizer)}"
 
 
-def repr_tokenized(s: str):
+def repr_tokenized(s: str, tokenizer):
     """Return the string where each token has been separated by a vertical bar."""
     tokens = tokenizer(s).input_ids
     return "|".join(tokenizer.decode(t) for t in tokens)

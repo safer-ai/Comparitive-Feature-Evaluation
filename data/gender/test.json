@@ -139,10 +139,10 @@
       "pattern": " {Assistants} always wear nice",
       "tag": "Y->Y",
       "positive_replacements": {
-        "Assistants": ["Assistants", "Dancers"]
+        "Assistants": ["Dancers"]
       },
       "negative_replacements": {
-        "Assistants": ["Technicians", "Comedians"]
+        "Assistants": ["Technicians"]
       },
       "positive_answers": [" bras"],
       "negative_answers": [" tanks"]
