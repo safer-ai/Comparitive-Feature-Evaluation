@@ -39,7 +39,7 @@ class DirFinder:
     iterations: int = 10_000
     projection_fn: ProjectionFunc = partial(project, strength=1)
     rolling_window_size: int = 400
-    method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe"] = "sgd"
+    method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff"] = "sgd"
     dataset_size: int = 1000  # only for rlace, inlp, and she-he-grad
 
     def find_dirs(self) -> torch.Tensor:
@@ -56,6 +56,8 @@ class DirFinder:
             return self.find_dirs_using_she_he_grad()
         elif self.method == "dropout-probe":
             return self.find_dirs_using_dropout_probe()
+        elif self.method == "mean-diff":
+            return self.find_dirs_using_mean_diff()
         else:
             raise NotImplementedError(f"Method {self.method} is not implemented")
 
@@ -177,38 +179,12 @@ class DirFinder:
         return normalize(grad_point.grad.detach())
 
     def find_dirs_using_tuned_lens(self) -> torch.Tensor:
-        grad_point = torch.zeros(1, self.h_size, device=self.device, requires_grad=True)
-
-        tokenized = [
-            tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(
-                self.device
-            )
-            for t in islice(self.pairs_generator, self.dataset_size)
-        ]
-
-        she_id, he_id = tokenizer.encode([" she", " he"])
-
-        g = tqdm(tokenized)
-        for t in g:
-            model_with_grad_pt = create_frankenstein(
-                torch.empty((0, self.h_size), device=self.device),
-                self.model,
-                self.layer,
-                grad_point,
-            )  # Just add a point where gradient is measured
-
-            out = torch.log_softmax(model_with_grad_pt(t, t), dim=-1)
-            out_she = out[..., she_id].mean()
-            out_he = out[..., he_id].mean()
-            s = out_she - out_he
-            s.backward()
-
-            g.set_postfix(
-                {
-                    "loss": s.item(),
-                }
-            )
-        return normalize(grad_point.grad.detach())
+        raise NotImplementedError("Tuned lens is not implemented")
+    
+    def find_dirs_using_mean_diff(self) -> torch.Tensor:
+        act_ds = self._get_train_ds()
+        mean_diff = torch.mean(act_ds.x_data[act_ds.y_data == 0], dim=0, keepdim=True) - torch.mean(act_ds.x_data[act_ds.y_data == 1], dim=0, keepdim=True)
+        return normalize(mean_diff).to(self.device)
 
     def _get_train_ds(self) -> ActivationsDataset:
         return get_act_ds(
