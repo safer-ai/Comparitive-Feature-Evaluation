@@ -134,13 +134,17 @@ def plot_tests(tests, dirs_dict, model, label: str = "", **plot_kwargs):
 
 #%%
 from matplotlib import rcParams
+import matplotlib.cm as cm
 
 rcParams["figure.figsize"] = (10, 8)
 
 Path(figure_folder).mkdir(parents=True, exist_ok=True)
+
+model_colors = {model_name: cm.viridis(i / (len(model_names) - 1)) for i, model_name in enumerate(model_names)}
+
 #%%
 for model_name, model in models.items():
-    plot_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he")[model_name], model, model_name)
+    plot_tests(easy_gender_tests, load_dirs("n1-dgender", "")[model_name], model, model_name, c=model_colors[model_name])
 
 plt.xlabel("Layer")
 plt.ylabel("Success rate")
@@ -152,7 +156,7 @@ plt.legend()
 plt.savefig(f"{figure_folder}/easy_cde.png", bbox_inches="tight")
 #%%
 for model_name, model in models.items():
-    plot_tests(hard_gender_tests, load_dirs("n1-dgender", "she-he")[model_name], model, model_name)
+    plot_tests(hard_gender_tests, load_dirs("n1-dgender", "")[model_name], model, model_name, c=model_colors[model_name])
 
 plt.xlabel("Layer")
 plt.ylabel("Success rate")
@@ -164,7 +168,7 @@ plt.legend()
 plt.savefig(f"{figure_folder}/hard_cde.png", bbox_inches="tight")
 #%%
 for model_name, model in models.items():
-    plot_tests(french_gender_tests, load_dirs("n1-dgender", "she-he")[model_name], model, model_name)
+    plot_tests(french_gender_tests, load_dirs("n1-dgender", "")[model_name], model, model_name, c=model_colors[model_name])
 
 plt.xlabel("Layer")
 plt.ylabel("Success rate")
@@ -174,3 +178,57 @@ plt.axhline(1, color="black", linestyle="--")
 plt.title("CDE performance on French gender tests")
 plt.legend()
 plt.savefig(f"{figure_folder}/french_cde.png", bbox_inches="tight")
+#%%
+for model_name, model in models.items():
+    plot_tests(easy_gender_tests, load_dirs("n1-dgender", "mean-diff")[model_name], model, model_name + " mean diff", c=model_colors[model_name])
+    plot_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he")[model_name], model, model_name + " she-he", c=model_colors[model_name], linestyle="--")
+
+plt.xlabel("Layer")
+plt.ylabel("Success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("Baselines performance on easy gender tests")
+plt.legend()
+plt.savefig(f"{figure_folder}/easy_baselines.png", bbox_inches="tight")
+#%%
+for model_name, model in models.items():
+    plot_tests(hard_gender_tests, load_dirs("n1-dgender", "mean-diff")[model_name], model, model_name + " mean diff", c=model_colors[model_name])
+    plot_tests(hard_gender_tests, load_dirs("n1-dgender", "she-he")[model_name], model, model_name + " she-he", c=model_colors[model_name], linestyle="--")
+    
+plt.xlabel("Layer")
+plt.ylabel("Success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("Baselines performance on hard gender tests")
+plt.legend()
+plt.savefig(f"{figure_folder}/hard_baselines.png", bbox_inches="tight")
+#%%
+for model_name, model in models.items():
+    plot_tests(french_gender_tests, load_dirs("n1-dgender", "mean-diff")[model_name], model, model_name + " mean diff", c=model_colors[model_name])
+    plot_tests(french_gender_tests, load_dirs("n1-dgender", "she-he")[model_name], model, model_name + " she-he", c=model_colors[model_name], linestyle="--")
+
+plt.xlabel("Layer")
+plt.ylabel("Success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("Baselines performance on French gender tests")
+plt.legend()
+plt.savefig(f"{figure_folder}/french_baselines.png", bbox_inches="tight")
+
+# %%
+# One subplot per model, each showing an imshow of cosines similarity between the dirs
+fig, ax = plt.subplots(1, len(model_names), figsize=(10, 2))
+
+def cosine_similarity(dirs):
+    return np.array([[(abs(d1[0] @ d2[0]).item()) for d1 in dirs.values()] for d2 in dirs.values()])
+    
+for i, model_name in enumerate(model_names):
+    im = ax[i].imshow(cosine_similarity(load_dirs("n1-dgender", "")[model_name]), vmin=0, vmax=1, cmap="viridis")
+    ax[i].set_title(model_name)
+fig.colorbar(im)
+fig.suptitle("Cosine similarity between CDE directions")
+plt.savefig(f"{figure_folder}/cosine_similarity.png", bbox_inches="tight")
+# %%

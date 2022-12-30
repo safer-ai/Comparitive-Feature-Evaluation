@@ -1,0 +1,1 @@
+{"bias": true, "identity_init": true, "include_input": true, "include_final": false, "orthogonal": false, "rank": null, "sublayers": false, "d_model": 1600, "num_layers": 48, "vocab_size": 50257}
