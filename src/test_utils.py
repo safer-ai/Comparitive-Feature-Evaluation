@@ -40,20 +40,22 @@ def test_get_confusion_ratio():
 
     torch.testing.assert_close(expected, get_confusion_ratio(a))
 
+
 def test_normalize():
     torch.testing.assert_close(normalize(torch.randn(5)).norm(), torch.tensor(1.0))
     torch.testing.assert_close(normalize(torch.randn(5, 3)).norm(dim=-1), torch.ones(5))
-    torch.testing.assert_close(normalize(torch.randn(4, 5, 3)).norm(dim=-1),torch.ones(4,5))
-    
+    torch.testing.assert_close(normalize(torch.randn(4, 5, 3)).norm(dim=-1), torch.ones(4, 5))
+
+
 def test_orthonormalize():
     # Note: in practice, doesn't work well for small vectors
-    
+
     def check(t):
         o = orthonormalize(t)
         s = torch.einsum("ik,jk->ij", o, o)
         print(s)
         torch.testing.assert_close(s, torch.eye(s.shape[0]))
-    
+
     check(torch.randn(5, 60))
     check(torch.randn(1, 30))
     check(torch.randn(5, 40))

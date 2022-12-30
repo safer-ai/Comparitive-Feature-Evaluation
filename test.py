@@ -15,6 +15,7 @@ from src.direction_methods.pairs_generation import (
 )
 
 from src.constants import device, gpt2_tokenizer as tokenizer
+
 #%%
 # model_name = "gpt2-xl"
 model_name = "EleutherAI/gpt-j-6B"
@@ -42,7 +43,7 @@ print(r10)
 
 if __name__ == "__main__":
     pass
-    
+
     # g = PairGeneratorDataset.from_dict(json.load(open("data/politics/train.json")))
     # for p in g.take(10):
     #     print(p)

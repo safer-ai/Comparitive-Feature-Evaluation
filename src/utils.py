@@ -17,13 +17,12 @@ from datasets import load_dataset
 import json
 from pathlib import Path
 
-SimpleModel = Callable[
-    [BatchEncoding], torch.Tensor
-]  # takes one input and returns the logits
+SimpleModel = Callable[[BatchEncoding], torch.Tensor]  # takes one input and returns the logits
 
 
 # The first input is the correct one, but the activation of the second one is the distraction.
 FrankenSteinModel = Callable[[BatchEncoding, BatchEncoding], torch.Tensor]
+
 
 @define
 class ActivationsDataset(torch.utils.data.Dataset):
@@ -177,13 +176,9 @@ def gen(model, prompt: str, seed: int = 0):
     transformers.set_seed(seed)
     torch.manual_seed(seed)
     inp = tokenizer(prompt, return_tensors="pt").to(device)
-    out = model.generate(
-        **inp,
-        top_k=40,
-        max_new_tokens=32,
-        do_sample=True,
-        pad_token_id=tokenizer.eos_token_id
-    )[:, inp.input_ids.shape[1] :]
+    out = model.generate(**inp, top_k=40, max_new_tokens=32, do_sample=True, pad_token_id=tokenizer.eos_token_id)[
+        :, inp.input_ids.shape[1] :
+    ]
     return tokenizer.batch_decode(out, skip_special_tokens=True)[0]
 
 
@@ -239,7 +234,6 @@ def run_and_modify(tokens, model, modification_fns):
             handle.remove()
 
 
-
 def compute_tests_results(test, model: FrankenSteinModel) -> torch.Tensor:
     """Return a line of results:
 
@@ -270,16 +264,11 @@ def measure_confusions_grad(test: Union[Test, Pair], model: FrankenSteinModel):
     res = torch.empty(2, 2, device=device)
     for i, q1 in enumerate([test.positive, test.negative]):
         corrects = [tokenizer.encode(a)[0] for a in q1.answers]
-        wrongs = [
-            tokenizer.encode(a)[0]
-            for a in [test.positive, test.negative][1 - i].answers
-        ]
+        wrongs = [tokenizer.encode(a)[0] for a in [test.positive, test.negative][1 - i].answers]
         for j, q2 in enumerate([test.positive, test.negative]):
             out_mixed = outs_mixed[i][j]
             res[i, j] = out_mixed[corrects].sum() - out_mixed[wrongs].sum()
-    return abs(res[0, 0] - res[0, 1]) + abs(
-        res[1, 1] - res[1, 0]
-    )  # Err on first + Err on second
+    return abs(res[0, 0] - res[0, 1]) + abs(res[1, 1] - res[1, 0])  # Err on first + Err on second
 
 
 def measure_confusions(test, model: FrankenSteinModel):
@@ -292,9 +281,7 @@ def measure_kl_confusions_grad(test, model: FrankenSteinModel):
 
     return torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
         outs_mixed_raw[[0, 3]], outs_mixed_raw[[1, 2]]
-    ) + torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
-        outs_mixed_raw[[1, 2]], outs_mixed_raw[[0, 3]]
-    )
+    ) + torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(outs_mixed_raw[[1, 2]], outs_mixed_raw[[0, 3]])
 
 
 def measure_kl_confusions(test, model: FrankenSteinModel):
@@ -311,34 +298,27 @@ def get_confusion_ratio(all_log_probs: torch.Tensor) -> torch.Tensor:
             starting_lp = all_log_probs[seq, 0, is_correct]
             worse_case_lp = all_log_probs[1 - seq, 0, 1 - is_correct]
             res_lp = all_log_probs[seq, 1, is_correct]
-            s += torch.clip(
-                (starting_lp - res_lp) / (starting_lp - worse_case_lp), 0, 1
-            )
+            s += torch.clip((starting_lp - res_lp) / (starting_lp - worse_case_lp), 0, 1)
     return s / 4
+
 
 def get_bi_confusion_ratio(all_log_probs: torch.Tensor) -> torch.Tensor:
     """Return the loss in two category: those aimed at positive seq and those aimed at negative seq."""
-    
+
     # all_log_probs[which_sequece][is_distracted][is_wrong]
 
     def compute(seq, is_correct):
         starting_lp = all_log_probs[seq, 0, is_correct]
         worse_case_lp = all_log_probs[1 - seq, 0, 1 - is_correct]
         res_lp = all_log_probs[seq, 1, is_correct]
-        return torch.clip(
-            (starting_lp - res_lp) / (starting_lp - worse_case_lp), 0, 1
-        ) 
-    
-    s = torch.tensor([
-        compute(seq, 0) + compute(seq, 1) for seq in range(2)
-    ])
-    
+        return torch.clip((starting_lp - res_lp) / (starting_lp - worse_case_lp), 0, 1)
+
+    s = torch.tensor([compute(seq, 0) + compute(seq, 1) for seq in range(2)])
+
     return s / 2
 
 
-def measure_confusions_ratio_grad(
-    test, model: FrankenSteinModel, use_log_probs: bool = True, use_bi: bool = False
-):
+def measure_confusions_ratio_grad(test, model: FrankenSteinModel, use_log_probs: bool = True, use_bi: bool = False):
     outs_mixed_raw = compute_tests_results(test, model)
 
     # log_probs = [probs0, probs1, probs2, probs3]
@@ -355,48 +335,42 @@ def measure_confusions_ratio_grad(
 
     for i, q1 in enumerate([test.positive, test.negative]):
         corrects = [tokenizer.encode(a)[0] for a in q1.answers]
-        wrongs = [
-            tokenizer.encode(a)[0]
-            for a in [test.positive, test.negative][1 - i].answers
-        ]
+        wrongs = [tokenizer.encode(a)[0] for a in [test.positive, test.negative][1 - i].answers]
         for j, q2 in enumerate([test.positive, test.negative]):
             all_log_probs[i, j, 0] = outs_mixed[i][j][corrects].sum()
             all_log_probs[i, j, 1] = outs_mixed[i][j][wrongs].sum()
     # print(all_log_probs)
 
     p = all_log_probs if use_log_probs else torch.exp(all_log_probs)
-    
+
     return get_bi_confusion_ratio(p) if use_bi else get_confusion_ratio(p)
 
 
-def measure_confusions_ratio(
-    test, model: FrankenSteinModel, use_log_probs: bool = True
-):
+def measure_confusions_ratio(test, model: FrankenSteinModel, use_log_probs: bool = True):
     with torch.no_grad():
         return measure_confusions_ratio_grad(test, model, use_log_probs).item()
 
 
 def measure_bi_confusion_ratio(test, model: FrankenSteinModel, use_log_probs: bool = True):
     with torch.no_grad():
-        return measure_confusions_ratio_grad(test, model, use_log_probs, use_bi = True)
+        return measure_confusions_ratio_grad(test, model, use_log_probs, use_bi=True)
+
 
 def measure_top1_success(test: Pair, model: SimpleModel, adverserial: bool = False) -> float:
     # Mostly makes sens on datasets like imdb_0_shot or imdb_1_shot
     good_answers = [tokenizer.encode(a)[0] for a in test.positive.answers]
     bad_answers = [tokenizer.encode(a)[0] for a in test.negative.answers]
-    
+
     with torch.no_grad():
         p = test.negative.prompt if adverserial else test.positive.prompt
         inpt = tokenizer(p, return_tensors="pt").to(device)
         r = model(inpt)[0, -1]
         r_correct = r[good_answers].sum()
         r_incorrect = r[bad_answers].sum()
-        return 1. if (r_correct > r_incorrect) ^ adverserial else 0.
+        return 1.0 if (r_correct > r_incorrect) ^ adverserial else 0.0
 
 
-ProjectionFunc = Callable[
-    [torch.Tensor, torch.Tensor], torch.Tensor
-]  # project first along second
+ProjectionFunc = Callable[[torch.Tensor, torch.Tensor], torch.Tensor]  # project first along second
 
 
 def create_frankenstein(
@@ -444,7 +418,6 @@ def zero_out(x_along_dirs, dirs):
     return 0
 
 
-
 def create_handicaped(
     dirs,
     model,
@@ -460,11 +433,7 @@ def create_handicaped(
     def handicaped(inp):
         def destroy_along_dirs(module, input, output):
             y, *rest = output
-            y = (
-                projection_fn(y, dirs)
-                + destruction_fn(y - projection_fn(y, dirs), dirs)
-                + additional
-            )
+            y = projection_fn(y, dirs) + destruction_fn(y - projection_fn(y, dirs), dirs) + additional
             return (y, *rest)
 
         return run_and_modify(inp, model, {layer_module: destroy_along_dirs}).logits
@@ -473,9 +442,7 @@ def create_handicaped(
 
 
 def measure_ablation_success(test: Pair, model, handicaped_model: SimpleModel):
-    inpt = tokenizer(
-        [test.positive.prompt, test.negative.prompt], return_tensors="pt"
-    ).to(device)
+    inpt = tokenizer([test.positive.prompt, test.negative.prompt], return_tensors="pt").to(device)
 
     with torch.no_grad():
         outs = torch.log_softmax(model(**inpt).logits[:, -1], dim=-1)
@@ -485,30 +452,39 @@ def measure_ablation_success(test: Pair, model, handicaped_model: SimpleModel):
     for a in test.positive.answers + test.negative.answers:
         t = tokenizer.encode(a)[0]
         r += torch.clip(
-            (handicaped_outs[0, t].sum() - handicaped_outs[1, t])
-            / (outs[0, t].sum() - outs[1, t]),
+            (handicaped_outs[0, t].sum() - handicaped_outs[1, t]) / (outs[0, t].sum() - outs[1, t]),
             0,
             1,
         ).item()
 
     return r / len(test.positive.answers + test.negative.answers)
 
-def get_corpus(ds_name: str = "wikitext", subset: str = "wikitext-2-raw-v1", split: str = "test", max_samples: int = 1000):
+
+def get_corpus(
+    ds_name: str = "wikitext", subset: str = "wikitext-2-raw-v1", split: str = "test", max_samples: int = 1000
+):
     """Get a list of strings from a dataset."""
     return "\n\n".join([s for s in load_dataset(ds_name, subset, split=split)["text"] if s][:max_samples])
 
 
 def measure_perplexity(model: SimpleModel, text: str, context_max_len: int = 1024, stride: int = 1024) -> float:
     """Measure the perplexity of the model.
-    
+
     Uses HF's algorithm for computing perplexity, and OpenAI's conventions, see https://huggingface.co/docs/transformers/perplexity"""
     # TODO: make more vectorized
-    
+
     all_tokens = tokenizer(text, return_tensors="pt").to(device)
     tokens_batches = []
     for i in range(0, all_tokens.input_ids.shape[1], stride):
-        tokens_batches.append(BatchEncoding({"input_ids": all_tokens.input_ids[:, i : i + context_max_len], "attention_mask": all_tokens.attention_mask[:, i : i + context_max_len]}))
-    
+        tokens_batches.append(
+            BatchEncoding(
+                {
+                    "input_ids": all_tokens.input_ids[:, i : i + context_max_len],
+                    "attention_mask": all_tokens.attention_mask[:, i : i + context_max_len],
+                }
+            )
+        )
+
     with torch.no_grad():
         lps_and_lengths = [measure_correct_log_prob(model, t) for t in tokens_batches]
         tokens_predicted = sum(l for _, l in lps_and_lengths)
@@ -517,7 +493,10 @@ def measure_perplexity(model: SimpleModel, text: str, context_max_len: int = 102
         perplexity = np.exp(avg_loss)
         return perplexity
 
-def get_stereoset(subset: str = "intersentence", split: str = "validation", bias_type: str = "gender") -> list[tuple[str, tuple[str, str, str]]]:
+
+def get_stereoset(
+    subset: str = "intersentence", split: str = "validation", bias_type: str = "gender"
+) -> list[tuple[str, tuple[str, str, str]]]:
     """Get the stereoset dataset."""
     ds = load_dataset("stereoset", subset, split=split)
     relevant_ds = [x for x in ds if x["bias_type"] == bias_type]
@@ -529,8 +508,8 @@ def get_stereoset(subset: str = "intersentence", split: str = "validation", bias
         irrelevant = x["sentences"]["sentence"][x["sentences"]["gold_label"].index(2)]
         r.append((context, (anti_stereotype, stereotype, irrelevant)))
     return r
-        
-    
+
+
 def measure_correct_log_prob(model: SimpleModel, tokens: BatchEncoding) -> float:
     """Measure the probability the model gives to the sentence."""
     with torch.no_grad():
@@ -540,20 +519,22 @@ def measure_correct_log_prob(model: SimpleModel, tokens: BatchEncoding) -> float
         correct_lp = torch.gather(log_probs[0, :-1, :], 1, correct_ids[0, :, None]).sum().item()
         return correct_lp, log_probs.shape[1] - 1
 
+
 def measure_bias_counts(model: SimpleModel, strings: list[tuple[str, tuple[str, ...]]]) -> tuple[float, ...]:
     """Measure the number of bias tokens in the model.
-    
+
     See get_stereoset for the format of strings."""
     categories = len(strings[0][1])
     counts = [0] * categories
-    
-    tokenize = lambda s:tokenizer(tokenizer.eos_token + s, return_tensors="pt").to(device)
-    
+
+    tokenize = lambda s: tokenizer(tokenizer.eos_token + s, return_tensors="pt").to(device)
+
     for context, sentences in strings:
         log_probs = [measure_correct_log_prob(model, tokenize(context + " " + s))[0] for s in sentences]
         most_likely = np.argmax(log_probs)
         counts[most_likely] += 1
     return counts
+
 
 def get_act_ds(model, tests: Sequence[Union[Test, Pair]], layer):
     positives = [t.positive.prompt for t in tests]
@@ -582,9 +563,7 @@ def get_act_ds(model, tests: Sequence[Union[Test, Pair]], layer):
     return ActivationsDataset(x_data, y_data)
 
 
-def get_act_ds_with_controls(
-    model, tests: list[SingleTest], control_test: list[SingleTest], layer
-):
+def get_act_ds_with_controls(model, tests: list[SingleTest], control_test: list[SingleTest], layer):
     positives = [t.prompt for t in tests]
     negatives = [t.prompt for t in control_test]
     positive_acts = [
@@ -611,20 +590,20 @@ def get_act_ds_with_controls(
     return ActivationsDataset(x_data, y_data)
 
 
-
 def orthonormalize(dirs: torch.Tensor) -> torch.Tensor:
     """Apply the Gram-Schmidt algorithm to make dirs orthonormal
-    
+
     Assumes that the number of dimensions and dirs is > 0."""
-    
+
     n, _ = dirs.shape
-    
+
     dirs_l = [normalize(dirs[0])]
-    
+
     for i in range(1, n):
         dirs_l.append(normalize(project(dirs[i], torch.stack(dirs_l))))
-    
+
     return torch.stack(dirs_l)
+
 
 def normalize(x: torch.Tensor) -> torch.Tensor:
     return x / x.norm(dim=-1, keepdim=True)
@@ -634,6 +613,7 @@ def get_unembed(model, word: str) -> torch.Tensor:
     inp = tokenizer(word, return_tensors="pt").input_ids[0, 0].item()
     return get_unembed_matrix(model)[inp][None, :].detach()
 
+
 def get_unembed_matrix(model) -> torch.Tensor:
     if isinstance(model, GPTJForCausalLM) or isinstance(model, GPT2LMHeadModel):
         return model.lm_head.weight
@@ -641,12 +621,14 @@ def get_unembed_matrix(model) -> torch.Tensor:
         return model.embed_out.weight
     raise NotImplementedError(f"Model of type {type(model)} not supported yet")
 
+
 def get_layer(model, layer: int) -> torch.nn.Module:
     if isinstance(model, GPTJForCausalLM) or isinstance(model, GPT2LMHeadModel):
         return model.transformer.h[layer]
     if isinstance(model, GPTNeoXForCausalLM):
         return model.gpt_neox.layers[layer]
     raise NotImplementedError(f"Model of type {type(model)} not supported yet")
+
 
 def get_number_of_layers(model) -> int:
     if isinstance(model, GPTJForCausalLM) or isinstance(model, GPT2LMHeadModel):
@@ -663,19 +645,13 @@ def get_embed_dim(model) -> int:
 def get_offsets(model, layer, dirs) -> torch.Tensor:
     reference_text = json.load(Path(f"./raw_data/reference_texts.json").open("r"))
     inp_min_len = min(len(a) for a in tokenizer(reference_text)["input_ids"])
-    inpt = tokenizer(
-        reference_text, return_tensors="pt", truncation=True, max_length=inp_min_len
-    ).to(device)
+    inpt = tokenizer(reference_text, return_tensors="pt", truncation=True, max_length=inp_min_len).to(device)
     reference_activations = get_activations(
         inpt,
         model,
         [layer],
     )[layer]
-    reference_activations = reference_activations.reshape(
-        (-1, reference_activations.shape[-1])
-    )
+    reference_activations = reference_activations.reshape((-1, reference_activations.shape[-1]))
 
-    means = torch.mean(
-        torch.einsum("n h, m h -> m n", dirs, reference_activations), dim=0
-    )
+    means = torch.mean(torch.einsum("n h, m h -> m n", dirs, reference_activations), dim=0)
     return torch.einsum("n h, n -> h", dirs, means)

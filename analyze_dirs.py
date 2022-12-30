@@ -13,6 +13,7 @@ from attrs import define
 from transformers import AutoModelForCausalLM
 import src.constants
 from src.constants import device, gpt2_tokenizer, tokenizer
+
 src.constants._tokenizer = gpt2_tokenizer
 from src.direction_methods.pairs_generation import (
     get_train_tests,
@@ -67,10 +68,7 @@ def load_dirs(name: str, method: str = ""):
 
     return {
         l: torch.load(path).to(device)
-        for l, path in [
-            (l, Path(f"./saved_dirs/v3-{model_name}{method_suffix}/l{l}-{name}.pt"))
-            for l in range(80)
-        ]
+        for l, path in [(l, Path(f"./saved_dirs/v3-{model_name}{method_suffix}/l{l}-{name}.pt")) for l in range(80)]
         if path.exists()
     }
 
@@ -108,13 +106,12 @@ def plot_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
     stds = []
 
     for l, dirs in tqdm(dirs_dict.items()):
-        layer = get_layer(model,l)
+        layer = get_layer(model, l)
         success_rate = 1 - evolve(evaluator, layer=layer, dirs=dirs).evaluate()
         means.append(torch.mean(success_rate).item())
         stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
-    plt.errorbar(
-        dirs_dict.keys(), means, yerr=stds, capsize=3, label=label, **plot_kwargs
-    )
+    plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label, **plot_kwargs)
+
 
 def plot_bi_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
     means_p = []
@@ -146,11 +143,12 @@ def plot_bi_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
         means_n.append(torch.mean(success_rate_n).item())
         stds_n.append(torch.std(success_rate_n).item() / np.sqrt(len(success_rate_n)))
     plt.errorbar(
-        dirs_dict.keys(), means_p, yerr=stds_p, capsize=3, label=label+" positive", marker="o", **plot_kwargs
+        dirs_dict.keys(), means_p, yerr=stds_p, capsize=3, label=label + " positive", marker="o", **plot_kwargs
     )
     plt.errorbar(
-        dirs_dict.keys(), means_n, yerr=stds_n, capsize=3, label=label+" negative", marker="x", **plot_kwargs
+        dirs_dict.keys(), means_n, yerr=stds_n, capsize=3, label=label + " negative", marker="x", **plot_kwargs
     )
+
 
 #%%
 from matplotlib import rcParams
@@ -162,9 +160,7 @@ Path(figure_folder).mkdir(parents=True, exist_ok=True)
 plot_tests(easy_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe")
 plot_tests(easy_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE")
 plot_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
-plot_tests(
-    easy_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he"
-)
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he")
 plot_tests(easy_gender_tests, load_dirs("n1-dgender", "dropout-probe"), "dropout-probe")
 plot_tests(easy_gender_tests, load_dirs("n1-dgender", "mean-diff"), "mean-diff")
 
@@ -180,9 +176,7 @@ plt.savefig(f"{figure_folder}/easy_probes.png", bbox_inches="tight")
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe")
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE")
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
-plot_tests(
-    hard_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he"
-)
+plot_tests(hard_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he")
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "dropout-probe"), "dropout-probe")
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "mean-diff"), "mean-diff")
 
@@ -198,9 +192,7 @@ plt.savefig(f"{figure_folder}/hard_probes.png", bbox_inches="tight")
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe")
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE")
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
-plot_tests(
-    french_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he"
-)
+plot_tests(french_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he")
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "dropout-probe"), "dropout-probe")
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "mean-diff"), "mean-diff")
 
@@ -251,9 +243,7 @@ plot_tests(
     color="green",
     linestyle="dashed",
 )
-plot_tests(
-    hard_gender_tests, rlace_dirs, "hard gender RLACE", color="red", linestyle="dashed"
-)
+plot_tests(hard_gender_tests, rlace_dirs, "hard gender RLACE", color="red", linestyle="dashed")
 plot_tests(
     french_gender_tests,
     rlace_dirs,
@@ -345,23 +335,15 @@ def plot_ablation_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
         )
         means.append(torch.mean(success_rate).item())
         stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
-    plt.errorbar(
-        dirs_dict.keys(), means, yerr=stds, capsize=3, label=label, **plot_kwargs
-    )
+    plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label, **plot_kwargs)
 
 
 #%%
 
 plot_ablation_tests(easy_gender_tests, load_dirs("n1-dgender"), "CDE")
-plot_ablation_tests(
-    easy_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe", alpha=0.3
-)
-plot_ablation_tests(
-    easy_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE", alpha=0.3
-)
-plot_ablation_tests(
-    easy_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he", alpha=0.3
-)
+plot_ablation_tests(easy_gender_tests, load_dirs("n1-dgender", "inlp"), "naive probe", alpha=0.3)
+plot_ablation_tests(easy_gender_tests, load_dirs("n1-dgender", "rlace"), "RLACE", alpha=0.3)
+plot_ablation_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he", alpha=0.3)
 plot_ablation_tests(
     easy_gender_tests,
     load_dirs("n1-dgender", "she-he-grad"),
@@ -398,9 +380,7 @@ plot_ablation_tests(
     color="green",
     linestyle="dashed",
 )
-plot_ablation_tests(
-    hard_gender_tests, rlace_dirs, "hard gender RLACE", color="red", linestyle="dashed"
-)
+plot_ablation_tests(hard_gender_tests, rlace_dirs, "hard gender RLACE", color="red", linestyle="dashed")
 plot_ablation_tests(
     french_gender_tests,
     rlace_dirs,
@@ -468,9 +448,7 @@ _, ax = plt.subplots()
 plt.errorbar(cosines, means, yerr=stds, capsize=3, linestyle="None", marker="x")
 for label, cosine, mean in zip(labels, cosines, means):
     ax.annotate(label, (cosine + 0.01, mean))
-plt.title(
-    f"Performance vs Cosine similarity with CDE on easy gender tests at layer {layer_nb}"
-)
+plt.title(f"Performance vs Cosine similarity with CDE on easy gender tests at layer {layer_nb}")
 plt.xlabel("Cosine similarity")
 plt.ylabel("Success rate")
 plt.savefig(f"{figure_folder}/cosine_v_perf.png", bbox_inches="tight")
@@ -478,9 +456,7 @@ plt.savefig(f"{figure_folder}/cosine_v_perf.png", bbox_inches="tight")
 single_dirs_it = sorted(list(load_dirs("n1-dgender").items()))
 keys = [k for k, _ in single_dirs_it]
 all_dirs_t = torch.cat([d for _, d in single_dirs_it])
-plt.imshow(
-    torch.einsum("n h, m h -> n m", all_dirs_t, all_dirs_t).abs().cpu(), cmap="hot"
-)
+plt.imshow(torch.einsum("n h, m h -> n m", all_dirs_t, all_dirs_t).abs().cpu(), cmap="hot")
 plt.xticks(list(range(len(single_dirs_it))), keys, rotation=45)
 plt.yticks(list(range(len(single_dirs_it))), keys)
 plt.colorbar()
@@ -497,9 +473,7 @@ dirs = load_dirs("n1-dgender")[layer_nb]
 tests = easy_gender_tests + hard_gender_tests
 for i, t in enumerate(tests):
     activations = get_activations(
-        tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(
-            device
-        ),
+        tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(device),
         model,
         [layer],
     )[layer]
@@ -547,9 +521,7 @@ if dirs_dict:
     tests = facts_tests
     for i, t in enumerate(tests):
         activations = get_activations(
-            tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(
-                device
-            ),
+            tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(device),
             model,
             [layer],
         )[layer]
@@ -592,9 +564,7 @@ if cde_dirs2 and cde_dirs:
         color="green",
         linestyle="dashed",
     )
-    plot_tests(
-        hard_gender_tests, cde_dirs2, "hard gender 2d", color="red", linestyle="dashed"
-    )
+    plot_tests(hard_gender_tests, cde_dirs2, "hard gender 2d", color="red", linestyle="dashed")
     plot_tests(
         french_gender_tests,
         cde_dirs2,
@@ -758,9 +728,7 @@ if dirs_dict:
     activations_Y_n = []
     for i, t in enumerate(tests):
         activations = get_activations(
-            tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(
-                device
-            ),
+            tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(device),
             model,
             [layer],
         )[layer]
@@ -807,9 +775,7 @@ if dirs_dict:
     activations_Y_n = []
     for i, t in enumerate(tests):
         activations = get_activations(
-            tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(
-                device
-            ),
+            tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(device),
             model,
             [layer],
         )[layer]

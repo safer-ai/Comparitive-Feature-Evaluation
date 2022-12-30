@@ -12,21 +12,30 @@ _tokenizer = gpt2_tokenizer
 class _Tokenizer:
     def __call__(self, *args, **kwargs):
         return _tokenizer(*args, **kwargs)
+
     def encode(self, *args, **kwargs):
         return _tokenizer.encode(*args, **kwargs)
+
     def decode(self, *args, **kwargs):
         return _tokenizer.decode(*args, **kwargs)
+
     def __str__(self):
         return str(_tokenizer)
+
     def __repr__(self) -> str:
         return repr(_tokenizer)
+
     @property
     def eos_token(self):
         return _tokenizer.eos_token
+
     @property
     def eos_token_id(self):
         return _tokenizer.eos_token_id
-tokenizer: AutoTokenizer = _Tokenizer() # type: ignore
+
+
+tokenizer: AutoTokenizer = _Tokenizer()  # type: ignore
+
 
 def get_tokenizer(model):
     if isinstance(model, GPTJForCausalLM) or isinstance(model, GPT2LMHeadModel):

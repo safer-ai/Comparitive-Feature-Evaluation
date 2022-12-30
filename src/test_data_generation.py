@@ -102,9 +102,7 @@ def check_dataset_sound(dataset: PairGeneratorDataset):
 def check_generations_line_up(dataset: PairGeneratorDataset, attempts: int = 100):
     for tokenizer in all_tokenizers:
         for pair in dataset.take(attempts):
-            lp, ln = map(
-                len, tokenizer([pair.positive.prompt, pair.negative.prompt]).input_ids
-            )
+            lp, ln = map(len, tokenizer([pair.positive.prompt, pair.negative.prompt]).input_ids)
             assert (
                 lp == ln
             ), f"{lp}, {ln}, {repr_tokenized(pair.positive.prompt, tokenizer)}\nvs\n{repr_tokenized(pair.negative.prompt, tokenizer)}"

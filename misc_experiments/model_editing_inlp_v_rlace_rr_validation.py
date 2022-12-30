@@ -88,12 +88,8 @@ train_ds = get_act_ds(model, train_tests, layer)
 
 def get_confusion_grad():
     h_size = train_ds.x_data.shape[-1]
-    grad_point = torch.autograd.Variable(
-        torch.zeros(1, h_size).to(device), requires_grad=True
-    )
-    model_with_append = create_frankenstein(
-        torch.empty((0, h_size)).to(device), model, layer, grad_point
-    )
+    grad_point = torch.autograd.Variable(torch.zeros(1, h_size).to(device), requires_grad=True)
+    model_with_append = create_frankenstein(torch.empty((0, h_size)).to(device), model, layer, grad_point)
     s = 0
     for t in train_tests:
         s += measure_confusions_grad(t, model_with_append)
@@ -117,9 +113,7 @@ def get_grad_descent(epochs=6, batch_size=2, lr=1e-4, seed=0):
         for i in g:
             random.shuffle(train_tests)
             optimizer.zero_grad()
-            model_with_grad = create_frankenstein(
-                dirs / torch.linalg.norm(dirs, dim=-1), model, layer
-            )
+            model_with_grad = create_frankenstein(dirs / torch.linalg.norm(dirs, dim=-1), model, layer)
             s = 0
             for t in train_tests[i : i + batch_size]:
                 s += measure_confusions_grad(t, model_with_grad)
@@ -135,21 +129,11 @@ def get_grad_descent_she_he(seed=0):
     torch.manual_seed(seed)
     random.seed(seed)
     h_size = train_ds.x_data.shape[-1]
-    grad_point = torch.autograd.Variable(
-        torch.zeros(1, h_size).to(device), requires_grad=True
-    )
-    model_with_append = create_frankenstein(
-        torch.empty((0, h_size)).to(device), model, layer, grad_point
-    )
+    grad_point = torch.autograd.Variable(torch.zeros(1, h_size).to(device), requires_grad=True)
+    model_with_append = create_frankenstein(torch.empty((0, h_size)).to(device), model, layer, grad_point)
 
-    tokenized = [
-        tokenizer(t.positive.prompt, return_tensors="pt").to(device)
-        for t in train_tests
-    ]
-    tokenized += [
-        tokenizer(t.negative.prompt, return_tensors="pt").to(device)
-        for t in train_tests
-    ]
+    tokenized = [tokenizer(t.positive.prompt, return_tensors="pt").to(device) for t in train_tests]
+    tokenized += [tokenizer(t.negative.prompt, return_tensors="pt").to(device) for t in train_tests]
     she_id = tokenizer(" she", return_tensors="pt").input_ids[0, 0].item()
     he_id = tokenizer(" he", return_tensors="pt").input_ids[0, 0].item()
 
@@ -272,9 +256,7 @@ prompts = [
 ]
 
 used_dirs = dirs
-modes, _ = torch.median(
-    torch.einsum("n h, m h -> m n", used_dirs, train_ds.x_data), dim=0
-)
+modes, _ = torch.median(torch.einsum("n h, m h -> m n", used_dirs, train_ds.x_data), dim=0)
 offset = torch.einsum("n h, n -> h", used_dirs, modes)
 # projection = lambda x: project_cone(x - offset, used_dirs, pi/2 * cone_strength) + offset
 # projection = lambda x: project(x - offset, used_dirs) + offset
@@ -290,9 +272,7 @@ recover_model_inplace(model, layer, module_name)
 #%%
 
 used_dirs = dirs_SGD
-modes, _ = torch.median(
-    torch.einsum("n h, m h -> m n", used_dirs, train_ds.x_data), dim=0
-)
+modes, _ = torch.median(torch.einsum("n h, m h -> m n", used_dirs, train_ds.x_data), dim=0)
 offset = torch.einsum("n h, n -> h", used_dirs, modes)
 # projection = lambda x: project_cone(x - offset, used_dirs, pi / 2 * cone_strength) + offset
 # projection = lambda x: project(x - offset, used_dirs) + offset

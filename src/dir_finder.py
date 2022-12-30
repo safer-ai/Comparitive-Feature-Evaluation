@@ -63,9 +63,7 @@ class DirFinder:
     def find_dirs_using_sgd(self) -> torch.Tensor:
         data_generator = iter(self.pairs_generator)
 
-        dirs = torch.randn(
-            (self.n_dirs, self.h_size), device=self.device, requires_grad=True
-        )
+        dirs = torch.randn((self.n_dirs, self.h_size), device=self.device, requires_grad=True)
         optimizer = torch.optim.Adam([dirs], lr=self.lr)
 
         g = trange(self.iterations // self.batch_size)
@@ -103,10 +101,7 @@ class DirFinder:
 
             # early stopping if loss is not decreasing
             batchs_per_rolling_window = self.rolling_window_size // self.batch_size
-            if (
-                e % batchs_per_rolling_window == 0
-                and len(losses) > self.rolling_window_size
-            ):
+            if e % batchs_per_rolling_window == 0 and len(losses) > self.rolling_window_size:
                 if rolling_loss > last_loss:
                     break
                 last_loss = rolling_loss
@@ -130,7 +125,7 @@ class DirFinder:
             n_dim=self.n_dirs,
             n_training_iters=2000,
         ).to(self.device)
-    
+
     def find_dirs_using_dropout_probe(self) -> torch.Tensor:
         return inlp(
             self._get_train_ds(),
@@ -145,13 +140,11 @@ class DirFinder:
 
     def find_dirs_using_she_he_grad(self) -> torch.Tensor:
         grad_point = torch.zeros(1, self.h_size, device=self.device, requires_grad=True)
-        
+
         tokenizer = get_tokenizer(self.model)
 
         tokenized = [
-            tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(
-                self.device
-            )
+            tokenizer([t.positive.prompt, t.negative.prompt], return_tensors="pt").to(self.device)
             for t in islice(self.pairs_generator, self.dataset_size)
         ]
 
@@ -181,10 +174,12 @@ class DirFinder:
 
     def find_dirs_using_tuned_lens(self) -> torch.Tensor:
         raise NotImplementedError("Tuned lens is not implemented")
-    
+
     def find_dirs_using_mean_diff(self) -> torch.Tensor:
         act_ds = self._get_train_ds()
-        mean_diff = torch.mean(act_ds.x_data[act_ds.y_data == 0], dim=0, keepdim=True) - torch.mean(act_ds.x_data[act_ds.y_data == 1], dim=0, keepdim=True)
+        mean_diff = torch.mean(act_ds.x_data[act_ds.y_data == 0], dim=0, keepdim=True) - torch.mean(
+            act_ds.x_data[act_ds.y_data == 1], dim=0, keepdim=True
+        )
         print("found mean diff of norm", mean_diff[0].norm().item())
         return normalize(mean_diff).to(self.device)
 

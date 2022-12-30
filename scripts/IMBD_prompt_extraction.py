@@ -27,37 +27,34 @@ def generate_pairs(df: pd.DataFrame, n=10, n_few_shot=5, review_max_len=200, opp
     for _ in range(n):
         positive_replacements = {"positive": ["positive"], "negative": ["negative"]}
         negative_replacements = {"positive": ["negative"], "negative": ["positive"]}
-        
+
         if not opposite_last:
             indices = np.random.choice(array.shape[0], n_few_shot + 1, replace=False)
             few_shot_lines = array[indices[1:]]
-        
+
             prompt = "\n".join(
-                template.format(review=review, sentiment=sentiment)
-                for review, sentiment in few_shot_lines
+                template.format(review=review, sentiment=sentiment) for review, sentiment in few_shot_lines
             )
-            
+
             correct_last_line = array[indices[0]]
             full_question = f"{prompt}\nreview: [{correct_last_line[0]}] sentiment:"
-        
+
         else:
             indices = np.random.choice(array.shape[0], n_few_shot + 2, replace=False)
             while array[indices][0, 1] == array[indices][1, 1]:
                 indices = np.random.choice(array.shape[0], n_few_shot + 2, replace=False)
             few_shot_lines = array[indices[2:]]
-        
+
             prompt = "\n".join(
-                template.format(review=review, sentiment=sentiment)
-                for review, sentiment in few_shot_lines
+                template.format(review=review, sentiment=sentiment) for review, sentiment in few_shot_lines
             )
-            
+
             correct_last_line = array[indices[0]]
             wrong_last_line = array[indices[1]]
             full_question = f"{prompt}\nreview: [{{lastreview}}] sentiment:"
             positive_replacements["lastreview"] = [correct_last_line[0]]
             negative_replacements["lastreview"] = [wrong_last_line[0]]
-            
-        
+
         pair_generators.append(
             PairGenerator(
                 full_question,
@@ -68,9 +65,7 @@ def generate_pairs(df: pd.DataFrame, n=10, n_few_shot=5, review_max_len=200, opp
             )
         )
 
-    return PairGeneratorDataset(
-        version="1", positive="correct", negative="inverse", generators=pair_generators
-    )
+    return PairGeneratorDataset(version="1", positive="correct", negative="inverse", generators=pair_generators)
 
 
 # Path("data/imdb_sentiments").mkdir(parents=True, exist_ok=True)

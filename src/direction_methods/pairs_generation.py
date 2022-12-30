@@ -23,16 +23,8 @@ class Test:
 def get_train_tests() -> list[Test]:
     train_tests: list[Test] = []
     for sw, sm in zip(
-        [
-            f"She is {c1} and she is {c2}."
-            for c1 in ["strong", "weak"]
-            for c2 in ["tall", "small"]
-        ],
-        [
-            f"He is {c1} and he is {c2}."
-            for c1 in ["strong", "weak"]
-            for c2 in ["tall", "small"]
-        ],
+        [f"She is {c1} and she is {c2}." for c1 in ["strong", "weak"] for c2 in ["tall", "small"]],
+        [f"He is {c1} and he is {c2}." for c1 in ["strong", "weak"] for c2 in ["tall", "small"]],
     ):
         train_tests.append(Test(Question(sw, " She"), Question(sm, " He")))
     for sw, sm in zip(
@@ -54,19 +46,11 @@ def get_train_tests() -> list[Test]:
             for p in ["princess", "queen"]
             for w in ["won", "lost"]
         ],
-        [
-            f"The {p} has fought and {w}. He will think about it."
-            for p in ["prince", "king"]
-            for w in ["won", "lost"]
-        ],
+        [f"The {p} has fought and {w}. He will think about it." for p in ["prince", "king"] for w in ["won", "lost"]],
     ):
         train_tests.append(Test(Question(sw, " She"), Question(sm, " He")))
     for sw, sm in zip(
-        [
-            f"He as{a} found his {w}, which is why"
-            for a in ["", " not"]
-            for w in ["spouse", "wallet", "bag", "sibling"]
-        ],
+        [f"He as{a} found his {w}, which is why" for a in ["", " not"] for w in ["spouse", "wallet", "bag", "sibling"]],
         [
             f"She as{a} found her {w}, which is why"
             for a in ["", " not"]
@@ -128,7 +112,5 @@ def get_val_controls():
             Question("Air is made out of", " air"),
             Question("Water is made out of", " water"),
         ),
-        Test(
-            Question("Apples are", " fruits"), Question("Broccoli are", " vegetables")
-        ),
+        Test(Question("Apples are", " fruits"), Question("Broccoli are", " vegetables")),
     ]

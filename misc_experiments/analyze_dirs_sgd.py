@@ -86,9 +86,7 @@ for t in train_tests[::10]:
         r = measure_confusions(t, create_frankenstein(d, model, layer))
         train_tests_res.append(((l, n), r))
         print(f"{n} {r:.2f}")
-    r = measure_confusions(
-        t, create_frankenstein(torch.empty(0, d.shape[-1]).to(device), model, layer)
-    )
+    r = measure_confusions(t, create_frankenstein(torch.empty(0, d.shape[-1]).to(device), model, layer))
     print(f"rdm {r:.2f}")
 #%%
 val_tests_res = []
@@ -101,9 +99,7 @@ for i, t in enumerate(val_tests):
         r = measure_confusions(t, create_frankenstein(d, model, layer))
         val_tests_res.append((i, (l, n), r))
         print(f"{n} {r:.2f}")
-    r = measure_confusions(
-        t, create_frankenstein(torch.empty(0, d.shape[-1]).to(device), model, layer)
-    )
+    r = measure_confusions(t, create_frankenstein(torch.empty(0, d.shape[-1]).to(device), model, layer))
     val_tests_difficulties.append(r)
     print(f"rdm {r:.2f}")
 #%%
@@ -117,9 +113,7 @@ for i, t in enumerate(val_controls):
         r = measure_confusions(t, create_frankenstein(d, model, layer))
         val_controls_res.append((i, (l, n), r))
         print(f"{n} {r:.2f}")
-    r = measure_confusions(
-        t, create_frankenstein(torch.empty(0, d.shape[-1]).to(device), model, layer)
-    )
+    r = measure_confusions(t, create_frankenstein(torch.empty(0, d.shape[-1]).to(device), model, layer))
     val_controls_difficulties.append(r)
     print(f"rdm {r:.2f}")
 
@@ -129,11 +123,7 @@ numbers = list(set([n for i, (l, n), r in val_tests_res]))
 for n in numbers:
     for i in range(len(val_tests)):
         xy = sorted(
-            [
-                (l, 1 - r / val_tests_difficulties[i])
-                for (i_, (l, n_), r) in val_tests_res
-                if i_ == i and n_ == n
-            ]
+            [(l, 1 - r / val_tests_difficulties[i]) for (i_, (l, n_), r) in val_tests_res if i_ == i and n_ == n]
         )
         x = [x for x, y in xy]
         y = [y for x, y in xy]
@@ -150,11 +140,7 @@ numbers = list(set([n for i, (l, n), r in val_controls_res]))
 for n in numbers:
     for i in range(len(val_controls)):
         xy = sorted(
-            [
-                (l, 1 - r / val_controls_difficulties[i])
-                for (i_, (l, n_), r) in val_controls_res
-                if i_ == i and n_ == n
-            ]
+            [(l, 1 - r / val_controls_difficulties[i]) for (i_, (l, n_), r) in val_controls_res if i_ == i and n_ == n]
         )
         x = [x for x, y in xy]
         y = [y for x, y in xy]
@@ -172,15 +158,11 @@ rcParams["figure.figsize"] = (8, 4)
 module_name = f"transformer.h.{l}"
 layer = model.get_submodule(module_name)
 positive_activations_at_l = [
-    get_activations(
-        tokenizer(t.positive.prompt, return_tensors="pt").to(device), model, [layer]
-    )[layer]
+    get_activations(tokenizer(t.positive.prompt, return_tensors="pt").to(device), model, [layer])[layer]
     for t in val_tests
 ]
 negative_activations_at_l = [
-    get_activations(
-        tokenizer(t.negative.prompt, return_tensors="pt").to(device), model, [layer]
-    )[layer]
+    get_activations(tokenizer(t.negative.prompt, return_tensors="pt").to(device), model, [layer])[layer]
     for t in val_tests
 ]
 single_dir = all_dirs[(l, 1)][0]
@@ -199,15 +181,11 @@ rcParams["figure.figsize"] = (8, 4)
 module_name = f"transformer.h.{l}"
 layer = model.get_submodule(module_name)
 positive_activations_at_l = [
-    get_activations(
-        tokenizer(t.positive.prompt, return_tensors="pt").to(device), model, [layer]
-    )[layer]
+    get_activations(tokenizer(t.positive.prompt, return_tensors="pt").to(device), model, [layer])[layer]
     for t in train_tests
 ]
 negative_activations_at_l = [
-    get_activations(
-        tokenizer(t.negative.prompt, return_tensors="pt").to(device), model, [layer]
-    )[layer]
+    get_activations(tokenizer(t.negative.prompt, return_tensors="pt").to(device), model, [layer])[layer]
     for t in train_tests
 ]
 single_dir = all_dirs[(l, 1)][0]
@@ -226,15 +204,11 @@ rcParams["figure.figsize"] = (8, 4)
 module_name = f"transformer.h.{l}"
 layer = model.get_submodule(module_name)
 positive_activations_at_l = [
-    get_activations(
-        tokenizer(t.positive.prompt, return_tensors="pt").to(device), model, [layer]
-    )[layer]
+    get_activations(tokenizer(t.positive.prompt, return_tensors="pt").to(device), model, [layer])[layer]
     for t in val_controls
 ]
 negative_activations_at_l = [
-    get_activations(
-        tokenizer(t.negative.prompt, return_tensors="pt").to(device), model, [layer]
-    )[layer]
+    get_activations(tokenizer(t.negative.prompt, return_tensors="pt").to(device), model, [layer])[layer]
     for t in val_controls
 ]
 single_dir = all_dirs[(l, 1)][0]

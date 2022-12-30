@@ -55,11 +55,7 @@ def run(model_name: str, n: int = 1, layer_nb: int = None):
             print(m.__name__)
             d = m(train_ds, train_tests, model, layer, seed=i)  # type: ignore
 
-            file_name = (
-                f"L{layer_nb} - {m.__name__} - {i} - v0.pt"
-                if layer_nb
-                else f"{m.__name__} - {i} - v0.pt"
-            )
+            file_name = f"L{layer_nb} - {m.__name__} - {i} - v0.pt" if layer_nb else f"{m.__name__} - {i} - v0.pt"
             path = Path(".") / "saved_dirs" / model_name / file_name
 
             torch.save(d, str(path))

@@ -48,6 +48,7 @@ from src.data_generation import PairGeneratorDataset, Pair
 from src.dir_evaluator import DirEvaluator
 from attrs import evolve
 from tqdm import tqdm  # type: ignore
+
 lt.monkey_patch()
 #%%
 # model_name = "gpt2-xl"
@@ -98,6 +99,7 @@ DEFAULT_REFERENCE_TEXT = [
     "Hamas leader Khaled Mashaal on Sunday praised Gaza’s attacks on Tel Aviv last month and, speaking colloquially, said Prime Minister Benjamin Netanyahu’s home would be destroyed the next time hostilities between Israel",
 ]
 
+
 def project(dir: torch.Tensor, dirs: torch.Tensor, strength: float = 1) -> torch.Tensor:
     """Return dir, but projected in the orthogonal of the subspace spanned by dirs.
 
@@ -135,11 +137,12 @@ class ProjectionWrapper(torch.nn.Module):
             print("leftover", l)
         return (hidden_states, *leftover) if self.has_leftover else hidden_states
 
+
 def get_activations(
     tokens,
     model: torch.nn.Module,
     module: torch.nn.Module,
-    operation = lambda x: x,
+    operation=lambda x: x,
 ) -> torch.Tensor:
     handles = []
     activations = {}
@@ -165,28 +168,22 @@ def edit_model_inplace(
     model,
     layer_nb: int,
     dirs: torch.Tensor,
-    reference_text = DEFAULT_REFERENCE_TEXT,
+    reference_text=DEFAULT_REFERENCE_TEXT,
 ):
     """Return a new module where activations are projected along dirs after the given layer."""
     module_name = f"transformer.h.{layer_nb}"
     old_module = model.get_submodule(module_name)
 
     inp_min_len = min(len(a) for a in tokenizer(reference_text)["input_ids"])
-    inpt = tokenizer(
-        reference_text, return_tensors="pt", truncation=True, max_length=inp_min_len
-    ).to(model.device)
+    inpt = tokenizer(reference_text, return_tensors="pt", truncation=True, max_length=inp_min_len).to(model.device)
     reference_activations = get_activations(
         inpt,
         model,
         old_module,
     )
-    reference_activations = reference_activations.reshape(
-        (-1, reference_activations.shape[-1])
-    )
+    reference_activations = reference_activations.reshape((-1, reference_activations.shape[-1]))
 
-    medians, _ = torch.median(
-        torch.einsum("n h, m h -> m n", dirs, reference_activations), dim=0
-    )
+    medians, _ = torch.median(torch.einsum("n h, m h -> m n", dirs, reference_activations), dim=0)
     offset = torch.einsum("n h, n -> h", dirs, medians)
     # projection = lambda x: project_cone(x - offset, used_dirs, pi / 2 * cone_strength) + offset
     projection = lambda x: project(x - offset, dirs, strength=2) + offset
@@ -201,6 +198,7 @@ def edit_model_inplace(
     else:  # ModuleList case, if it's the member of a list
         parent[int(name)] = new_module  # type: ignore
     gc.collect()
+
 
 # %%
 path = Path(f"./saved_dirs/v3-EleutherAI/gpt-j-6B/l13-n1-dgender.pt")
@@ -227,7 +225,7 @@ def generate(prompt, max_length=40):
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
     outputs = model.generate(input_ids, do_sample=True, temperature=0.6, max_length=max_length, num_return_sequences=5)
     return tokenizer.batch_decode(outputs, skip_special_tokens=True)
-        
+
 
 generate("Her favorite color is")
 # %%

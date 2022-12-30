@@ -48,9 +48,7 @@ def run(
             )
 
             file_name = f"l{layer_nb}-n{n}.pt"
-            path = (
-                Path(".") / "saved_dirs" / f"{model_name}-sgd{cone_suffix}" / file_name
-            )
+            path = Path(".") / "saved_dirs" / f"{model_name}-sgd{cone_suffix}" / file_name
 
             torch.save(d, str(path))
 
