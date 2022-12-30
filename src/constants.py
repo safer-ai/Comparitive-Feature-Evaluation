@@ -20,6 +20,12 @@ class _Tokenizer:
         return str(_tokenizer)
     def __repr__(self) -> str:
         return repr(_tokenizer)
+    @property
+    def eos_token(self):
+        return _tokenizer.eos_token
+    @property
+    def eos_token_id(self):
+        return _tokenizer.eos_token_id
 tokenizer: AutoTokenizer = _Tokenizer() # type: ignore
 
 def get_tokenizer(model):

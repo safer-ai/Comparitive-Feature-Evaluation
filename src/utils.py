@@ -13,7 +13,9 @@ from src.constants import device, gpt2_tokenizer, gptneox_tokenizer, tokenizer
 from src.data_generation import Pair
 from src.direction_methods.pairs_generation import Test
 from src.direction_methods.singles_generations import SingleTest
-
+from datasets import load_dataset
+import json
+from pathlib import Path
 
 SimpleModel = Callable[
     [BatchEncoding], torch.Tensor
@@ -491,6 +493,57 @@ def measure_ablation_success(test: Pair, model, handicaped_model: SimpleModel):
 
     return r / len(test.positive.answers + test.negative.answers)
 
+def get_strings(ds_name: str = "wikitext", subset: str = "wikitext-2-raw-v1", split: str = "test", max_samples: int = 1000):
+    """Get a list of strings from a dataset."""
+    return [s for s in load_dataset(ds_name, subset, split=split)["text"] if s][:max_samples]
+
+
+def measure_perplexity(model: SimpleModel, strings: list[str]) -> float:
+    """Measure the perplexity of the model."""
+    # TODO: make more vectorized
+    with torch.no_grad():
+        lps_and_lengths = [measure_sentence_log_prob(model, s) for s in strings]
+        tokens_predicted = sum(l for _, l in lps_and_lengths)
+        loss = -sum(lp for lp, _ in lps_and_lengths)
+        avg_loss = loss / tokens_predicted
+        perplexity = np.exp(avg_loss)
+        return perplexity
+
+def get_stereoset(subset: str = "intersentence", split: str = "validation", bias_type: str = "gender") -> list[tuple[str, tuple[str, str, str]]]:
+    """Get the stereoset dataset."""
+    ds = load_dataset("stereoset", subset, split=split)
+    relevant_ds = [x for x in ds if x["bias_type"] == bias_type]
+    r = []
+    for x in relevant_ds:
+        context = x["context"]
+        anti_stereotype = x["sentences"]["sentence"][x["sentences"]["gold_label"].index(0)]
+        stereotype = x["sentences"]["sentence"][x["sentences"]["gold_label"].index(1)]
+        irrelevant = x["sentences"]["sentence"][x["sentences"]["gold_label"].index(2)]
+        r.append((context, (anti_stereotype, stereotype, irrelevant)))
+    return r
+        
+    
+def measure_sentence_log_prob(model: SimpleModel, sentence: str) -> float:
+    """Measure the probability the model gives to the sentence."""
+    with torch.no_grad():
+        tokens = tokenizer(tokenizer.eos_token + sentence, return_tensors="pt").to(device)
+        logits = model(tokens)
+        log_probs = torch.log_softmax(logits, dim=-1)
+        correct_ids = tokens.input_ids[:, 1:]
+        correct_lp = torch.gather(log_probs[0, :-1, :], 1, correct_ids[0, :, None]).sum().item()
+        return correct_lp, log_probs.shape[1] - 1
+
+def measure_bias_counts(model: SimpleModel, strings: list[tuple[str, tuple[str, ...]]]) -> tuple[float, ...]:
+    """Measure the number of bias tokens in the model.
+    
+    See get_stereoset for the format of strings."""
+    categories = len(strings[0][1])
+    counts = [0] * categories
+    for context, sentences in strings:
+        log_probs = [measure_sentence_log_prob(model, context + " " + s)[0] for s in sentences]
+        most_likely = np.argmax(log_probs)
+        counts[most_likely] += 1
+    return counts
 
 def get_act_ds(model, tests: Sequence[Union[Test, Pair]], layer):
     positives = [t.positive.prompt for t in tests]
@@ -595,3 +648,24 @@ def get_number_of_layers(model) -> int:
 
 def get_embed_dim(model) -> int:
     return get_unembed_matrix(model).shape[1]
+
+
+def get_offsets(model, layer, dirs) -> torch.Tensor:
+    reference_text = json.load(Path(f"./raw_data/reference_texts.json").open("r"))
+    inp_min_len = min(len(a) for a in tokenizer(reference_text)["input_ids"])
+    inpt = tokenizer(
+        reference_text, return_tensors="pt", truncation=True, max_length=inp_min_len
+    ).to(device)
+    reference_activations = get_activations(
+        inpt,
+        model,
+        [layer],
+    )[layer]
+    reference_activations = reference_activations.reshape(
+        (-1, reference_activations.shape[-1])
+    )
+
+    means = torch.mean(
+        torch.einsum("n h, m h -> m n", dirs, reference_activations), dim=0
+    )
+    return torch.einsum("n h, n -> h", dirs, means)
