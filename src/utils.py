@@ -493,16 +493,24 @@ def measure_ablation_success(test: Pair, model, handicaped_model: SimpleModel):
 
     return r / len(test.positive.answers + test.negative.answers)
 
-def get_strings(ds_name: str = "wikitext", subset: str = "wikitext-2-raw-v1", split: str = "test", max_samples: int = 1000):
+def get_corpus(ds_name: str = "wikitext", subset: str = "wikitext-2-raw-v1", split: str = "test", max_samples: int = 1000):
     """Get a list of strings from a dataset."""
-    return [s for s in load_dataset(ds_name, subset, split=split)["text"] if s][:max_samples]
+    return "\n\n".join([s for s in load_dataset(ds_name, subset, split=split)["text"] if s][:max_samples])
 
 
-def measure_perplexity(model: SimpleModel, strings: list[str]) -> float:
-    """Measure the perplexity of the model."""
+def measure_perplexity(model: SimpleModel, text: str, context_max_len: int = 1024, stride: int = 1024) -> float:
+    """Measure the perplexity of the model.
+    
+    Uses HF's algorithm for computing perplexity, and OpenAI's conventions, see https://huggingface.co/docs/transformers/perplexity"""
     # TODO: make more vectorized
+    
+    all_tokens = tokenizer(text, return_tensors="pt").to(device)
+    tokens_batches = []
+    for i in range(0, all_tokens.input_ids.shape[1], stride):
+        tokens_batches.append(BatchEncoding({"input_ids": all_tokens.input_ids[:, i : i + context_max_len], "attention_mask": all_tokens.attention_mask[:, i : i + context_max_len]}))
+    
     with torch.no_grad():
-        lps_and_lengths = [measure_sentence_log_prob(model, s) for s in strings]
+        lps_and_lengths = [measure_correct_log_prob(model, t) for t in tokens_batches]
         tokens_predicted = sum(l for _, l in lps_and_lengths)
         loss = -sum(lp for lp, _ in lps_and_lengths)
         avg_loss = loss / tokens_predicted
@@ -523,10 +531,9 @@ def get_stereoset(subset: str = "intersentence", split: str = "validation", bias
     return r
         
     
-def measure_sentence_log_prob(model: SimpleModel, sentence: str) -> float:
+def measure_correct_log_prob(model: SimpleModel, tokens: BatchEncoding) -> float:
     """Measure the probability the model gives to the sentence."""
     with torch.no_grad():
-        tokens = tokenizer(tokenizer.eos_token + sentence, return_tensors="pt").to(device)
         logits = model(tokens)
         log_probs = torch.log_softmax(logits, dim=-1)
         correct_ids = tokens.input_ids[:, 1:]
@@ -539,8 +546,11 @@ def measure_bias_counts(model: SimpleModel, strings: list[tuple[str, tuple[str, 
     See get_stereoset for the format of strings."""
     categories = len(strings[0][1])
     counts = [0] * categories
+    
+    tokenize = lambda s:tokenizer(tokenizer.eos_token + s, return_tensors="pt").to(device)
+    
     for context, sentences in strings:
-        log_probs = [measure_sentence_log_prob(model, context + " " + s)[0] for s in sentences]
+        log_probs = [measure_correct_log_prob(model, tokenize(context + " " + s))[0] for s in sentences]
         most_likely = np.argmax(log_probs)
         counts[most_likely] += 1
     return counts

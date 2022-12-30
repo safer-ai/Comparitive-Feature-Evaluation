@@ -13,7 +13,7 @@ from src.constants import device
 from src.data_generation import PairGeneratorDataset
 from src.dir_finder import DirFinder
 from src.utils import (create_handicaped, get_embed_dim, get_layer,
-                       get_number_of_layers, project, project_cone, get_stereoset, get_strings, measure_perplexity, measure_bias_counts, get_offsets)
+                       get_number_of_layers, project, project_cone, get_stereoset, get_corpus, measure_perplexity, measure_bias_counts, get_offsets)
 
 
 def load_dirs(name: str, method: str = "", model_name: str = "gpt2-xl"):
@@ -33,7 +33,7 @@ def run(
     n_dirs: int = 1,
     data: str = "gender",
     method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff"] = "sgd",
-    measurements: tuple[Literal["perplexity", "stereotype"]] = ["perplexity", "stereotype"],
+    measurements: tuple[Literal["perplexity", "stereotype"]] = ["perplexity"],
 ):
     model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     for param in model.parameters():
@@ -47,7 +47,7 @@ def run(
         r = []
         
         if measurement == "perplexity":
-            ds = get_strings(max_samples=1000)
+            ds = get_corpus(max_samples=2000)
         elif measurement == "stereotype":
             ds = get_stereoset()
         else:
