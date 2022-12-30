@@ -3,3 +3,4 @@
 .vscode
 .mypy_cache
 !**/v3*/**/**.pt
+*.bin
