@@ -20,44 +20,25 @@ from src.constants import device, gpt2_tokenizer as tokenizer
 model_name = "EleutherAI/gpt-j-6B"
 model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 #%%
-tests0 = list(PairGeneratorDataset.from_dict(json.load(open("data/rte_0_shot/test.json"))).generate_all())
-tests1 = list(PairGeneratorDataset.from_dict(json.load(open("data/rte_1_shot/test.json"))).generate_all())
-tests5 = list(PairGeneratorDataset.from_dict(json.load(open("data/rte_5_shot/test.json"))).generate_all())
+tests0 = list(PairGeneratorDataset.from_dict(json.load(open("data/imdb_0_shot/test.json"))).generate_all())
+tests10 = list(PairGeneratorDataset.from_dict(json.load(open("data/imdb_10_shot/test.json"))).generate_all())
 
 model_f = lambda t: model(**t).logits
 
 r0 = torch.tensor([measure_top1_success(t, model_f) for t in tests0]).mean().item()
 print(r0)
-r1 = torch.tensor([measure_top1_success(t, model_f) for t in tests1]).mean().item()
-print(r1)
-r5 = torch.tensor([measure_top1_success(t, model_f) for t in tests5]).mean().item()
-print(r5)
+r10 = torch.tensor([measure_top1_success(t, model_f) for t in tests10]).mean().item()
+print(r10)
 #%%
-tests0 = list(PairGeneratorDataset.from_dict(json.load(open("data/rte_0_shot/train.json"))).generate_all())
-tests1 = list(PairGeneratorDataset.from_dict(json.load(open("data/rte_1_shot/train.json"))).generate_all())
-tests5 = list(PairGeneratorDataset.from_dict(json.load(open("data/rte_5_shot/train.json"))).generate_all())
+tests0 = list(PairGeneratorDataset.from_dict(json.load(open("data/imdb_0_shot/train.json"))).generate_all())
+tests10 = list(PairGeneratorDataset.from_dict(json.load(open("data/imdb_10_shot/train.json"))).generate_all())
 
 model_f = lambda t: model(**t).logits
 
 r0 = torch.tensor([measure_top1_success(t, model_f) for t in tests0]).mean().item()
 print(r0)
-r1 = torch.tensor([measure_top1_success(t, model_f) for t in tests1]).mean().item()
-print(r1)
-r5 = torch.tensor([measure_top1_success(t, model_f) for t in tests5]).mean().item()
-print(r5)
-#%%
-tests0 = list(PairGeneratorDataset.from_dict(json.load(open("data/rte_0_shot/train.json"))).generate_all())
-tests1 = list(PairGeneratorDataset.from_dict(json.load(open("data/rte_1_shot/train.json"))).generate_all())
-tests5 = list(PairGeneratorDataset.from_dict(json.load(open("data/rte_5_shot/train.json"))).generate_all())
-
-model_f = lambda t: model(**t).logits
-
-r0 = torch.tensor([measure_top1_success(t, model_f, adverserial=True) for t in tests0]).mean().item()
-print(r0)
-r1 = torch.tensor([measure_top1_success(t, model_f, adverserial=True) for t in tests1]).mean().item()
-print(r1)
-r5 = torch.tensor([measure_top1_success(t, model_f, adverserial=True) for t in tests5]).mean().item()
-print(r5)
+r10 = torch.tensor([measure_top1_success(t, model_f) for t in tests10]).mean().item()
+print(r10)
 
 if __name__ == "__main__":
     pass
