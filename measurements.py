@@ -24,6 +24,9 @@ from src.utils import (
     measure_perplexity,
     measure_bias_counts,
     get_offsets,
+    get_professions_ds,
+    measure_profession_polarities,
+    project_model_inplace,
 )
 
 
@@ -42,7 +45,7 @@ def run(
     n_dirs: int = 1,
     data: str = "gender",
     method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff"] = "sgd",
-    measurements: tuple[Literal["perplexity", "stereotype"]] = ["perplexity"],
+    measurements: tuple[Literal["perplexity", "stereotype", "profession"]] = ["profession", "perplexity", "stereotype"],
 ):
     model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     for param in model.parameters():
@@ -59,6 +62,8 @@ def run(
             ds = get_corpus(max_samples=2000)
         elif measurement == "stereotype":
             ds = get_stereoset()
+        elif measurement == "profession":
+            ds = get_professions_ds()
         else:
             raise NotImplementedError(f"Measurement {measurement} not implemented")
 
@@ -68,17 +73,19 @@ def run(
 
             if layer_nb == -2:
                 # Not damaged
-                damaged_model = lambda t: model(**t).logits
+                remove_handle = lambda: None
             else:
-                layer = get_layer(model, layer_nb)
-                offset = get_offsets(model, layer, dirs)
-                damaged_model = create_handicaped(dirs, model, layer, additional=offset)
+                remove_handle = project_model_inplace(dirs, model, layer_nb)
 
             if measurement == "perplexity":
+                damaged_model = lambda t: model(**t).logits
                 p = measure_perplexity(damaged_model, ds)
             elif measurement == "stereotype":
+                damaged_model = lambda t: model(**t).logits
                 p = measure_bias_counts(damaged_model, ds)
-
+            elif measurement == "profession":
+                p = measure_profession_polarities(model, ds, "raw_data/debiased_w2v.bin")
+            remove_handle()
             r_dict = {"layer": layer_nb, "p": p}
             print(measurement, r_dict)
             r.append(r_dict)
@@ -94,4 +101,8 @@ if __name__ == "__main__":
 
 # python measurements.py --model_name EleutherAI/pythia-19m --method mean-diff; python measurements.py --model_name EleutherAI/pythia-19m --method she-he; python measurements.py --model_name EleutherAI/pythia-19m;
 
-# python measurements.py --model_name gpt2-xl; python measurements.py --model_name EleutherAI/gpt-j-6B; python measurements.py --model_name gpt2-xl --method she-he; python measurements.py --model_name EleutherAI/gpt-j-6B --method she-he; python measurements.py --model_name gpt2-xl --method rlace; python measurements.py --model_name EleutherAI/gpt-j-6B --method rlace; python measurements.py --model_name gpt2-xl --method inlp; python measurements.py --model_name EleutherAI/gpt-j-6B --method inlp;
+# python measurements.py --model_name gpt2-xl; python measurements.py --model_name EleutherAI/gpt-j-6B; python measurements.py --model_name gpt2-xl --method she-he; python measurements.py --model_name EleutherAI/gpt-j-6B --method she-he; TODO: python measurements.py --model_name gpt2-xl --method rlace; python measurements.py --model_name EleutherAI/gpt-j-6B --method rlace; python measurements.py --model_name gpt2-xl --method inlp; python measurements.py --model_name EleutherAI/gpt-j-6B --method inlp;
+
+# python measurements.py --model_name gpt2 --method mean-diff; python measurements.py --model_name gpt2 --method she-he; python measurements.py --model_name gpt2; python measurements.py --model_name distilgpt2 --method mean-diff; python measurements.py --model_name distilgpt2 --method she-he; python measurements.py --model_name distilgpt2;
+
+# python measurements.py --model_name EleutherAI/gpt-j-6B --method mean-diff; python measurements.py --model_name EleutherAI/gpt-j-6B --method she-he; python measurements.py --model_name EleutherAI/gpt-j-6B;
