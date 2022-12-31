@@ -66,6 +66,7 @@ def run(
             ds = get_professions_ds()
             print({k: len(v) for k, v in ds.items()})
             from gensim.models.keyedvectors import KeyedVectors
+
             w2v = KeyedVectors.load_word2vec_format("raw_data/debiased_w2v.bin", binary=True)
         else:
             raise NotImplementedError(f"Measurement {measurement} not implemented")

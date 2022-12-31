@@ -32,7 +32,7 @@ class _Tokenizer:
     @property
     def eos_token_id(self):
         return _tokenizer.eos_token_id
-    
+
     def batch_decode(self, *args, **kwargs):
         return _tokenizer.batch_decode(*args, **kwargs)
 
