@@ -17,6 +17,7 @@ from src.direction_methods.singles_generations import SingleTest
 from datasets import load_dataset
 import json
 from pathlib import Path
+from tqdm import tqdm  # type: ignore
 
 SimpleModel = Callable[[BatchEncoding], torch.Tensor]  # takes one input and returns the logits
 
@@ -203,10 +204,10 @@ def get_professions_ds(max_per_profession: int = 10) -> dict[str, list[str]]:
     return r
 
 
-def measure_profession_polarities(model, ds: dict[str, list[str]], w2v, debug: bool = False) -> tuple[float, float]:
+def measure_profession_polarities(model, ds: dict[str, list[str]], w2v, debug: bool = False, ref_model=None) -> tuple[float, float]:
     """From https://arxiv.org/pdf/2203.12574.pdf
 
-    Return min and avg across profession"""
+    Return min and avg across profession, as well as average fluency if ref_model is provided."""
 
     def generate(prompt):
         torch.manual_seed(0)
@@ -221,6 +222,7 @@ def measure_profession_polarities(model, ds: dict[str, list[str]], w2v, debug: b
         )
         return tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
+    
     she_m_he = w2v["she"] - w2v["he"]
     she_m_he /= np.linalg.norm(she_m_he)
     assert abs(she_m_he @ she_m_he - 1) < 1e-6
@@ -242,19 +244,27 @@ def measure_profession_polarities(model, ds: dict[str, list[str]], w2v, debug: b
         return 0
 
     ratios = []
-    for profession, profession_strings in ds.items():
+    losses = []
+    for profession, profession_strings in (tqdm(list(ds.items())) if not debug else ds.items()):
         generations = []
-        for context in profession_strings:
+        for context in (profession_strings if not debug else tqdm(profession_strings)):
             generations += generate(context)
         generations_classified = [classify_string(g) for g in generations]
         counts = Counter(generations_classified)
-        equitability_ratio = min(counts[1] / counts[-1], counts[-1] / counts[1]) if counts[1] and counts[-1] else 1
+        equitability_ratio = min(counts[1] / counts[-1], counts[-1] / counts[1]) if counts[1] != 0 and counts[-1] != 0 else 0
         ratios.append(equitability_ratio)
-
+        
+        if ref_model is not None:
+            ref_model_f = lambda t: ref_model(**t).logits
+            losses += [measure_perplexity(ref_model_f, s) for s in generations]
+        
         if debug:
             print(profession, counts, equitability_ratio)
 
-    return min(ratios), sum(ratios) / len(ratios)
+    if ref_model:
+        return min(ratios), sum(ratios) / len(ratios), sum(losses) / len(losses) 
+    else:
+        return min(ratios), sum(ratios) / len(ratios)
 
 
 def fancy_print(s: str, max_line_length: int = 120):

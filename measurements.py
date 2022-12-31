@@ -63,11 +63,12 @@ def run(
         elif measurement == "stereotype":
             ds = get_stereoset()
         elif measurement == "profession":
-            ds = get_professions_ds()
-            print({k: len(v) for k, v in ds.items()})
+            ds = get_professions_ds(max_per_profession=100)
             from gensim.models.keyedvectors import KeyedVectors
 
             w2v = KeyedVectors.load_word2vec_format("raw_data/debiased_w2v.bin", binary=True)
+            
+            ref_model = AutoModelForCausalLM.from_pretrained("gpt2-large").to(device)
         else:
             raise NotImplementedError(f"Measurement {measurement} not implemented")
 
@@ -88,7 +89,7 @@ def run(
                 damaged_model = lambda t: model(**t).logits
                 p = measure_bias_counts(damaged_model, ds)
             elif measurement == "profession":
-                p = measure_profession_polarities(model, ds, w2v)
+                p = measure_profession_polarities(model, ds, w2v, ref_model=ref_model, debug=True)
             remove_handle()
             r_dict = {"layer": layer_nb, "p": p}
             print(measurement, r_dict)
@@ -111,3 +112,7 @@ if __name__ == "__main__":
 # python measurements.py --model_name gpt2 --method mean-diff; python measurements.py --model_name gpt2 --method she-he; python measurements.py --model_name gpt2; python measurements.py --model_name distilgpt2 --method mean-diff; python measurements.py --model_name distilgpt2 --method she-he; python measurements.py --model_name distilgpt2;
 
 # python measurements.py --model_name EleutherAI/gpt-j-6B --method mean-diff; python measurements.py --model_name EleutherAI/gpt-j-6B --method she-he; python measurements.py --model_name EleutherAI/gpt-j-6B;
+
+# python measurements.py --model_name gpt2-xl --measurements profession,; python measurements.py --model_name EleutherAI/gpt-j-6B --measurements profession,; python measurements.py --model_name gpt2-xl --method she-he --measurements profession,; python measurements.py --model_name EleutherAI/gpt-j-6B --method she-he --measurements profession,;
+
+# python measurements.py --model_name distilgpt2 --measurements profession,; python measurements.py --model_name gpt2 --measurements profession,; 
