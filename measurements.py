@@ -64,6 +64,9 @@ def run(
             ds = get_stereoset()
         elif measurement == "profession":
             ds = get_professions_ds()
+            print({k: len(v) for k, v in ds.items()})
+            from gensim.models.keyedvectors import KeyedVectors
+            w2v = KeyedVectors.load_word2vec_format("raw_data/debiased_w2v.bin", binary=True)
         else:
             raise NotImplementedError(f"Measurement {measurement} not implemented")
 
@@ -84,11 +87,12 @@ def run(
                 damaged_model = lambda t: model(**t).logits
                 p = measure_bias_counts(damaged_model, ds)
             elif measurement == "profession":
-                p = measure_profession_polarities(model, ds, "raw_data/debiased_w2v.bin")
+                p = measure_profession_polarities(model, ds, w2v)
             remove_handle()
             r_dict = {"layer": layer_nb, "p": p}
             print(measurement, r_dict)
             r.append(r_dict)
+            # TODO: fix bug
 
         method_suffix = f"-{method}" if method != "sgd" else ""
         measurement_folder = Path(".") / "measurements" / f"v3-{model_name}{method_suffix}"

@@ -164,32 +164,51 @@ def recover_model_inplace(model: nn.Module, old_module: nn.Module, module_name: 
 def project_model_inplace(dirs: torch.Tensor, model: nn.Module, layer_nb: int):
     layer = get_layer(model, layer_nb)
     offsets = get_offsets(model, layer, dirs)
-    projection = lambda t: lambda x: project(x - offsets, dirs) + offsets
+    projection = lambda x: project(x - offsets, dirs) + offsets
     return edit_model_inplace(model, layer, get_layer_name(model, layer_nb), projection, True)
 
-def get_professions_ds() -> dict[str, list[str]]:
+def get_professions_ds(max_per_profession: int = 10) -> dict[str, list[str]]:
     """Use BOLD"""
     
+    professions = ['metalworking_occupations',
+'sewing_occupations',
+'healthcare_occupations',
+'computer_occupations',
+'film_and_television_occupations',
+'artistic_occupations',
+'scientific_occupations',
+'entertainer_occupations',
+'dance_occupations',
+'nursing_specialties',
+'writing_occupations',
+'professional_driver_types',
+'engineering_branches',
+'mental_health_occupations',
+'theatre_personnel',
+'corporate_titles',
+'industrial_occupations',
+'railway_industry_occupations']
+    
     ds = load_dataset("AlexaAI/bold", split="train") # only train is available
-    r = {}
+    r = {p: [] for p in professions}
     for p in ds:
-        if p["category"] not in r:
-            r[p["category"]] = []
-        r[p["category"]] += p["prompts"]
+        if p["category"] in professions:
+            r[p["category"]] += p["prompts"]
+    for k in r:
+        r[k] = r[k][:max_per_profession]
     return r
 
-def measure_profession_polarities(model, ds: dict[str, list[str]], w2v_path: str, debug: bool = True, ) -> tuple[float, float]:
+def measure_profession_polarities(model, ds: dict[str, list[str]], w2v, debug: bool = False) -> tuple[float, float]:
     """From https://arxiv.org/pdf/2203.12574.pdf
     
     Return min and avg across profession"""
     def generate(prompt):
         torch.manual_seed(0)
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
-        outputs = model.generate(input_ids, do_sample=True, top_p=0.9, max_length=100, num_return_sequences=10)
+        outputs = model.generate(input_ids, do_sample=True, top_p=0.9, max_length=100, num_return_sequences=10, pad_token_id=tokenizer.eos_token_id)
         return tokenizer.batch_decode(outputs, skip_special_tokens=True)
     
-    from gensim.models.keyedvectors import KeyedVectors
-    w2v = KeyedVectors.load_word2vec_format(w2v_path, binary=True)
+    
     she_m_he = w2v["she"] - w2v["he"]
     she_m_he /= np.linalg.norm(she_m_he)
     assert abs(she_m_he @ she_m_he - 1) < 1e-6
@@ -221,7 +240,7 @@ def measure_profession_polarities(model, ds: dict[str, list[str]], w2v_path: str
         ratios.append(equitability_ratio)
         
         if debug:
-            print(profession, counts)
+            print(profession, counts, equitability_ratio)
     
     return min(ratios), sum(ratios)/len(ratios)
     
