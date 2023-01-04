@@ -80,7 +80,8 @@ def run(
                 # Not damaged
                 remove_handle = lambda: None
             else:
-                remove_handle = project_model_inplace(dirs, model, layer_nb)
+                auto_gender_balance = data == "gender"
+                remove_handle = project_model_inplace(dirs, model, layer_nb, auto_gender_balance)
 
             if measurement == "perplexity":
                 damaged_model = lambda t: model(**t).logits

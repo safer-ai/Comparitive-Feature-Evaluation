@@ -18,6 +18,7 @@ from datasets import load_dataset
 import json
 from pathlib import Path
 from tqdm import tqdm  # type: ignore
+import countergen as cg
 
 SimpleModel = Callable[[BatchEncoding], torch.Tensor]  # takes one input and returns the logits
 
@@ -163,9 +164,9 @@ def recover_model_inplace(model: nn.Module, old_module: nn.Module, module_name: 
         parent[int(name)] = old_module  # type: ignore
 
 
-def project_model_inplace(dirs: torch.Tensor, model: nn.Module, layer_nb: int):
+def project_model_inplace(dirs: torch.Tensor, model: nn.Module, layer_nb: int, auto_gender_balance: bool = False):
     layer = get_layer(model, layer_nb)
-    offsets = get_offsets(model, layer, dirs)
+    offsets = get_offsets(model, layer, dirs, auto_gender_balance)
     projection = lambda x: project(x - offsets, dirs) + offsets
     return edit_model_inplace(model, layer, get_layer_name(model, layer_nb), projection, True)
 
@@ -758,8 +759,14 @@ def get_embed_dim(model) -> int:
     return get_unembed_matrix(model).shape[1]
 
 
-def get_offsets(model, layer, dirs) -> torch.Tensor:
+def get_offsets(model, layer, dirs, auto_gender_balance: bool = False) -> torch.Tensor:
     reference_text = json.load(Path(f"./raw_data/reference_texts.json").open("r"))
+    
+    if auto_gender_balance:
+        ds = cg.Dataset([cg.Sample(s) for s in reference_text])
+        aug_ds = ds.augment([cg.SimpleAugmenter.from_default("gender")])
+        reference_text = [s.text for aug_s in aug_ds.samples for s in aug_s.get_variations()]
+    
     inp_min_len = min(len(a) for a in tokenizer(reference_text)["input_ids"])
     inpt = tokenizer(reference_text, return_tensors="pt", truncation=True, max_length=inp_min_len).to(device)
     reference_activations = get_activations(
