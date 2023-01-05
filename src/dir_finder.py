@@ -22,6 +22,7 @@ from src.utils import (
     project,
     ProjectionFunc,
 )
+from geom_median.torch import compute_geometric_median
 
 
 @define
@@ -38,7 +39,7 @@ class DirFinder:
     iterations: int = 10_000
     projection_fn: ProjectionFunc = partial(project, strength=1)
     rolling_window_size: int = 400
-    method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff"] = "sgd"
+    method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff"] = "sgd"
     dataset_size: int = 1000  # only for rlace, inlp, and she-he-grad
 
     def find_dirs(self) -> torch.Tensor:
@@ -57,6 +58,8 @@ class DirFinder:
             return self.find_dirs_using_dropout_probe()
         elif self.method == "mean-diff":
             return self.find_dirs_using_mean_diff()
+        elif self.method == "median-diff":
+            return self.find_dirs_using_median_diff()
         else:
             raise NotImplementedError(f"Method {self.method} is not implemented")
 
@@ -183,6 +186,12 @@ class DirFinder:
         print("found mean diff of norm", mean_diff[0].norm().item())
         return normalize(mean_diff).to(self.device)
 
+    def find_dirs_using_median_diff(self) -> torch.Tensor:
+        act_ds = self._get_train_ds()
+        median_diff = compute_geometric_median(act_ds.x_data[act_ds.y_data == 0].cpu()).median - compute_geometric_median(act_ds.x_data[act_ds.y_data == 1].cpu()).median
+        print("found mean diff of norm", median_diff.norm().item())
+        return normalize(median_diff[None, :]).to(self.device)
+    
     def _get_train_ds(self) -> ActivationsDataset:
         return get_act_ds(
             self.model,

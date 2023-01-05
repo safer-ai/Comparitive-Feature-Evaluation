@@ -23,12 +23,13 @@ class DirEvaluator:
     dirs: torch.Tensor
     projection_fn: ProjectionFunc = project
     confusion_fn: ConfusionFn = measure_confusions
+    validate: bool = True
 
     def evaluate(self) -> torch.Tensor:
         return torch.Tensor(
             [
                 self.confusion_fn(
-                    validate(t),
+                    validate(t) if self.validate else t,
                     create_frankenstein(
                         self.dirs,
                         self.model,

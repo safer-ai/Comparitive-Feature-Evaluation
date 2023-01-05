@@ -38,10 +38,10 @@ from src.utils import (
     run_and_modify,
     create_frankenstein,
     measure_confusions,
-    measure_confusions_grad,
-    measure_kl_confusions_grad,
+    measure_kl_confusions,
     measure_confusions_ratio,
     get_layer,
+    get_embed_dim,
 )
 from collections import defaultdict
 from pathlib import Path
@@ -53,8 +53,9 @@ from attrs import evolve
 from tqdm import tqdm  # type: ignore
 
 #%%
-model_name = "gpt2-xl"
-# model_name = "EleutherAI/gpt-j-6B"
+# model_name = "gpt2"
+# model_name = "gpt2-xl"
+model_name = "EleutherAI/gpt-j-6B"
 #%%
 model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 for param in model.parameters():
@@ -91,6 +92,8 @@ hard_gender_tests = [t for t in gender_tests if t.tag in {"X->Y", "Y->X"}]
 french_gender_tests = load("french_gender/test")
 politics_tests = load("politics/test")
 facts_tests = load("facts/test")[:10]
+
+kgender_tests = load("autogender/train")
 #%%
 
 
@@ -112,6 +115,29 @@ def plot_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
         stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
     plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label, **plot_kwargs)
 
+def plot_ktests(tests, dirs_dict, label: str = "", **plot_kwargs):
+    
+    evaluator = DirEvaluator(
+        model,
+        None,  # type: ignore
+        tests,
+        None,  # type: ignore
+        confusion_fn=measure_kl_confusions,
+        validate=False,
+    )
+    means = []
+    stds = []
+    
+    empty = torch.empty(0, get_embed_dim(model)).to(device)
+    base_confusions = evolve(evaluator, layer=get_layer(model, 0), dirs=empty).evaluate()
+
+    for l, dirs in tqdm(dirs_dict.items()):
+        layer = get_layer(model, l)
+        confusions = evolve(evaluator, layer=layer, dirs=dirs).evaluate()
+        success_rate = torch.clip(1 - confusions / base_confusions, 0, 1)
+        means.append(torch.mean(success_rate).item())
+        stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
+    plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label, **plot_kwargs)
 
 def plot_bi_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
     means_p = []
@@ -279,14 +305,21 @@ plt.savefig(f"{figure_folder}/hard_cde.png", bbox_inches="tight")
 # %%
 
 cde_dirs = load_dirs("n1-dpolitics")
+md_dirs = load_dirs("n1-dpolitics", method="mean-diff")
 
 if cde_dirs:
 
-    plot_tests(easy_gender_tests, cde_dirs, "easy gender", alpha=0.3, color="green")
-    plot_tests(hard_gender_tests, cde_dirs, "hard gender", alpha=0.3, color="red")
-    plot_tests(french_gender_tests, cde_dirs, "French gender", alpha=0.3, color="blue")
+    # plot_tests(easy_gender_tests, cde_dirs, "easy gender", alpha=0.3, color="green")
+    # plot_tests(hard_gender_tests, cde_dirs, "hard gender", alpha=0.3, color="red")
+    # plot_tests(french_gender_tests, cde_dirs, "French gender", alpha=0.3, color="blue")
     plot_tests(politics_tests, cde_dirs, "politics", color="purple")
-    plot_tests(facts_tests, cde_dirs, "facts", alpha=0.3, color="orange")
+    # plot_tests(facts_tests, cde_dirs, "facts", alpha=0.3, color="orange")
+    
+    # plot_tests(easy_gender_tests, md_dirs, "easy gender md", linestyle="--", alpha=0.3, color="green")
+    # plot_tests(hard_gender_tests, md_dirs, "hard gender md", linestyle="--", alpha=0.3, color="red")
+    # plot_tests(french_gender_tests, md_dirs, "French gender md", linestyle="--", alpha=0.3, color="blue")
+    plot_tests(politics_tests, md_dirs, "politics md", linestyle="--", color="purple")
+    # plot_tests(facts_tests, md_dirs, "facts md", linestyle="--", alpha=0.3, color="orange")
 
     plt.xlabel("Layer")
     plt.ylabel("Success rate")
@@ -836,4 +869,22 @@ if cde_dirs:
     plt.title("CDE performance with facts direction")
     plt.legend()
     plt.savefig(f"{figure_folder}/bi_facts_cde.png", bbox_inches="tight")
+# %%
+
+plot_ktests(kgender_tests[:10], load_dirs("n1-dgender"), "cde")
+plot_ktests(kgender_tests[:10], load_dirs("n1-dgender", "inlp"), "naive probe")
+plot_ktests(kgender_tests[:10], load_dirs("n1-dgender", "rlace"), "RLACE")
+plot_ktests(kgender_tests[:10], load_dirs("n1-dgender", "she-he"), "she-he")
+plot_ktests(kgender_tests[:10], load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he")
+plot_ktests(kgender_tests[:10], load_dirs("n1-dgender", "dropout-probe"), "dropout-probe")
+plot_ktests(kgender_tests[:10], load_dirs("n1-dgender", "mean-diff"), "mean-diff")
+
+plt.xlabel("Layer")
+plt.ylabel("Success rate")
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color="black", linestyle="--")
+plt.axhline(1, color="black", linestyle="--")
+plt.title("Performances on auto gender tests")
+plt.legend()
+plt.savefig(f"{figure_folder}/autogender.png", bbox_inches="tight")
 # %%
