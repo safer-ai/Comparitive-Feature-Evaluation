@@ -11,12 +11,16 @@ from tqdm import tqdm  # type: ignore
 # %%
 
 
-def generate_pairs(dataset, templates, n=10, n_few_shot=5, example_max_len=400):
+def generate_pairs(dataset, templates, n=10, n_few_shot=5, example_max_len=400, seed=0, test_max_tokens=512, total_max_tokens=1024):
     print(len(dataset))
     pair_generators: list[PairGenerator] = []
+    
+    margin = n
+    np.random.seed(seed)
+    target_indexes = np.random.choice(len(dataset), margin + n, replace=False)
 
     example_max_len = example_max_len or 1e9
-    usable_indexes = [i for i, example in enumerate(dataset) if len(example["text"]) < example_max_len]
+    usable_indexes = [i for i, example in enumerate(dataset) if len(example["text"]) < example_max_len and i not in target_indexes]
 
     i = 0
     j = 0
@@ -31,9 +35,9 @@ def generate_pairs(dataset, templates, n=10, n_few_shot=5, example_max_len=400):
             positive_replacements = {p_answer: [p_answer], n_answer: [n_answer]}
             negative_replacements = {p_answer: [n_answer], n_answer: [p_answer]}
 
-            target_idx = (i + skipped) % len(dataset)
+            target_idx = int(target_indexes[i + skipped])
 
-            if len(tokenizer(dataset[target_idx]["text"])["input_ids"]) > 512:
+            if len(tokenizer(dataset[target_idx]["text"])["input_ids"]) > test_max_tokens:
                 skipped += 1
                 continue
 
@@ -47,7 +51,7 @@ def generate_pairs(dataset, templates, n=10, n_few_shot=5, example_max_len=400):
             prompt = "\n\n".join(f"{p} {{{label}}}" for p, label in [template.apply(dataset[i]) for i in indxs])
 
             margin = 20
-            if len(tokenizer(prompt)["input_ids"]) > 2048 - 512 - margin:
+            if len(tokenizer(prompt)["input_ids"]) > total_max_tokens - test_max_tokens - margin:
                 continue
 
             correct_last_line, correct = template.apply(dataset[target_idx])
@@ -83,7 +87,8 @@ dataset = load_dataset("imdb")
 templates = [t for t in DatasetTemplates("imdb").templates.values() if template_is_correct(t)]
 
 #%%
-for shot in [0, 1, 5, 10]:
+for shot in [0, 1, 5]:
+    print(shot)
 
     path = Path(f"data/imdb_{shot}_shot")
     path.mkdir(parents=True, exist_ok=True)

@@ -39,6 +39,7 @@ class DirFinder:
     iterations: int = 10_000
     projection_fn: ProjectionFunc = partial(project, strength=1)
     rolling_window_size: int = 400
+    last_tok: bool = False
     method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff"] = "sgd"
     dataset_size: int = 1000  # only for rlace, inlp, and she-he-grad
 
@@ -64,6 +65,9 @@ class DirFinder:
             raise NotImplementedError(f"Method {self.method} is not implemented")
 
     def find_dirs_using_sgd(self) -> torch.Tensor:
+        if self.last_tok:
+            raise NotImplementedError()
+        
         data_generator = iter(self.pairs_generator)
 
         dirs = torch.randn((self.n_dirs, self.h_size), device=self.device, requires_grad=True)
@@ -197,6 +201,7 @@ class DirFinder:
             self.model,
             list(islice(self.pairs_generator, self.dataset_size)),
             self.layer,
+            last_tok = self.last_tok,
         )
 
     def _fix_seed(self):

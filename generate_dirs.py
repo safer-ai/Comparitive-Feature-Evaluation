@@ -22,6 +22,7 @@ def run(
     use_cone: bool = False,
     data: str = "gender",
     method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff"] = "sgd",
+    last_tok: bool = False,
 ):
     model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     for param in model.parameters():
@@ -29,11 +30,12 @@ def run(
 
     src.constants._tokenizer = src.constants.get_tokenizer(model)
 
-    print(model_name, layer_nbs, n_dirs, data, use_cone, method)
+    print(model_name, layer_nbs, n_dirs, data, use_cone, method, last_tok)
 
     projection_fn = partial(project_cone, gamma=pi / 2 * 0.95) if use_cone else partial(project, strength=1)
     cone_suffix = "-cone" if use_cone else ""
     method_suffix = f"-{method}" if method != "sgd" else ""
+    last_tok_suffix = "-lt" if last_tok else ""
 
     h_size: int = get_embed_dim(model)
 
@@ -59,10 +61,11 @@ def run(
             n_dirs,
             projection_fn=projection_fn,
             method=method,
+            last_tok=last_tok,
         ).find_dirs()
 
         file_name = f"l{layer_nb}-n{n_dirs}-d{data}.pt"
-        dir_path = Path(".") / "saved_dirs" / f"v3-{model_name}{cone_suffix}{method_suffix}"
+        dir_path = Path(".") / "saved_dirs" / f"v3-{model_name}{cone_suffix}{method_suffix}{last_tok_suffix}"
         dir_path.mkdir(parents=True, exist_ok=True)
         path = dir_path / file_name
 
@@ -91,3 +94,6 @@ if __name__ == "__main__":
 # python generate_dirs.py --model_name EleutherAI/pythia-19m --method mean-diff; python generate_dirs.py --model_name EleutherAI/pythia-125m --method mean-diff; python generate_dirs.py --model_name EleutherAI/pythia-350m --method mean-diff; python generate_dirs.py --model_name EleutherAI/pythia-800m --method mean-diff; python generate_dirs.py --model_name EleutherAI/pythia-1.3b --method mean-diff; python generate_dirs.py --model_name EleutherAI/pythia-2.7b --method mean-diff; python generate_dirs.py --model_name EleutherAI/pythia-6.7b --method mean-diff; python generate_dirs.py --model_name EleutherAI/pythia-13b --method mean-diff; python generate_dirs.py --model_name EleutherAI/pythia-19m --method she-he; python generate_dirs.py --model_name EleutherAI/pythia-125m --method she-he; python generate_dirs.py --model_name EleutherAI/pythia-350m --method she-he; python generate_dirs.py --model_name EleutherAI/pythia-800m --method she-he; python generate_dirs.py --model_name EleutherAI/pythia-1.3b --method she-he; python generate_dirs.py --model_name EleutherAI/pythia-2.7b --method she-he; python generate_dirs.py --model_name EleutherAI/pythia-6.7b --method she-he; python generate_dirs.py --model_name EleutherAI/pythia-13b --method she-he;
 
 # python generate_dirs.py --model_name gpt2; python generate_dirs.py --model_name gpt2 --method mean-diff; generate_dirs.py --model_name gpt2 --method she-he; python generate_dirs.py --model_name distilgpt2; python generate_dirs.py --model_name distilgpt2 --method mean-diff; generate_dirs.py --model_name distilgpt2 --method she-he;
+
+# python generate_dirs.py --model_name gpt2-xl --data imdb_5_shot --method mean-diff --last_tok True
+# python generate_dirs.py --model_name EleutherAI/gpt-j-6B --data imdb_5_shot --method mean-diff --last_tok True

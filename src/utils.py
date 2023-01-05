@@ -384,8 +384,11 @@ def measure_confusions(test, model: FrankenSteinModel):
         return measure_confusions_grad(test, model).item()
 
 
-def measure_kl_confusions_grad(test, model: FrankenSteinModel):
+def measure_kl_confusions_grad(test, model: FrankenSteinModel, last_tok: bool = False):
     outs_mixed_raw = compute_tests_results(test, model)
+    
+    if last_tok:
+        outs_mixed_raw = outs_mixed_raw[:, :, -2:-1]
 
     return torch.nn.KLDivLoss(log_target=True, reduction="batchmean")(
         outs_mixed_raw[[0, 3]], outs_mixed_raw[[1, 2]]
@@ -644,27 +647,23 @@ def measure_bias_counts(model: SimpleModel, strings: list[tuple[str, tuple[str, 
     return counts
 
 
-def get_act_ds(model, tests: Sequence[Union[Test, Pair]], layer):
+def get_act_ds(model, tests: Sequence[Union[Test, Pair]], layer, last_tok: bool = False):
     positives = [t.positive.prompt for t in tests]
     negatives = [t.negative.prompt for t in tests]
-    positive_acts = [
-        get_activations(
+    
+    def get_act(texts):
+        processing = lambda t: (t.reshape((-1, t.shape[-1]))[-1:] if last_tok else t.reshape((-1, t.shape[-1])))
+        
+        return [get_activations(
             tokenizer(text, return_tensors="pt"),
             model,
             [layer],
-            lambda t: t.reshape((-1, t.shape[-1])),
-        )[layer]
-        for text in positives
-    ]
-    negative_acts = [
-        get_activations(
-            tokenizer(text, return_tensors="pt"),
-            model,
-            [layer],
-            lambda t: t.reshape((-1, t.shape[-1])),
-        )[layer]
-        for text in negatives
-    ]
+            processing,
+        )[layer] for text in texts]
+    
+    positive_acts = get_act(positives)
+    negative_acts = get_act(negatives)
+    
     x_data = torch.cat(positive_acts + negative_acts).to(device)
     y_data = torch.zeros(len(x_data), dtype=torch.long).to(device)
     y_data[len(x_data) // 2 :] = 1
