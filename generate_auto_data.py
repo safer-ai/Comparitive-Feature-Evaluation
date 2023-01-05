@@ -110,16 +110,3 @@ def load_dirs(name: str, method: str = ""):
         ]
         if path.exists()
     }
-
-#%%
-dirs1 = load_dirs("n1-dgender", method="mean-diff")
-dirs2 = load_dirs("n1-dautogender", method="mean-diff")
-for k in dirs2:
-    print(k, dirs1[k][0] @ dirs2[k][0])
-# %%
-
-dirs1 = load_dirs("n1-dgender")
-dirs2 = load_dirs("n1-dautogender")
-for k in dirs2:
-    print(k, dirs1[k][0] @ dirs2[k][0])
-# %%
