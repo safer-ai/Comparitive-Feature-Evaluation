@@ -163,10 +163,14 @@ def recover_model_inplace(model: nn.Module, old_module: nn.Module, module_name: 
         parent[int(name)] = old_module  # type: ignore
 
 
-def project_model_inplace(dirs: torch.Tensor, model: nn.Module, layer_nb: int):
+def project_model_inplace(dirs: torch.Tensor, model: nn.Module, layer_nb: int, random_ablation: bool = False):
     layer = get_layer(model, layer_nb)
-    offsets = get_offsets(model, layer, dirs)
-    projection = lambda x: project(x - offsets, dirs) + offsets
+    if random_ablation:
+        offsets, variations = get_offsets_and_variations(model, layer, dirs)
+        projection = lambda x: project(x - offsets, dirs) + variations(x)
+    else:
+        offsets = get_offsets(model, layer, dirs)
+        projection = lambda x: project(x - offsets, dirs) + offsets
     return edit_model_inplace(model, layer, get_layer_name(model, layer_nb), projection, True)
 
 
@@ -777,3 +781,25 @@ def get_offsets(model, layer, dirs) -> torch.Tensor:
 
     means = torch.mean(torch.einsum("n h, m h -> m n", dirs, reference_activations), dim=0)
     return torch.einsum("n h, n -> h", dirs, means)
+
+def get_offsets_and_variations(model, layer, dirs) -> tuple[torch.Tensor, Callable[[torch.Tensor], torch.Tensor]]:
+    reference_text = json.load(Path(f"./raw_data/reference_texts.json").open("r"))
+
+    inp_min_len = min(len(a) for a in tokenizer(reference_text)["input_ids"])
+    inpt = tokenizer(reference_text, return_tensors="pt", truncation=True, max_length=inp_min_len).to(device)
+    reference_activations = get_activations(
+        inpt,
+        model,
+        [layer],
+    )[layer]
+    reference_activations = reference_activations.reshape((-1, reference_activations.shape[-1]))
+
+    projected_acts = torch.einsum("n h, m h -> m n", dirs, reference_activations)
+    means = torch.mean(projected_acts, dim=0)
+    stds = torch.std(projected_acts, dim=0)
+    offsets = torch.einsum("n h, n -> h", dirs, means)
+    def variations(x: torch.Tensor) -> torch.Tensor:
+        normaly_distributed = torch.randn(x.shape[:-1] + stds.shape, device=x.device)
+        centered_variations = torch.einsum("... n, n -> ... n", normaly_distributed, stds)
+        return torch.einsum("n h, ... n -> ... h", dirs, centered_variations) + offsets
+    return offsets, variations

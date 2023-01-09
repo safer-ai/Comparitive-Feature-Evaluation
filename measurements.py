@@ -45,7 +45,8 @@ def run(
     n_dirs: int = 1,
     data: str = "gender",
     method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff"] = "sgd",
-    measurements: tuple[Literal["perplexity", "stereotype", "profession"]] = ["profession", "perplexity", "stereotype"],
+    random_ablation: bool = False,
+    measurements: tuple[Literal["perplexity", "stereotype", "profession"]] = ["perplexity", "stereotype", "profession"],
 ):
     model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     for param in model.parameters():
@@ -53,7 +54,7 @@ def run(
 
     src.constants._tokenizer = src.constants.get_tokenizer(model)
 
-    print(model_name, n_dirs, data, method, measurements)
+    print(model_name, n_dirs, data, method, random_ablation, measurements)
 
     for measurement in measurements:
         r = []
@@ -80,7 +81,7 @@ def run(
                 # Not damaged
                 remove_handle = lambda: None
             else:
-                remove_handle = project_model_inplace(dirs, model, layer_nb)
+                remove_handle = project_model_inplace(dirs, model, layer_nb, random_ablation=random_ablation)
 
             if measurement == "perplexity":
                 damaged_model = lambda t: model(**t).logits
@@ -97,6 +98,8 @@ def run(
             # TODO: fix bug
 
         method_suffix = f"-{method}" if method != "sgd" else ""
+        if random_ablation:
+            method_suffix += "-ra"
         measurement_folder = Path(".") / "measurements" / f"v3-{model_name}{method_suffix}"
         measurement_folder.mkdir(parents=True, exist_ok=True)
         json.dump(r, (measurement_folder / f"{measurement}.json").open("w"))
@@ -117,4 +120,4 @@ if __name__ == "__main__":
 
 # python measurements.py --model_name distilgpt2 --measurements profession,; python measurements.py --model_name gpt2 --measurements profession,;
 
-# python measurements.py --model_name EleutherAI/gpt-j-6B --measurements profession,; python measurements.py --model_name gpt2-xl --measurements profession,;
+# python measurements.py --model_name distilgpt2 --measurements stereotype, --random_ablation True; python measurements.py --model_name EleutherAI/gpt-j-6B --measurements stereotype, --random_ablation True; python measurements.py --model_name gpt2-xl --measurements stereotype, --random_ablation True; python measurements.py --model_name EleutherAI/gpt-j-6B --measurements perplexity, --random_ablation True; python measurements.py --model_name gpt2-xl --measurements perplexity, --random_ablation True; python measurements.py --model_name EleutherAI/gpt-j-6B --measurements profession, --random_ablation True; python measurements.py --model_name gpt2-xl --measurements profession, --random_ablation True;
