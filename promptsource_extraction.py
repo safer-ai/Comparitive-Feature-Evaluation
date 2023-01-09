@@ -5,7 +5,7 @@ import numpy as np
 import json
 from datasets import load_dataset
 from promptsource.templates import DatasetTemplates
-from src.constants import tokenizer
+from src.constants import tokenizer, all_tokenizers
 from tqdm import tqdm  # type: ignore
 
 # %%
@@ -80,7 +80,7 @@ def generate_pairs(dataset, templates, n=10, n_few_shot=5, example_max_len=400, 
 
 def template_is_correct(template):
     p, n = template.answer_choices.split(" ||| ")
-    return len(tokenizer(" " + p)["input_ids"]) == 1 and len(tokenizer(" " + n)["input_ids"]) == 1
+    return all(len(tok(" " + p)["input_ids"]) == 1 and len(tok(" " + n)["input_ids"]) == 1 for tok in all_tokenizers)
 
 
 dataset = load_dataset("imdb")
@@ -90,15 +90,15 @@ templates = [t for t in DatasetTemplates("imdb").templates.values() if template_
 for shot in [0, 1, 5]:
     print(shot)
 
-    path = Path(f"data/imdb_{shot}_shot")
+    path = Path(f"data/imdb_{shot}_shot_v3")
     path.mkdir(parents=True, exist_ok=True)
 
     json.dump(
-        generate_pairs(dataset["test"], [templates[1]], n=100, n_few_shot=shot).to_dict(),
+        generate_pairs(dataset["test"], templates, n=100, n_few_shot=shot).to_dict(),
         (path / "test.json").open("w"),
     )
     json.dump(
-        generate_pairs(dataset["train"], [templates[1]], n=1000, n_few_shot=shot).to_dict(),
+        generate_pairs(dataset["train"], templates, n=1000, n_few_shot=shot).to_dict(),
         (path / "train.json").open("w"),
     )
 

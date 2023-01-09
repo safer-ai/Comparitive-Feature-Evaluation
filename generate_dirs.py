@@ -97,3 +97,4 @@ if __name__ == "__main__":
 
 # python generate_dirs.py --model_name gpt2-xl --data imdb_5_shot --method mean-diff --last_tok True
 # python generate_dirs.py --model_name EleutherAI/gpt-j-6B --data imdb_5_shot --method mean-diff --last_tok True
+# python generate_dirs.py --model_name gpt2-xl --data imdb_5_shot_v2 --method mean-diff --last_tok True; python generate_dirs.py --model_name EleutherAI/gpt-j-6B --data imdb_5_shot_v2 --method mean-diff --last_tok True
