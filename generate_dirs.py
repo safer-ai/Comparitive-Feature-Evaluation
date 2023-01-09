@@ -22,7 +22,7 @@ def run(
     use_cone: bool = False,
     data: str = "gender",
     method: Literal[
-        "sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff"
+        "sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff", "mean-diff-norm", "mean-diff-std"
     ] = "sgd",
     last_tok: bool = False,
 ):

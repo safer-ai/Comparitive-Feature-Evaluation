@@ -655,7 +655,7 @@ def get_act_ds(model, tests: Sequence[Union[Test, Pair]], layer, last_tok: bool 
     negatives = [t.negative.prompt for t in tests]
 
     def get_act(texts):
-        processing = lambda t: (t.reshape((-1, t.shape[-1]))[-1:] if last_tok else t.reshape((-1, t.shape[-1])))
+        processing = (lambda t: (t.reshape((-1, t.shape[-1]))[-1:]) if last_tok else (lambda t: t.reshape((-1, t.shape[-1]))))
 
         return [
             get_activations(
