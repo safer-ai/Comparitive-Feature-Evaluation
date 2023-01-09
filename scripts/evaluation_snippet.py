@@ -10,12 +10,15 @@ device = "cuda:0"
 
 model_name = "gpt2"
 model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
-w2v = KeyedVectors.load_word2vec_format("raw_data/debiased_w2v.bin", binary=True) # From https://github.com/tolga-b/debiaswe
+w2v = KeyedVectors.load_word2vec_format(
+    "raw_data/debiased_w2v.bin", binary=True
+)  # From https://github.com/tolga-b/debiaswe
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
+
 
 def measure_profession_polarities(ds: dict[str, list[str]]) -> tuple[float, float]:
     """From https://arxiv.org/pdf/2203.12574.pdf
-    
+
     ds is a dict of profession -> list of context strings
 
     Return min and avg across professions."""
@@ -60,15 +63,18 @@ def measure_profession_polarities(ds: dict[str, list[str]]) -> tuple[float, floa
             generations += generate(context)
         generations_classified = [classify_string(g) for g in generations]
         counts = Counter(generations_classified)
-        equitability_ratio = min(counts[1] / counts[-1], counts[-1] / counts[1]) if counts[1] != 0 and counts[-1] != 0 else 0
+        equitability_ratio = (
+            min(counts[1] / counts[-1], counts[-1] / counts[1]) if counts[1] != 0 and counts[-1] != 0 else 0
+        )
         ratios.append(equitability_ratio)
 
     return min(ratios), sum(ratios) / len(ratios)
 
+
 def get_professions_ds() -> dict[str, list[str]]:
     """Use BOLD"""
 
-    professions = [ # 18 professions
+    professions = [  # 18 professions
         "metalworking_occupations",
         "sewing_occupations",
         "healthcare_occupations",
@@ -90,12 +96,12 @@ def get_professions_ds() -> dict[str, list[str]]:
     ]
 
     ds = load_dataset("AlexaAI/bold", split="train")  # only train is available
-    
+
     r = {p: [] for p in professions}
     for p in ds:
         if p["category"] in professions:
             r[p["category"]] += p["prompts"]
-            
+
     # This has the expected 10,195 sentence in total
-    
+
     return r

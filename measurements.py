@@ -67,7 +67,7 @@ def run(
             from gensim.models.keyedvectors import KeyedVectors
 
             w2v = KeyedVectors.load_word2vec_format("raw_data/debiased_w2v.bin", binary=True)
-            
+
             ref_model = AutoModelForCausalLM.from_pretrained("gpt2-large").to(device)
         else:
             raise NotImplementedError(f"Measurement {measurement} not implemented")
@@ -115,6 +115,6 @@ if __name__ == "__main__":
 
 # python measurements.py --model_name gpt2-xl --measurements profession,; python measurements.py --model_name EleutherAI/gpt-j-6B --measurements profession,; python measurements.py --model_name gpt2-xl --method she-he --measurements profession,; python measurements.py --model_name EleutherAI/gpt-j-6B --method she-he --measurements profession,;
 
-# python measurements.py --model_name distilgpt2 --measurements profession,; python measurements.py --model_name gpt2 --measurements profession,; 
+# python measurements.py --model_name distilgpt2 --measurements profession,; python measurements.py --model_name gpt2 --measurements profession,;
 
-# python measurements.py --model_name EleutherAI/gpt-j-6B --measurements profession,; python measurements.py --model_name gpt2-xl --measurements profession,; 
+# python measurements.py --model_name EleutherAI/gpt-j-6B --measurements profession,; python measurements.py --model_name gpt2-xl --measurements profession,;

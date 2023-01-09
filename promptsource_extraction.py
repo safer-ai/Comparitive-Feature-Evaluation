@@ -11,16 +11,20 @@ from tqdm import tqdm  # type: ignore
 # %%
 
 
-def generate_pairs(dataset, templates, n=10, n_few_shot=5, example_max_len=400, seed=0, test_max_tokens=512, total_max_tokens=1024):
+def generate_pairs(
+    dataset, templates, n=10, n_few_shot=5, example_max_len=400, seed=0, test_max_tokens=512, total_max_tokens=1024
+):
     print(len(dataset))
     pair_generators: list[PairGenerator] = []
-    
+
     margin = n
     np.random.seed(seed)
     target_indexes = np.random.choice(len(dataset), margin + n, replace=False)
 
     example_max_len = example_max_len or 1e9
-    usable_indexes = [i for i, example in enumerate(dataset) if len(example["text"]) < example_max_len and i not in target_indexes]
+    usable_indexes = [
+        i for i, example in enumerate(dataset) if len(example["text"]) < example_max_len and i not in target_indexes
+    ]
 
     i = 0
     j = 0

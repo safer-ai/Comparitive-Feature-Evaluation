@@ -9,38 +9,39 @@ augmenter = cg.SimpleAugmenter.from_ds(
     cg.augmentation.simple_augmenter.ConversionDataset(
         ("male", "female"),
         [
-        [["he"], ["she"]],
-        [["his"], ["her"]],
-        [["him"], ["her"]],
-        [["himself"], ["herself"]],
-        [["gods"], ["goddesses"]],
-        [["manager"], ["manageress"]],
-        [["barons"], ["baronesses"]],
-        [["nephew"], ["niece"]],
-        [["prince"], ["princess"]],
-        [["boars"], ["sows"]],
-        [["baron"], ["baroness"]],
-        [["stepfathers"], ["stepmothers"]],
-        [["wizard"], ["witch"]],
-        [["father"], ["mother"]],
-        [["stepsons"], ["stepdaughters"]],
-        [["sons-in-law"], ["daughters-in-law"]],
-        [["dukes"], ["duchesses"]],
-        [["boyfriend"], ["girlfriend"]],
-        [["schoolboy"], ["schoolgirl"]],
-        [["fiances"], ["fiancees"]],
-        [["dad"], ["mom"]],
-        [["daddy"], ["mommy"]],
-        [["shepherd"], ["shepherdess"]],
-        [["uncles"], ["aunts"]],
-        [["beau"], ["belle"]],
-        [["males"], ["females"]],
-        [["hunter"], ["huntress"]],
-        [["beaus"], ["belles"]],
-        [["grandfathers"], ["grandmothers"]],
-        [["lads"], ["lasses"]],
-        [["daddies"], ["mummies"]],
-        [["step-son"], ["step-daughter"]]],
+            [["he"], ["she"]],
+            [["his"], ["her"]],
+            [["him"], ["her"]],
+            [["himself"], ["herself"]],
+            [["gods"], ["goddesses"]],
+            [["manager"], ["manageress"]],
+            [["barons"], ["baronesses"]],
+            [["nephew"], ["niece"]],
+            [["prince"], ["princess"]],
+            [["boars"], ["sows"]],
+            [["baron"], ["baroness"]],
+            [["stepfathers"], ["stepmothers"]],
+            [["wizard"], ["witch"]],
+            [["father"], ["mother"]],
+            [["stepsons"], ["stepdaughters"]],
+            [["sons-in-law"], ["daughters-in-law"]],
+            [["dukes"], ["duchesses"]],
+            [["boyfriend"], ["girlfriend"]],
+            [["schoolboy"], ["schoolgirl"]],
+            [["fiances"], ["fiancees"]],
+            [["dad"], ["mom"]],
+            [["daddy"], ["mommy"]],
+            [["shepherd"], ["shepherdess"]],
+            [["uncles"], ["aunts"]],
+            [["beau"], ["belle"]],
+            [["males"], ["females"]],
+            [["hunter"], ["huntress"]],
+            [["beaus"], ["belles"]],
+            [["grandfathers"], ["grandmothers"]],
+            [["lads"], ["lasses"]],
+            [["daddies"], ["mummies"]],
+            [["step-son"], ["step-daughter"]],
+        ],
     )
 )
 aug_ds = ds.augment([augmenter])
@@ -78,12 +79,7 @@ from src.data_generation import PairGeneratorDataset, PairGenerator
 import json
 from pathlib import Path
 
-pair_gens = [
-    PairGenerator(
-        "{p}", positive_replacements={"p": [p]}, negative_replacements={"p": [n]}
-    )
-    for p, n in pairs
-]
+pair_gens = [PairGenerator("{p}", positive_replacements={"p": [p]}, negative_replacements={"p": [n]}) for p, n in pairs]
 
 ds = PairGeneratorDataset(generators=pair_gens)
 path = Path("data/autogender")
@@ -104,9 +100,6 @@ def load_dirs(name: str, method: str = ""):
 
     return {
         l: torch.load(path).to(device)
-        for l, path in [
-            (l, Path(f"./saved_dirs/v3-{model_name}{method_suffix}/l{l}-{name}.pt"))
-            for l in range(80)
-        ]
+        for l, path in [(l, Path(f"./saved_dirs/v3-{model_name}{method_suffix}/l{l}-{name}.pt")) for l in range(80)]
         if path.exists()
     }

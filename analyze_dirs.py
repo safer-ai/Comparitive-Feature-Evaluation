@@ -115,8 +115,9 @@ def plot_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
         stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
     plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label, **plot_kwargs)
 
+
 def plot_ktests(tests, dirs_dict, label: str = "", **plot_kwargs):
-    
+
     evaluator = DirEvaluator(
         model,
         None,  # type: ignore
@@ -127,7 +128,7 @@ def plot_ktests(tests, dirs_dict, label: str = "", **plot_kwargs):
     )
     means = []
     stds = []
-    
+
     empty = torch.empty(0, get_embed_dim(model)).to(device)
     base_confusions = evolve(evaluator, layer=get_layer(model, 0), dirs=empty).evaluate()
 
@@ -138,6 +139,7 @@ def plot_ktests(tests, dirs_dict, label: str = "", **plot_kwargs):
         means.append(torch.mean(success_rate).item())
         stds.append(torch.std(success_rate).item() / np.sqrt(len(success_rate)))
     plt.errorbar(dirs_dict.keys(), means, yerr=stds, capsize=3, label=label, **plot_kwargs)
+
 
 def plot_bi_tests(tests, dirs_dict, label: str = "", **plot_kwargs):
     means_p = []
@@ -314,7 +316,7 @@ if cde_dirs:
     # plot_tests(french_gender_tests, cde_dirs, "French gender", alpha=0.3, color="blue")
     plot_tests(politics_tests, cde_dirs, "politics", color="purple")
     # plot_tests(facts_tests, cde_dirs, "facts", alpha=0.3, color="orange")
-    
+
     # plot_tests(easy_gender_tests, md_dirs, "easy gender md", linestyle="--", alpha=0.3, color="green")
     # plot_tests(hard_gender_tests, md_dirs, "hard gender md", linestyle="--", alpha=0.3, color="red")
     # plot_tests(french_gender_tests, md_dirs, "French gender md", linestyle="--", alpha=0.3, color="blue")

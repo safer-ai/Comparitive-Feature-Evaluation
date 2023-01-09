@@ -40,7 +40,9 @@ class DirFinder:
     projection_fn: ProjectionFunc = partial(project, strength=1)
     rolling_window_size: int = 400
     last_tok: bool = False
-    method: Literal["sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff"] = "sgd"
+    method: Literal[
+        "sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff", "mean-diff-norm"
+    ] = "sgd"
     dataset_size: int = 1000  # only for rlace, inlp, and she-he-grad
 
     def find_dirs(self) -> torch.Tensor:
@@ -61,13 +63,15 @@ class DirFinder:
             return self.find_dirs_using_mean_diff()
         elif self.method == "median-diff":
             return self.find_dirs_using_median_diff()
+        elif self.method == "mean-diff-norm":
+            return self.find_dirs_using_mean_diff_norm()
         else:
             raise NotImplementedError(f"Method {self.method} is not implemented")
 
     def find_dirs_using_sgd(self) -> torch.Tensor:
         if self.last_tok:
             raise NotImplementedError()
-        
+
         data_generator = iter(self.pairs_generator)
 
         dirs = torch.randn((self.n_dirs, self.h_size), device=self.device, requires_grad=True)
@@ -192,16 +196,27 @@ class DirFinder:
 
     def find_dirs_using_median_diff(self) -> torch.Tensor:
         act_ds = self._get_train_ds()
-        median_diff = compute_geometric_median(act_ds.x_data[act_ds.y_data == 0].cpu()).median - compute_geometric_median(act_ds.x_data[act_ds.y_data == 1].cpu()).median
+        median_diff = (
+            compute_geometric_median(act_ds.x_data[act_ds.y_data == 0].cpu()).median
+            - compute_geometric_median(act_ds.x_data[act_ds.y_data == 1].cpu()).median
+        )
         print("found mean diff of norm", median_diff.norm().item())
         return normalize(median_diff[None, :]).to(self.device)
-    
+
+    def find_dirs_using_mean_diff_norm(self) -> torch.Tensor:
+        act_ds = self._get_train_ds()
+        normalized_ds = normalize(act_ds.x_data)
+        mean_diff = torch.mean(normalized_ds[act_ds.y_data == 0], dim=0, keepdim=True) - torch.mean(
+            normalized_ds[act_ds.y_data == 1], dim=0, keepdim=True
+        )
+        return normalize(mean_diff).to(self.device)
+
     def _get_train_ds(self) -> ActivationsDataset:
         return get_act_ds(
             self.model,
             list(islice(self.pairs_generator, self.dataset_size)),
             self.layer,
-            last_tok = self.last_tok,
+            last_tok=self.last_tok,
         )
 
     def _fix_seed(self):

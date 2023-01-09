@@ -204,7 +204,9 @@ def get_professions_ds(max_per_profession: int = 10) -> dict[str, list[str]]:
     return r
 
 
-def measure_profession_polarities(model, ds: dict[str, list[str]], w2v, debug: bool = False, ref_model=None) -> tuple[float, float]:
+def measure_profession_polarities(
+    model, ds: dict[str, list[str]], w2v, debug: bool = False, ref_model=None
+) -> tuple[float, float]:
     """From https://arxiv.org/pdf/2203.12574.pdf
 
     Return min and avg across profession, as well as average fluency if ref_model is provided."""
@@ -222,7 +224,6 @@ def measure_profession_polarities(model, ds: dict[str, list[str]], w2v, debug: b
         )
         return tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
-    
     she_m_he = w2v["she"] - w2v["he"]
     she_m_he /= np.linalg.norm(she_m_he)
     assert abs(she_m_he @ she_m_he - 1) < 1e-6
@@ -245,24 +246,26 @@ def measure_profession_polarities(model, ds: dict[str, list[str]], w2v, debug: b
 
     ratios = []
     losses = []
-    for profession, profession_strings in (tqdm(list(ds.items())) if not debug else ds.items()):
+    for profession, profession_strings in tqdm(list(ds.items())) if not debug else ds.items():
         generations = []
-        for context in (profession_strings if not debug else tqdm(profession_strings)):
+        for context in profession_strings if not debug else tqdm(profession_strings):
             generations += generate(context)
         generations_classified = [classify_string(g) for g in generations]
         counts = Counter(generations_classified)
-        equitability_ratio = min(counts[1] / counts[-1], counts[-1] / counts[1]) if counts[1] != 0 and counts[-1] != 0 else 0
+        equitability_ratio = (
+            min(counts[1] / counts[-1], counts[-1] / counts[1]) if counts[1] != 0 and counts[-1] != 0 else 0
+        )
         ratios.append(equitability_ratio)
-        
+
         if ref_model is not None:
             ref_model_f = lambda t: ref_model(**t).logits
             losses += [measure_perplexity(ref_model_f, s) for s in generations]
-        
+
         if debug:
             print(profession, counts, equitability_ratio)
 
     if ref_model:
-        return min(ratios), sum(ratios) / len(ratios), sum(losses) / len(losses) 
+        return min(ratios), sum(ratios) / len(ratios), sum(losses) / len(losses)
     else:
         return min(ratios), sum(ratios) / len(ratios)
 
@@ -386,7 +389,7 @@ def measure_confusions(test, model: FrankenSteinModel):
 
 def measure_kl_confusions_grad(test, model: FrankenSteinModel, last_tok: bool = False):
     outs_mixed_raw = compute_tests_results(test, model)
-    
+
     if last_tok:
         outs_mixed_raw = outs_mixed_raw[:, :, -2:-1]
 
@@ -650,20 +653,23 @@ def measure_bias_counts(model: SimpleModel, strings: list[tuple[str, tuple[str, 
 def get_act_ds(model, tests: Sequence[Union[Test, Pair]], layer, last_tok: bool = False):
     positives = [t.positive.prompt for t in tests]
     negatives = [t.negative.prompt for t in tests]
-    
+
     def get_act(texts):
         processing = lambda t: (t.reshape((-1, t.shape[-1]))[-1:] if last_tok else t.reshape((-1, t.shape[-1])))
-        
-        return [get_activations(
-            tokenizer(text, return_tensors="pt"),
-            model,
-            [layer],
-            processing,
-        )[layer] for text in texts]
-    
+
+        return [
+            get_activations(
+                tokenizer(text, return_tensors="pt"),
+                model,
+                [layer],
+                processing,
+            )[layer]
+            for text in texts
+        ]
+
     positive_acts = get_act(positives)
     negative_acts = get_act(negatives)
-    
+
     x_data = torch.cat(positive_acts + negative_acts).to(device)
     y_data = torch.zeros(len(x_data), dtype=torch.long).to(device)
     y_data[len(x_data) // 2 :] = 1
@@ -759,7 +765,7 @@ def get_embed_dim(model) -> int:
 
 def get_offsets(model, layer, dirs) -> torch.Tensor:
     reference_text = json.load(Path(f"./raw_data/reference_texts.json").open("r"))
-    
+
     inp_min_len = min(len(a) for a in tokenizer(reference_text)["input_ids"])
     inpt = tokenizer(reference_text, return_tensors="pt", truncation=True, max_length=inp_min_len).to(device)
     reference_activations = get_activations(

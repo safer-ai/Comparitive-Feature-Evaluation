@@ -2,19 +2,16 @@
 import json
 from pathlib import Path
 import matplotlib.pyplot as plt
+
 #%%
 models = ["gpt2-xl", "EleutherAI/gpt-j-6B"]
-all_methods = {
-    "": "CDE",
-    "-inlp": "probe",
-    "-rlace": "RLACE",
-    "-she-he": "logit lens"
-}
+all_methods = {"": "CDE", "-inlp": "probe", "-rlace": "RLACE", "-she-he": "logit lens"}
 
 figure_folder = Path("figures/measurement_plots")
 figure_folder.mkdir(exist_ok=True, parents=True)
 
-def load_results(model:str, result_type:str):
+
+def load_results(model: str, result_type: str):
     results = {}
     for method, method_name in all_methods.items():
         path = Path(f"measurements/v3-{model}{method}/{result_type}.json")
@@ -22,7 +19,9 @@ def load_results(model:str, result_type:str):
             results[method_name] = json.load(path.open("r"))
     return results
 
+
 # %%
+
 
 def plot_perplexity(model):
     results = load_results(model, "perplexity")
@@ -35,7 +34,7 @@ def plot_perplexity(model):
     ref_val = ref["p"]
     plt.axhline(ref_val, label="without ablation", color="black", linestyle="--")
     plt.ylim(ref_val * 0.9, ref_val * 1.1)
-    
+
     plt.title(model)
     plt.xlabel("Layer")
     plt.ylabel("Perplexity")
@@ -43,6 +42,7 @@ def plot_perplexity(model):
     folder = figure_folder / model
     folder.mkdir(exist_ok=True, parents=True)
     plt.savefig(f"{figure_folder}/{model}/perplexity.png", bbox_inches="tight")
+
 
 for model in models:
     plot_perplexity(model)
@@ -62,7 +62,7 @@ def plot_stereotypes(model):
     plt.axhline(ref_val, label="without ablation", color="black", linestyle="--")
     plt.axhline(0.5, label="as much stereotypes as anti stereotypes", color="gray", linestyle=":")
     plt.ylim(0.48, ref_val * 1.1)
-    
+
     plt.title(model)
     plt.xlabel("Layer")
     plt.ylabel("Ratio of stereotype sentences")
@@ -70,6 +70,7 @@ def plot_stereotypes(model):
     folder = figure_folder / model
     folder.mkdir(exist_ok=True, parents=True)
     plt.savefig(f"{figure_folder}/{model}/stereotype.png", bbox_inches="tight")
+
 
 for model in models:
     plot_stereotypes(model)
@@ -90,7 +91,7 @@ def plot_professions(model):
     plt.axhline(0, color="gray", linestyle=":")
     plt.axhline(1, color="gray", linestyle=":")
     plt.ylim(-0.1, 1.1)
-    
+
     plt.title(model)
     plt.xlabel("Layer")
     plt.ylabel("Average equity score")
@@ -98,6 +99,7 @@ def plot_professions(model):
     folder = figure_folder / model
     folder.mkdir(exist_ok=True, parents=True)
     plt.savefig(f"{figure_folder}/{model}/professions.png", bbox_inches="tight")
+
 
 for model in models:
     plot_professions(model)

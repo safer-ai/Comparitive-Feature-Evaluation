@@ -61,7 +61,7 @@ model_name = "gpt2-xl"
 model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 for param in model.parameters():
     param.requires_grad = False
-figure_folder = f"figures/{model_name}" 
+figure_folder = f"figures/{model_name}"
 #%%
 def load_dirs(name: str, method: str = ""):
     method_suffix = "" if method == "sgd" or method == "" else f"-{method}"
@@ -71,6 +71,8 @@ def load_dirs(name: str, method: str = ""):
         for l, path in [(l, Path(f"./saved_dirs/v3-{model_name}{method_suffix}-lt/l{l}-{name}.pt")) for l in range(80)]
         if path.exists()
     }
+
+
 def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]:
     g = PairGeneratorDataset.from_dict(json.load(Path(f"./data/{ds}.json").open("r")))
 
@@ -79,6 +81,7 @@ def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]
     else:
         random.seed(seed)
         return list(g.take(max_amount))
+
 
 ds0 = load("imdb_0_shot_v2/test")
 ds5 = load("imdb_5_shot_v2/test")
@@ -92,9 +95,9 @@ print(f"raw: {np.mean(raw_perfs)}")
 #%%
 dirs = load_dirs("n1-dimdb_5_shot_v2", method="mean-diff")
 layer_nbs = list(dirs.keys())
-act_dss = [get_act_ds(model, ds5, get_layer(model, nb),last_tok=True) for nb in tqdm(layer_nbs)]
+act_dss = [get_act_ds(model, ds5, get_layer(model, nb), last_tok=True) for nb in tqdm(layer_nbs)]
 #%%
-act_dss0shot = [get_act_ds(model, ds0, get_layer(model, nb),last_tok=True) for nb in tqdm(layer_nbs)]
+act_dss0shot = [get_act_ds(model, ds0, get_layer(model, nb), last_tok=True) for nb in tqdm(layer_nbs)]
 #%%
 layer_nb_i = 2
 layer_nb = layer_nbs[layer_nb_i]
@@ -126,9 +129,11 @@ plt.show()
 #%%
 from random import randint
 
+
 def project_along(y, dirs):
     inner_products = torch.einsum("n h, ...h -> ...n", dirs, y)
     return torch.einsum("...n, n h -> ...h", inner_products, dirs)
+
 
 positive_injected_models = []
 negative_injected_models = []
@@ -139,15 +144,24 @@ for nb, act_ds in zip(layer_nbs, act_dss):
     n_additional = project_along(n_act_ds, dirs[nb]).mean(0)
     delta = p_additional - n_additional
     print(p_additional.shape)
-    
+
     def get_projection_fn(additional):
         def projection_fn(y, dirs):
             y[:, -1] = project(y[:, -1], dirs) + additional
             return y
+
         return projection_fn
-    
-    positive_injected_models.append(create_handicaped(dirs[nb], model, get_layer(model, nb), projection_fn=get_projection_fn(p_additional + 2 * delta)))
-    negative_injected_models.append(create_handicaped(dirs[nb], model, get_layer(model, nb), projection_fn=get_projection_fn(n_additional - 2 * delta)))
+
+    positive_injected_models.append(
+        create_handicaped(
+            dirs[nb], model, get_layer(model, nb), projection_fn=get_projection_fn(p_additional + 2 * delta)
+        )
+    )
+    negative_injected_models.append(
+        create_handicaped(
+            dirs[nb], model, get_layer(model, nb), projection_fn=get_projection_fn(n_additional - 2 * delta)
+        )
+    )
 
 #%%
 # Measure perfs
