@@ -82,32 +82,32 @@ def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]
         random.seed(seed)
         return list(g.take(max_amount))
 
+ds = "imdb_5_shot_v3"
 
-ds0 = load("imdb_0_shot_v2/test")
-ds5 = load("imdb_5_shot_v2/test")
-good_tokens = [" positive"]
-bad_tokens = [" negative"]
+ds0 = load(ds + "/test")
+ds5 = load(ds.replace("5", "0") + "/test")
 #%%
 raw_model = lambda t: model(**t).logits
 
 raw_perfs = [measure_top1_success(t, raw_model) for t in ds0]
 print(f"raw: {np.mean(raw_perfs)}")
 #%%
-dirs = load_dirs("n1-dimdb_5_shot_v2", method="mean-diff")
+dirs = load_dirs(ds, method="mean-diff-norm")
 layer_nbs = list(dirs.keys())
 act_dss = [get_act_ds(model, ds5, get_layer(model, nb), last_tok=True) for nb in tqdm(layer_nbs)]
 #%%
 act_dss0shot = [get_act_ds(model, ds0, get_layer(model, nb), last_tok=True) for nb in tqdm(layer_nbs)]
 #%%
-layer_nb_i = 2
+layer_nb_i = 3
 layer_nb = layer_nbs[layer_nb_i]
 act_ds = act_dss[layer_nb_i]
 dir = dirs[layer_nb][0]
 activations = torch.einsum("nh,h->n", act_ds.x_data, dir)
 act0 = activations[act_ds.y_data == 0]
 act1 = activations[act_ds.y_data == 1]
-good_pairs = [i for i, p in enumerate(ds5) if p.positive.answers == good_tokens]
-bad_pairs = [i for i, p in enumerate(ds5) if p.positive.answers == bad_tokens]
+
+good_pairs = [i for i, p in enumerate(ds5) if p.positive.answers > p.negative.answers]
+bad_pairs = [i for i, p in enumerate(ds5) if p.positive.answers < p.negative.answers]
 plt.hist(list(act0[good_pairs].cpu().numpy()), bins=20, alpha=0.3, label="good 0")
 plt.hist(list(act0[bad_pairs].cpu().numpy()), bins=20, alpha=0.3, label="bad 0")
 plt.hist(list(act1[good_pairs].cpu().numpy()), bins=20, alpha=0.3, label="good 1")
@@ -143,6 +143,7 @@ for nb, act_ds in zip(layer_nbs, act_dss):
     p_additional = project_along(p_act_ds, dirs[nb]).mean(0)
     n_additional = project_along(n_act_ds, dirs[nb]).mean(0)
     delta = p_additional - n_additional
+    additional_strength = 0
     print(p_additional.shape)
 
     def get_projection_fn(additional):
@@ -154,12 +155,12 @@ for nb, act_ds in zip(layer_nbs, act_dss):
 
     positive_injected_models.append(
         create_handicaped(
-            dirs[nb], model, get_layer(model, nb), projection_fn=get_projection_fn(p_additional + 2 * delta)
+            dirs[nb], model, get_layer(model, nb), projection_fn=get_projection_fn(p_additional + additional_strength * delta)
         )
     )
     negative_injected_models.append(
         create_handicaped(
-            dirs[nb], model, get_layer(model, nb), projection_fn=get_projection_fn(n_additional - 2 * delta)
+            dirs[nb], model, get_layer(model, nb), projection_fn=get_projection_fn(n_additional - additional_strength * delta)
         )
     )
 
