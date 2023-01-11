@@ -54,8 +54,8 @@ from tqdm import tqdm  # type: ignore
 
 #%%
 # model_name = "gpt2"
-# model_name = "gpt2-xl"
-model_name = "EleutherAI/gpt-j-6B"
+model_name = "gpt2-xl"
+# model_name = "EleutherAI/gpt-j-6B"
 #%%
 model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
 for param in model.parameters():
@@ -191,6 +191,7 @@ plot_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
 plot_tests(easy_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he")
 plot_tests(easy_gender_tests, load_dirs("n1-dgender", "dropout-probe"), "dropout-probe")
 plot_tests(easy_gender_tests, load_dirs("n1-dgender", "mean-diff"), "mean-diff")
+plot_tests(easy_gender_tests, load_dirs("n1-dgender", "mean-diff-norm"), "mean-diff-norm")
 
 plt.xlabel("Layer")
 plt.ylabel("Success rate")
@@ -207,6 +208,7 @@ plot_tests(hard_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he")
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "dropout-probe"), "dropout-probe")
 plot_tests(hard_gender_tests, load_dirs("n1-dgender", "mean-diff"), "mean-diff")
+plot_tests(hard_gender_tests, load_dirs("n1-dgender", "mean-diff-norm"), "mean-diff-norm")
 
 plt.xlabel("Layer")
 plt.ylabel("Success rate")
@@ -223,6 +225,7 @@ plot_tests(french_gender_tests, load_dirs("n1-dgender", "she-he"), "she-he")
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "she-he-grad"), "opt for she vs he")
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "dropout-probe"), "dropout-probe")
 plot_tests(french_gender_tests, load_dirs("n1-dgender", "mean-diff"), "mean-diff")
+plot_tests(french_gender_tests, load_dirs("n1-dgender", "mean-diff-norm"), "mean-diff-norm")
 
 plt.xlabel("Layer")
 plt.ylabel("Success rate")
@@ -308,8 +311,9 @@ plt.savefig(f"{figure_folder}/hard_cde.png", bbox_inches="tight")
 
 cde_dirs = load_dirs("n1-dpolitics")
 md_dirs = load_dirs("n1-dpolitics", method="mean-diff")
+mdn_dirs = load_dirs("n1-dpolitics", method="mean-diff-norm")
 
-if cde_dirs:
+if cde_dirs or md_dirs or mdn_dirs:
 
     # plot_tests(easy_gender_tests, cde_dirs, "easy gender", alpha=0.3, color="green")
     # plot_tests(hard_gender_tests, cde_dirs, "hard gender", alpha=0.3, color="red")
@@ -321,6 +325,7 @@ if cde_dirs:
     # plot_tests(hard_gender_tests, md_dirs, "hard gender md", linestyle="--", alpha=0.3, color="red")
     # plot_tests(french_gender_tests, md_dirs, "French gender md", linestyle="--", alpha=0.3, color="blue")
     plot_tests(politics_tests, md_dirs, "politics md", linestyle="--", color="purple")
+    plot_tests(politics_tests, mdn_dirs, "politics mdn", linestyle="-.", color="purple")
     # plot_tests(facts_tests, md_dirs, "facts md", linestyle="--", alpha=0.3, color="orange")
 
     plt.xlabel("Layer")
@@ -334,13 +339,17 @@ if cde_dirs:
 # %%
 
 cde_dirs = load_dirs("n1-dfacts")
+md_dirs = load_dirs("n1-dfacts", "mean-diff")
+mdn_dirs = load_dirs("n1-dfacts", "mean-diff-norm")
 
-if cde_dirs:
+if cde_dirs or md_dirs or mdn_dirs:
     plot_tests(easy_gender_tests, cde_dirs, "easy gender", alpha=0.3, color="green")
     plot_tests(hard_gender_tests, cde_dirs, "hard gender", alpha=0.3, color="red")
     plot_tests(french_gender_tests, cde_dirs, "French gender", alpha=0.3, color="blue")
     plot_tests(politics_tests, cde_dirs, "politics", alpha=0.3, color="purple")
     plot_tests(facts_tests, cde_dirs, "facts", color="orange")
+    plot_tests(facts_tests, md_dirs, "facts", color="orange", linestyle="--")
+    plot_tests(facts_tests, mdn_dirs, "facts", color="orange", linestyle="-.")
 
     plt.xlabel("Layer")
     plt.ylabel("Success rate")

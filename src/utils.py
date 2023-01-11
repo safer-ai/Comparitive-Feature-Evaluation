@@ -1,6 +1,6 @@
 import gc
 from math import cos
-from typing import Callable, Sequence, Union
+from typing import Callable, Optional, Sequence, Union
 
 import numpy as np
 import torch
@@ -473,20 +473,49 @@ def measure_bi_confusion_ratio(test, model: FrankenSteinModel, use_log_probs: bo
     with torch.no_grad():
         return measure_confusions_ratio_grad(test, model, use_log_probs, use_bi=True)
 
-
-def measure_top1_success(test: Pair, model: SimpleModel, adverserial: bool = False) -> float:
-    # Mostly makes sens on datasets like imdb_0_shot or imdb_1_shot
+def measure_correct_prob(test: Pair, model: SimpleModel, adverserial: bool = False) -> float:
     good_answers = [tokenizer.encode(a)[0] for a in test.positive.answers]
     bad_answers = [tokenizer.encode(a)[0] for a in test.negative.answers]
 
     with torch.no_grad():
         p = test.negative.prompt if adverserial else test.positive.prompt
         inpt = tokenizer(p, return_tensors="pt").to(device)
-        r = model(inpt)[0, -1]
-        r_correct = r[good_answers].sum()
-        r_incorrect = r[bad_answers].sum()
-        return 1.0 if (r_correct > r_incorrect) ^ adverserial else 0.0
+        logits = model(inpt)[0, -1]
+        assert logits.ndim == 1
+        probs = torch.softmax(logits, dim=-1)
+        p_correct = probs[good_answers].sum()
+        p_incorrect = probs[bad_answers].sum()
+        
+        return (p_correct / (p_correct + p_incorrect)).item()
+    
 
+def measure_top1_success(test: Pair, model: SimpleModel, adverserial: bool = False) -> float:
+    return 1.0 if measure_correct_prob(test, model, adverserial) > 0.5 else 0.0
+
+
+def measure_rebalanced_acc(model: SimpleModel, tests: list[Pair], adverserial: bool = False) -> float:
+    """Measure accuracy after choosing threshold which makes balanced predictions.
+    
+    Will give too optimistic accuracies for small sample sizes."""
+    
+    positive_labels = tests[0].positive.answers
+    negative_labels = tests[0].negative.answers
+    is_positive = [t.positive.answers == positive_labels and t.negative.answers == negative_labels for t in tests]
+    is_negative = [t.positive.answers == negative_labels and t.negative.answers == positive_labels for t in tests]
+    
+    assert all(p ^ n for p,n in zip(is_positive, is_negative)), "only works for constant labels"
+    
+    is_positive_t = torch.tensor(is_positive)
+    correct_probs = torch.tensor([measure_correct_prob(t, model, adverserial) for t in tests])
+    pred_probs = torch.where(is_positive_t, correct_probs, 1 - correct_probs)
+    # positive_proportion = is_positive_t.float().mean()
+    positive_proportion = 0.5
+    threshold = pred_probs.quantile(1 - positive_proportion)
+    correct_predictions = torch.where(pred_probs > threshold, is_positive_t, ~is_positive_t)
+    
+    accuracy = correct_predictions.sum().item() / len(tests)
+    return accuracy
+    
 
 ProjectionFunc = Callable[[torch.Tensor, torch.Tensor], torch.Tensor]  # project first along second
 
@@ -659,7 +688,7 @@ def get_act_ds(model, tests: Sequence[Union[Test, Pair]], layer, last_tok: bool 
     negatives = [t.negative.prompt for t in tests]
 
     def get_act(texts):
-        processing = (lambda t: (t.reshape((-1, t.shape[-1]))[-1:]) if last_tok else (lambda t: t.reshape((-1, t.shape[-1]))))
+        processing = (lambda t: (t.reshape((-1, t.shape[-1]))[-1:])) if last_tok else (lambda t: t.reshape((-1, t.shape[-1])))
 
         return [
             get_activations(
@@ -676,6 +705,10 @@ def get_act_ds(model, tests: Sequence[Union[Test, Pair]], layer, last_tok: bool 
 
     x_data = torch.cat(positive_acts + negative_acts).to(device)
     y_data = torch.zeros(len(x_data), dtype=torch.long).to(device)
+    
+    if last_tok:
+        assert len(x_data) // 2 == len(tests)
+    
     y_data[len(x_data) // 2 :] = 1
     return ActivationsDataset(x_data, y_data)
 

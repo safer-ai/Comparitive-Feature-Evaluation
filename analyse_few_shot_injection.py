@@ -43,6 +43,7 @@ from src.utils import (
     get_layer,
     get_embed_dim,
     measure_top1_success,
+    measure_rebalanced_acc,
 )
 from collections import defaultdict
 from pathlib import Path
@@ -82,17 +83,17 @@ def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]
         random.seed(seed)
         return list(g.take(max_amount))
 
-ds = "imdb_5_shot_v3"
-
-ds0 = load(ds + "/test")
-ds5 = load(ds.replace("5", "0") + "/test")
+dir_ds = "imdb_5_shot_v4"
+ds0 = load("imdb_0_shot_v3/test")
+ds5 = load("imdb_5_shot_v3/test")
 #%%
 raw_model = lambda t: model(**t).logits
 
-raw_perfs = [measure_top1_success(t, raw_model) for t in ds0]
-print(f"raw: {np.mean(raw_perfs)}")
+# raw_perfs = [measure_top1_success(t, raw_model) for t in ds0]
+# print(f"raw: {np.mean(raw_perfs)}")
+print(f"raw rebalanced: {measure_rebalanced_acc(raw_model, ds0)}")
 #%%
-dirs = load_dirs(ds, method="mean-diff-norm")
+dirs = load_dirs("n1-d" + dir_ds, method="mean-diff-norm")
 layer_nbs = list(dirs.keys())
 act_dss = [get_act_ds(model, ds5, get_layer(model, nb), last_tok=True) for nb in tqdm(layer_nbs)]
 #%%
@@ -103,8 +104,8 @@ layer_nb = layer_nbs[layer_nb_i]
 act_ds = act_dss[layer_nb_i]
 dir = dirs[layer_nb][0]
 activations = torch.einsum("nh,h->n", act_ds.x_data, dir)
-act0 = activations[act_ds.y_data == 0]
-act1 = activations[act_ds.y_data == 1]
+act0 = activations[act_ds.y_data == 1]
+act1 = activations[act_ds.y_data == 0]
 
 good_pairs = [i for i, p in enumerate(ds5) if p.positive.answers > p.negative.answers]
 bad_pairs = [i for i, p in enumerate(ds5) if p.positive.answers < p.negative.answers]
@@ -138,8 +139,8 @@ def project_along(y, dirs):
 positive_injected_models = []
 negative_injected_models = []
 for nb, act_ds in zip(layer_nbs, act_dss):
-    p_act_ds = act_ds.x_data[act_ds.y_data == 1]
-    n_act_ds = act_ds.x_data[act_ds.y_data == 0]
+    p_act_ds = act_ds.x_data[act_ds.y_data == 0]
+    n_act_ds = act_ds.x_data[act_ds.y_data == 1]
     p_additional = project_along(p_act_ds, dirs[nb]).mean(0)
     n_additional = project_along(n_act_ds, dirs[nb]).mean(0)
     delta = p_additional - n_additional
@@ -168,16 +169,20 @@ for nb, act_ds in zip(layer_nbs, act_dss):
 # Measure perfs
 for p_model, n_model, nb in zip(positive_injected_models, negative_injected_models, layer_nbs):
     print(f"layer {nb}")
-    perfs = [measure_top1_success(t, p_model) for t in ds0]
-    print(f"positive injected {nb}: {np.mean(perfs)}")
-    perfs = [measure_top1_success(t, n_model) for t in ds0]
-    print(f"negative injected {nb}: {np.mean(perfs)}")
+    # perfs = [measure_top1_success(t, p_model) for t in ds0]
+    # print(f"positive injected {nb}: {np.mean(perfs)}")
+    print(f"positive rebalanced {measure_rebalanced_acc(p_model, ds0)}")
+    # perfs = [measure_top1_success(t, n_model) for t in ds0]
+    # print(f"negative injected {nb}: {np.mean(perfs)}")
+    print(f"negative rebalanced {measure_rebalanced_acc(n_model, ds0)}")
 #%%
 # Measure perfs on ds5
-raw_perfs = [measure_top1_success(t, raw_model) for t in ds5]
-print(f"raw 5 shot: {np.mean(raw_perfs)}")
-raw_perfs = [measure_top1_success(t, raw_model, adverserial=True) for t in ds5]
-print(f"raw 5 adv shots: {np.mean(raw_perfs)}")
+# raw_perfs = [measure_top1_success(t, raw_model) for t in ds5]
+# print(f"raw 5 shot: {np.mean(raw_perfs)}")
+print(f"raw 5 shot rebalanced {measure_rebalanced_acc(raw_model, ds5)}")
+# raw_perfs = [measure_top1_success(t, raw_model, adverserial=True) for t in ds5]
+# print(f"raw 5 adv shots: {np.mean(raw_perfs)}")
+print(f"raw 5 adv shots rebalanced {measure_rebalanced_acc(raw_model, ds5, adverserial=True)}")
 #%%
 # Measure perfs
 for p_model, n_model, nb in zip(positive_injected_models, negative_injected_models, layer_nbs):

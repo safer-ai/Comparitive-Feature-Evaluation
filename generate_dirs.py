@@ -21,6 +21,7 @@ def run(
     n_dirs: int = 1,
     use_cone: bool = False,
     data: str = "gender",
+    dataset_size: Optional[int] = 1000,
     method: Literal[
         "sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff", "mean-diff-norm", "mean-diff-std"
     ] = "sgd",
@@ -38,6 +39,7 @@ def run(
     cone_suffix = "-cone" if use_cone else ""
     method_suffix = f"-{method}" if method != "sgd" else ""
     last_tok_suffix = "-lt" if last_tok else ""
+    dataset_size_suffix = "" if dataset_size==1000 else ("-Nall" if dataset_size is None else f"-N{dataset_size}")
 
     h_size: int = get_embed_dim(model)
 
@@ -64,10 +66,11 @@ def run(
             projection_fn=projection_fn,
             method=method,
             last_tok=last_tok,
+            dataset_size=dataset_size,
         ).find_dirs()
 
         file_name = f"l{layer_nb}-n{n_dirs}-d{data}.pt"
-        dir_path = Path(".") / "saved_dirs" / f"v3-{model_name}{cone_suffix}{method_suffix}{last_tok_suffix}"
+        dir_path = Path(".") / "saved_dirs" / f"v3-{model_name}{cone_suffix}{method_suffix}{last_tok_suffix}{dataset_size_suffix}"
         dir_path.mkdir(parents=True, exist_ok=True)
         path = dir_path / file_name
 
@@ -101,4 +104,5 @@ if __name__ == "__main__":
 # python generate_dirs.py --model_name EleutherAI/gpt-j-6B --data imdb_5_shot --method mean-diff --last_tok True
 # python generate_dirs.py --model_name gpt2-xl --data imdb_5_shot_v2 --method mean-diff --last_tok True; python generate_dirs.py --model_name EleutherAI/gpt-j-6B --data imdb_5_shot_v2 --method mean-diff --last_tok True
 
-# python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data politics; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data facts; python generate_dirs.py --model_name EleutherAI/gpt-j-6B --method mean-diff-norm; python generate_dirs.py --model_name EleutherAI/gpt-j-6B --method mean-diff-norm --data politics; python generate_dirs.py --model_name EleutherAI/gpt-j-6B --method mean-diff-norm --data facts;
+# python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data facts; python generate_dirs.py --model_name EleutherAI/gpt-j-6B --method mean-diff-norm; python generate_dirs.py --model_name EleutherAI/gpt-j-6B --method mean-diff-norm --data politics; python generate_dirs.py --model_name EleutherAI/gpt-j-6B --method mean-diff-norm --data facts;
+# python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v4 --last_tok True; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v4b --last_tok True; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5b --last_tok True;

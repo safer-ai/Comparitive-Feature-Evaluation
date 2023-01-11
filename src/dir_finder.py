@@ -1,6 +1,6 @@
 from functools import partial
 from itertools import islice
-from typing import Callable, Iterable, Literal
+from typing import Callable, Iterable, Literal, Optional
 from attrs import define
 import numpy as np
 import torch
@@ -43,7 +43,7 @@ class DirFinder:
     method: Literal[
         "sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff", "mean-diff-norm", "mean-diff-std"
     ] = "sgd"
-    dataset_size: int = 1000  # only for rlace, inlp, and she-he-grad
+    dataset_size: Optional[int] = 1000  # only for rlace, inlp, she-he-grad and mean based methods. None means all
 
     def find_dirs(self) -> torch.Tensor:
         self._fix_seed()
@@ -127,7 +127,7 @@ class DirFinder:
             self._get_train_ds(),
             n_dim=self.n_dirs,
             out_iters=6000,
-            num_clfs_in_eval=3,
+            num_clfs_in_escre=3,
             evalaute_every=500,
             device=self.device,
         ).to(self.device)
