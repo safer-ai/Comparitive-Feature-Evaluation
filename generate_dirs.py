@@ -21,7 +21,7 @@ def run(
     n_dirs: int = 1,
     use_cone: bool = False,
     data: str = "gender",
-    dataset_size: Optional[int] = 1000,
+    dataset_size: int = 1000,
     method: Literal[
         "sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff", "mean-diff-norm", "mean-diff-std"
     ] = "sgd",
@@ -39,7 +39,7 @@ def run(
     cone_suffix = "-cone" if use_cone else ""
     method_suffix = f"-{method}" if method != "sgd" else ""
     last_tok_suffix = "-lt" if last_tok else ""
-    dataset_size_suffix = "" if dataset_size==1000 else ("-Nall" if dataset_size is None else f"-N{dataset_size}")
+    dataset_size_suffix = "" if dataset_size==1000 else f"-N{dataset_size}"
 
     h_size: int = get_embed_dim(model)
 
