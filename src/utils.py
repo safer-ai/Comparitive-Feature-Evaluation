@@ -25,6 +25,7 @@ SimpleModel = Callable[[BatchEncoding], torch.Tensor]  # takes one input and ret
 # The first input is the correct one, but the activation of the second one is the distraction.
 FrankenSteinModel = Callable[[BatchEncoding, BatchEncoding], torch.Tensor]
 
+HFModel = Union[GPTJForCausalLM, GPT2LMHeadModel, GPTNeoXForCausalLM]
 
 @define
 class ActivationsDataset(torch.utils.data.Dataset):
