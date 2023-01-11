@@ -69,7 +69,7 @@ def load_dirs(name: str, method: str = ""):
 
     return {
         l: torch.load(path).to(device)
-        for l, path in [(l, Path(f"./saved_dirs/v3-{model_name}{method_suffix}-lt/l{l}-{name}.pt")) for l in range(80)]
+        for l, path in [(l, Path(f"./saved_dirs/v3-{model_name}{method_suffix}/l{l}-{name}.pt")) for l in range(80)]
         if path.exists()
     }
 
@@ -83,9 +83,9 @@ def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]
         random.seed(seed)
         return list(g.take(max_amount))
 
-dir_ds = "imdb_5_shot_v4"
-ds0 = load("imdb_0_shot_v3/test")
-ds5 = load("imdb_5_shot_v3/test")
+dir_ds = "imdb_5_shot_v5"
+ds0 = load("imdb_0_shot_v5/test")
+ds5 = load("imdb_5_shot/test")
 #%%
 raw_model = lambda t: model(**t).logits
 
@@ -93,8 +93,9 @@ raw_model = lambda t: model(**t).logits
 # print(f"raw: {np.mean(raw_perfs)}")
 print(f"raw rebalanced: {measure_rebalanced_acc(raw_model, ds0)}")
 #%%
-dirs = load_dirs("n1-d" + dir_ds, method="mean-diff-norm")
+dirs = load_dirs("n1-d" + dir_ds, method="mean-diff-norm-lt-N/1")
 layer_nbs = list(dirs.keys())
+#%%
 act_dss = [get_act_ds(model, ds5, get_layer(model, nb), last_tok=True) for nb in tqdm(layer_nbs)]
 #%%
 act_dss0shot = [get_act_ds(model, ds0, get_layer(model, nb), last_tok=True) for nb in tqdm(layer_nbs)]
@@ -199,4 +200,28 @@ for p_model, n_model, nb in zip(positive_injected_models, negative_injected_mode
     print(f"positive injected {nb}: {np.mean(perfs)}")
     perfs = [measure_top1_success(t, n_model, adverserial=True) for t in ds5]
     print(f"negative injected {nb}: {np.mean(perfs)}")
+# %%
+def load_dirs_bis(name: str, method: str = "", layer: int = 0):
+    method_suffix = "" if method == "sgd" or method == "" else f"-{method}"
+
+    return {
+        n: torch.load(path).to(device)
+        for n, path in [(nb, Path(f"./saved_dirs/v3-{model_name}{method_suffix}-lt-N/{nb}/l{layer}-{name}.pt")) for nb in range(100_000)]
+        if path.exists()
+    }
+# %%
+layer_nb_i = 3
+dirs_dict = load_dirs_bis("n1-d" + dir_ds, method="mean-diff-norm", layer=layer_nbs[layer_nb_i])
+print(len(dirs_dict))
+# %%
+similarities = np.zeros((len(dirs_dict), len(dirs_dict)))
+for i, dir1 in enumerate(dirs_dict.values()):
+    for j, dir2 in enumerate(dirs_dict.values()):
+        similarities[i, j] = dir1[0] @ dir2[0]
+plt.imshow(similarities, vmin=0.9, vmax=1)
+# Add ticks using keys
+plt.title("cosine similarities between directions\ntrained with different numbers of samples") 
+plt.xticks(list(range(len(dirs_dict))), list(dirs_dict.keys()), rotation=45)
+plt.yticks(list(range(len(dirs_dict))), list(dirs_dict.keys()))
+plt.colorbar()
 # %%

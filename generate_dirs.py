@@ -14,6 +14,7 @@ from src.data_generation import PairGeneratorDataset
 from src.dir_finder import DirFinder
 from src.utils import get_embed_dim, get_layer, get_number_of_layers, project, project_cone
 
+DEFAULT_DATASET_SIZE = 1000
 
 def run(
     model_name: str = "gpt2-xl",
@@ -21,7 +22,7 @@ def run(
     n_dirs: int = 1,
     use_cone: bool = False,
     data: str = "gender",
-    dataset_size: int = 1000,
+    dataset_size: int = DEFAULT_DATASET_SIZE,
     method: Literal[
         "sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff", "mean-diff-norm", "mean-diff-std"
     ] = "sgd",
@@ -33,13 +34,13 @@ def run(
 
     src.constants._tokenizer = src.constants.get_tokenizer(model)
 
-    print(model_name, layer_nbs, n_dirs, data, use_cone, method, last_tok)
+    print(model_name, layer_nbs, n_dirs, data, use_cone, dataset_size, method, last_tok)
 
     projection_fn = partial(project_cone, gamma=pi / 2 * 0.95) if use_cone else partial(project, strength=1)
     cone_suffix = "-cone" if use_cone else ""
     method_suffix = f"-{method}" if method != "sgd" else ""
     last_tok_suffix = "-lt" if last_tok else ""
-    dataset_size_suffix = "" if dataset_size==1000 else f"-N{dataset_size}"
+    dataset_size_suffix = "" if dataset_size==DEFAULT_DATASET_SIZE else f"-N/{dataset_size}"
 
     h_size: int = get_embed_dim(model)
 
@@ -106,3 +107,5 @@ if __name__ == "__main__":
 
 # python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data facts; python generate_dirs.py --model_name EleutherAI/gpt-j-6B --method mean-diff-norm; python generate_dirs.py --model_name EleutherAI/gpt-j-6B --method mean-diff-norm --data politics; python generate_dirs.py --model_name EleutherAI/gpt-j-6B --method mean-diff-norm --data facts;
 # python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v4 --last_tok True; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v4b --last_tok True; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5b --last_tok True;
+
+# python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 1; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 2; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 4; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 8; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 16; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 32; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 64; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 128; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 256; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 512; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 1024; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 2048; python generate_dirs.py --model_name gpt2-xl --method mean-diff-norm --data imdb_5_shot_v5 --last_tok True --dataset_size 2048; python generate_dirs.py --model_name distilgpt2 --method mean-diff-norm --data autogender;
