@@ -83,6 +83,7 @@ def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]
         random.seed(seed)
         return list(g.take(max_amount))
 
+
 dir_ds = "imdb_5_shot_v5"
 ds0 = load("imdb_0_shot_v5/test")
 ds5 = load("imdb_5_shot/test")
@@ -157,12 +158,18 @@ for nb, act_ds in zip(layer_nbs, act_dss):
 
     positive_injected_models.append(
         create_handicaped(
-            dirs[nb], model, get_layer(model, nb), projection_fn=get_projection_fn(p_additional + additional_strength * delta)
+            dirs[nb],
+            model,
+            get_layer(model, nb),
+            projection_fn=get_projection_fn(p_additional + additional_strength * delta),
         )
     )
     negative_injected_models.append(
         create_handicaped(
-            dirs[nb], model, get_layer(model, nb), projection_fn=get_projection_fn(n_additional - additional_strength * delta)
+            dirs[nb],
+            model,
+            get_layer(model, nb),
+            projection_fn=get_projection_fn(n_additional - additional_strength * delta),
         )
     )
 
@@ -206,9 +213,14 @@ def load_dirs_bis(name: str, method: str = "", layer: int = 0):
 
     return {
         n: torch.load(path).to(device)
-        for n, path in [(nb, Path(f"./saved_dirs/v3-{model_name}{method_suffix}-lt-N/{nb}/l{layer}-{name}.pt")) for nb in range(100_000)]
+        for n, path in [
+            (nb, Path(f"./saved_dirs/v3-{model_name}{method_suffix}-lt-N/{nb}/l{layer}-{name}.pt"))
+            for nb in range(100_000)
+        ]
         if path.exists()
     }
+
+
 # %%
 layer_nb_i = 3
 dirs_dict = load_dirs_bis("n1-d" + dir_ds, method="mean-diff-norm", layer=layer_nbs[layer_nb_i])
@@ -220,7 +232,7 @@ for i, dir1 in enumerate(dirs_dict.values()):
         similarities[i, j] = dir1[0] @ dir2[0]
 plt.imshow(similarities, vmin=0.9, vmax=1)
 # Add ticks using keys
-plt.title("cosine similarities between directions\ntrained with different numbers of samples") 
+plt.title("cosine similarities between directions\ntrained with different numbers of samples")
 plt.xticks(list(range(len(dirs_dict))), list(dirs_dict.keys()), rotation=45)
 plt.yticks(list(range(len(dirs_dict))), list(dirs_dict.keys()))
 plt.colorbar()

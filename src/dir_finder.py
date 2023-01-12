@@ -41,7 +41,16 @@ class DirFinder:
     rolling_window_size: int = 400
     last_tok: bool = False
     method: Literal[
-        "sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff", "mean-diff-norm", "mean-diff-std"
+        "sgd",
+        "rlace",
+        "inlp",
+        "she-he",
+        "she-he-grad",
+        "dropout-probe",
+        "mean-diff",
+        "median-diff",
+        "mean-diff-norm",
+        "mean-diff-std",
     ] = "sgd"
     dataset_size: int = 1000  # only for rlace, inlp, she-he-grad and mean based methods
 
@@ -213,10 +222,12 @@ class DirFinder:
         )
         print("found mean diff of norm", mean_diff.norm().item())
         return normalize(mean_diff).to(self.device)
-    
+
     def find_dirs_using_mean_diff_std(self) -> torch.Tensor:
         act_ds = self._get_train_ds()
-        normalized_ds = (act_ds.x_data - act_ds.x_data.mean(dim=0, keepdim=True)) / act_ds.x_data.std(dim=0, keepdim=True)
+        normalized_ds = (act_ds.x_data - act_ds.x_data.mean(dim=0, keepdim=True)) / act_ds.x_data.std(
+            dim=0, keepdim=True
+        )
         mean_diff = torch.mean(normalized_ds[act_ds.y_data == 0], dim=0, keepdim=True) - torch.mean(
             normalized_ds[act_ds.y_data == 1], dim=0, keepdim=True
         )

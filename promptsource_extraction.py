@@ -12,11 +12,19 @@ from tqdm import tqdm  # type: ignore
 
 
 def generate_pairs(
-    dataset, templates, n=10, n_few_shot=5, example_max_len=400, seed=0, test_max_tokens=512, total_max_tokens=1024, kind="n_good_v_n_bad",
+    dataset,
+    templates,
+    n=10,
+    n_few_shot=5,
+    example_max_len=400,
+    seed=0,
+    test_max_tokens=512,
+    total_max_tokens=1024,
+    kind="n_good_v_n_bad",
 ):
     assert kind in {"n_good_v_n_bad", "n_good_vs_0", "n_bad_vs_0"}
     n_vs_0_shot = kind == "n_good_vs_0" or kind == "n_bad_vs_0"
-    
+
     print(len(dataset))
     pair_generators: list[PairGenerator] = []
 
@@ -68,10 +76,10 @@ def generate_pairs(
                 else:
                     prompt = prompt.replace(f"{{{p_answer}}}", n_answer)
                     prompt = prompt.replace(f"{{{n_answer}}}", p_answer)
-                
+
                 full_question = f"{{prompt}}{correct_last_line}"
 
-                positive_replacements = {"prompt": [prompt + "\n\n"]} 
+                positive_replacements = {"prompt": [prompt + "\n\n"]}
                 negative_replacements = {"prompt": [""]}
             else:
                 full_question = f"{prompt}\n\n{correct_last_line}"

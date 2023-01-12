@@ -16,6 +16,7 @@ from src.utils import get_embed_dim, get_layer, get_number_of_layers, project, p
 
 DEFAULT_DATASET_SIZE = 1000
 
+
 def run(
     model_name: str = "gpt2-xl",
     layer_nbs: Optional[tuple[int, ...]] = None,
@@ -24,7 +25,16 @@ def run(
     data: str = "gender",
     dataset_size: int = DEFAULT_DATASET_SIZE,
     method: Literal[
-        "sgd", "rlace", "inlp", "she-he", "she-he-grad", "dropout-probe", "mean-diff", "median-diff", "mean-diff-norm", "mean-diff-std"
+        "sgd",
+        "rlace",
+        "inlp",
+        "she-he",
+        "she-he-grad",
+        "dropout-probe",
+        "mean-diff",
+        "median-diff",
+        "mean-diff-norm",
+        "mean-diff-std",
     ] = "sgd",
     last_tok: bool = False,
 ):
@@ -40,7 +50,7 @@ def run(
     cone_suffix = "-cone" if use_cone else ""
     method_suffix = f"-{method}" if method != "sgd" else ""
     last_tok_suffix = "-lt" if last_tok else ""
-    dataset_size_suffix = "" if dataset_size==DEFAULT_DATASET_SIZE else f"-N/{dataset_size}"
+    dataset_size_suffix = "" if dataset_size == DEFAULT_DATASET_SIZE else f"-N/{dataset_size}"
 
     h_size: int = get_embed_dim(model)
 
@@ -71,7 +81,11 @@ def run(
         ).find_dirs()
 
         file_name = f"l{layer_nb}-n{n_dirs}-d{data}.pt"
-        dir_path = Path(".") / "saved_dirs" / f"v3-{model_name}{cone_suffix}{method_suffix}{last_tok_suffix}{dataset_size_suffix}"
+        dir_path = (
+            Path(".")
+            / "saved_dirs"
+            / f"v3-{model_name}{cone_suffix}{method_suffix}{last_tok_suffix}{dataset_size_suffix}"
+        )
         dir_path.mkdir(parents=True, exist_ok=True)
         path = dir_path / file_name
 
