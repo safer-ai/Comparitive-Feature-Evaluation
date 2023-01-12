@@ -129,7 +129,11 @@ class ProjectionWrapper(torch.nn.Module):
         else:
             hidden_states = y
 
-        if "attention_mask" in kwargs and kwargs["attention_mask"] is not None and self.projection_with_attn_mask is not None:
+        if (
+            "attention_mask" in kwargs
+            and kwargs["attention_mask"] is not None
+            and self.projection_with_attn_mask is not None
+        ):
             hidden_states = self.projection_with_attn_mask(hidden_states, kwargs["attention_mask"])
         else:
             hidden_states = self.projection(hidden_states)
@@ -143,7 +147,7 @@ def edit_model_inplace(
     module_name: str,
     projection: Callable[[torch.Tensor], torch.Tensor],
     has_leftover: bool,
-    projection_with_attn_mask: Optional[Callable[[torch.Tensor, torch.Tensor], torch.Tensor]] = None
+    projection_with_attn_mask: Optional[Callable[[torch.Tensor, torch.Tensor], torch.Tensor]] = None,
 ):
     """Return a new module where the replacements described in the config have been done."""
     new_module = ProjectionWrapper(old_module, projection, has_leftover, projection_with_attn_mask)
@@ -481,12 +485,12 @@ def measure_bi_confusion_ratio(test, model: FrankenSteinModel, use_log_probs: bo
         return measure_confusions_ratio_grad(test, model, use_log_probs, use_bi=True)
 
 
-def measure_correct_prob(test: Pair, model: SimpleModel, adverserial: bool = False) -> float:
+def measure_correct_prob(test: Pair, model: SimpleModel, adversarial: bool = False) -> float:
     good_answers = [tokenizer.encode(a)[0] for a in test.positive.answers]
     bad_answers = [tokenizer.encode(a)[0] for a in test.negative.answers]
 
     with torch.no_grad():
-        p = test.negative.prompt if adverserial else test.positive.prompt
+        p = test.negative.prompt if adversarial else test.positive.prompt
         inpt = tokenizer(p, return_tensors="pt").to(device)
         logits = model(inpt)[0, -1]
         assert logits.ndim == 1
@@ -497,11 +501,11 @@ def measure_correct_prob(test: Pair, model: SimpleModel, adverserial: bool = Fal
         return (p_correct / (p_correct + p_incorrect)).item()
 
 
-def measure_top1_success(test: Pair, model: SimpleModel, adverserial: bool = False) -> float:
-    return 1.0 if measure_correct_prob(test, model, adverserial) > 0.5 else 0.0
+def measure_top1_success(test: Pair, model: SimpleModel, adversarial: bool = False) -> float:
+    return 1.0 if measure_correct_prob(test, model, adversarial) > 0.5 else 0.0
 
 
-def measure_rebalanced_acc(model: SimpleModel, tests: list[Pair], adverserial: bool = False) -> float:
+def measure_rebalanced_acc(model: SimpleModel, tests: list[Pair], adversarial: bool = False) -> float:
     """Measure accuracy after choosing threshold which makes balanced predictions.
 
     Will give too optimistic accuracies for small sample sizes."""
@@ -514,7 +518,7 @@ def measure_rebalanced_acc(model: SimpleModel, tests: list[Pair], adverserial: b
     assert all(p ^ n for p, n in zip(is_positive, is_negative)), "only works for constant labels"
 
     is_positive_t = torch.tensor(is_positive)
-    correct_probs = torch.tensor([measure_correct_prob(t, model, adverserial) for t in tests])
+    correct_probs = torch.tensor([measure_correct_prob(t, model, adversarial) for t in tests])
     pred_probs = torch.where(is_positive_t, correct_probs, 1 - correct_probs)
     # positive_proportion = is_positive_t.float().mean()
     positive_proportion = 0.5

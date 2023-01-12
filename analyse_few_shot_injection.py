@@ -188,9 +188,9 @@ for p_model, n_model, nb in zip(positive_injected_models, negative_injected_mode
 # raw_perfs = [measure_top1_success(t, raw_model) for t in ds5]
 # print(f"raw 5 shot: {np.mean(raw_perfs)}")
 print(f"raw 5 shot rebalanced {measure_rebalanced_acc(raw_model, ds5)}")
-# raw_perfs = [measure_top1_success(t, raw_model, adverserial=True) for t in ds5]
+# raw_perfs = [measure_top1_success(t, raw_model, adversarial=True) for t in ds5]
 # print(f"raw 5 adv shots: {np.mean(raw_perfs)}")
-print(f"raw 5 adv shots rebalanced {measure_rebalanced_acc(raw_model, ds5, adverserial=True)}")
+print(f"raw 5 adv shots rebalanced {measure_rebalanced_acc(raw_model, ds5, adversarial=True)}")
 #%%
 # Measure perfs
 for p_model, n_model, nb in zip(positive_injected_models, negative_injected_models, layer_nbs):
@@ -202,10 +202,10 @@ for p_model, n_model, nb in zip(positive_injected_models, negative_injected_mode
 #%%
 # Measure perfs
 for p_model, n_model, nb in zip(positive_injected_models, negative_injected_models, layer_nbs):
-    print(f"layer {nb}, adverserial")
-    perfs = [measure_top1_success(t, p_model, adverserial=True) for t in ds5]
+    print(f"layer {nb}, adversarial")
+    perfs = [measure_top1_success(t, p_model, adversarial=True) for t in ds5]
     print(f"positive injected {nb}: {np.mean(perfs)}")
-    perfs = [measure_top1_success(t, n_model, adverserial=True) for t in ds5]
+    perfs = [measure_top1_success(t, n_model, adversarial=True) for t in ds5]
     print(f"negative injected {nb}: {np.mean(perfs)}")
 # %%
 def load_dirs_bis(name: str, method: str = "", layer: int = 0):

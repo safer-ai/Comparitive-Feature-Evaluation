@@ -28,7 +28,7 @@ class ProjectionParams:
 @define
 class PromptInjector:
     model: HFModel
-    layer_nb: int = 0
+    layer_nb: Optional[int] = 0
     method: Literal["ln"] = "ln"
     n_classes: int = 2
     batch_size: int = 16
@@ -61,7 +61,7 @@ class PromptInjector:
 
         Includes the logits on the last token of the prompts."""
         n_toks = len(self._tokenizer(completion).input_ids) + 1
-        
+
         if self.params is not None:
             old_n_toks = self.params.ntoks
             self.params.ntoks = n_toks
@@ -78,7 +78,7 @@ class PromptInjector:
             r = self.model(**tokens.to(self.model.device)).logits  # type: ignore
             ends = tokens.attention_mask.sum(dim=1)
             for i in range(r.shape[0]):
-                logits.append(r[i, ends[i]-n_toks:ends[i], :])
+                logits.append(r[i, ends[i] - n_toks : ends[i], :])
 
         if self.params is not None:
             self.params.ntoks = old_n_toks
@@ -86,12 +86,16 @@ class PromptInjector:
 
         return torch.stack(logits)
 
-    def measure_correct_probs(self, tests: list[Pair], adverserial: bool = False) -> list[float]:
+    def measure_correct_probs(self, tests: list[Pair], adversarial: bool = False) -> list[float]:
         probs: list[float] = []
         for test_batch in batchyfy(tests, self.batch_size):
-            prompts = [test.negative.prompt if adverserial else test.positive.prompt for test in test_batch]
+            prompts = [test.negative.prompt if adversarial else test.positive.prompt for test in test_batch]
             logits = self.forward(prompts)
-            assert logits.shape == (len(test_batch), 1, logits.shape[-1]), f"{logits.shape} != {(len(test_batch), 1, logits.shape[-1])}"
+            assert logits.shape == (
+                len(test_batch),
+                1,
+                logits.shape[-1],
+            ), f"{logits.shape} != {(len(test_batch), 1, logits.shape[-1])}"
 
             for i, test in enumerate(test_batch):
                 good_answers: list[int] = [self._tokenizer.encode(a)[0] for a in test.positive.answers]
@@ -104,7 +108,7 @@ class PromptInjector:
                 probs.append((p_correct / (p_correct + p_incorrect)).item())
         return probs
 
-    def measure_rebalanced_acc(self, tests: list[Pair], adverserial: bool = False) -> float:
+    def measure_rebalanced_acc(self, tests: list[Pair], adversarial: bool = False) -> float:
         """Measure accuracy after choosing threshold which makes balanced predictions.
 
         Will give too optimistic accuracies for small sample sizes."""
@@ -117,7 +121,7 @@ class PromptInjector:
         assert all(p ^ n for p, n in zip(is_positive, is_negative)), "only works for constant labels"
 
         is_positive_t = torch.tensor(is_positive)
-        correct_probs = torch.tensor(self.measure_correct_probs(tests, adverserial=adverserial))
+        correct_probs = torch.tensor(self.measure_correct_probs(tests, adversarial=adversarial))
         pred_probs = torch.where(is_positive_t, correct_probs, 1 - correct_probs)
         # positive_proportion = is_positive_t.float().mean()
         positive_proportion = 0.5
@@ -159,16 +163,18 @@ class PromptInjector:
         return ProjectionParams(dirs, offsets)
 
     @property
-    def layer(self) -> torch.nn.Module:
+    def layer(self) -> Optional[torch.nn.Module]:
+        if self.layer_nb is None:
+            return None
         return get_layer(self.model, self.layer_nb)
 
     def _get_activations(self, tokens: BatchEncoding, ntoks: int) -> torch.Tensor:
         nb_seqs = tokens.input_ids.shape[0]
         assert tokens.input_ids.shape[1] >= ntoks >= 0
+        assert self.layer is not None
 
-        all_activations = get_activations(
-            tokens.to(device), self.model, [self.layer])[self.layer]
-        
+        all_activations = get_activations(tokens.to(device), self.model, [self.layer])[self.layer]
+
         ntoks_activations = []
         for i in range(nb_seqs):
             mask = tokens.attention_mask[i]
@@ -185,13 +191,19 @@ class PromptInjector:
 
     def _inject_projection(self, params: ProjectionParams):
         assert not isinstance(self.layer, ProjectionWrapper), "Can't inject twice, try to recover first"
-        
+        assert self.layer_nb is not None
+
         projection = partial(project_with_params, params=params)
         projection_with_attn_mask = partial(project_with_params_and_attn_mask, params=params)
         self._recover_handle = edit_model_inplace(
-            self.model, self.layer, get_layer_name(self.model, self.layer_nb), projection, has_leftover=True, projection_with_attn_mask=projection_with_attn_mask
+            self.model,
+            self.layer,  # type: ignore
+            get_layer_name(self.model, self.layer_nb),  # type: ignore
+            projection,
+            has_leftover=True,
+            projection_with_attn_mask=projection_with_attn_mask,
         )
-    
+
     def _recover(self):
         """Remove the injection."""
         assert self._recover_handle is not None, "Can't recover before injecting"
@@ -219,12 +231,20 @@ def project_with_params(x: torch.Tensor, params: ProjectionParams) -> torch.Tens
         y[..., -params.ntoks :, :] += torch.einsum("...n, n h -> ...h", params.offsets - inner_products, params.dirs)
         return y
 
-def project_with_params_and_attn_mask(x: torch.Tensor, attn_mask: torch.Tensor, params: ProjectionParams) -> torch.Tensor:
-    assert attn_mask.shape == (x.shape[0], 1, 1, x.shape[1]), f"attn_mask shape is {attn_mask.shape}, x shape is {x.shape}"
+
+def project_with_params_and_attn_mask(
+    x: torch.Tensor, attn_mask: torch.Tensor, params: ProjectionParams
+) -> torch.Tensor:
+    assert attn_mask.shape == (
+        x.shape[0],
+        1,
+        1,
+        x.shape[1],
+    ), f"attn_mask shape is {attn_mask.shape}, x shape is {x.shape}"
     assert x.ndim == 3, f"x shape is {x.shape}"
-    
-    attn_mask = (attn_mask[:, 0, 0, :] == 0) # attn_mask is 0 or -inf
-    
+
+    attn_mask = attn_mask[:, 0, 0, :] == 0  # attn_mask is 0 or -inf
+
     apply_projection_mask = attn_mask
     if params.ntoks is not None:
         rev_cum_sum = torch.cumsum(attn_mask.flip(1), dim=1).flip(1)
@@ -235,6 +255,7 @@ def project_with_params_and_attn_mask(x: torch.Tensor, attn_mask: torch.Tensor, 
     x = torch.where(apply_projection_mask[:, :, None], y, x)
     return x
 
+
 T = TypeVar("T")
 
 
@@ -244,4 +265,3 @@ def batchyfy(prompts: list[T], batch_size: int) -> list[list[T]]:
 
 def append_to_all(prompts: list[str], completion: str) -> list[str]:
     return [p + completion for p in prompts]
-

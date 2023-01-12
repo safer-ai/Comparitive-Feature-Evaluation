@@ -1,51 +1,10 @@
-#%%
-# %load_ext autoreload
-# %autoreload 2
-
-#%%
-from functools import partial
-import random
 from typing import Optional
 
-import numpy as np
 import torch
-from attrs import define
 from transformers import AutoModelForCausalLM
-import src.constants
-from src.constants import device, gpt2_tokenizer, tokenizer
-from src.prompt_injector import PromptInjector, ProjectionParams
-
-src.constants._tokenizer = gpt2_tokenizer
-from src.direction_methods.pairs_generation import (
-    get_train_tests,
-    get_val_controls,
-    get_val_tests,
-)
-from src.direction_methods.inlp import inlp
-from src.direction_methods.rlace import rlace
-from src.utils import (
-    ActivationsDataset,
-    create_handicaped,
-    get_act_ds,
-    edit_model_inplace,
-    gen,
-    gen_and_print,
-    get_activations,
-    measure_ablation_success,
-    measure_bi_confusion_ratio,
-    project,
-    project_cone,
-    recover_model_inplace,
-    run_and_modify,
-    create_frankenstein,
-    measure_confusions,
-    measure_kl_confusions,
-    measure_confusions_ratio,
-    get_layer,
-    get_embed_dim,
-    measure_top1_success,
-    measure_rebalanced_acc,
-)
+from src.constants import device
+from src.prompt_injector import PromptInjector
+from src.utils import get_number_of_layers, HFModel
 from collections import defaultdict
 from pathlib import Path
 import matplotlib.pyplot as plt  # type: ignore
@@ -55,77 +14,135 @@ from src.dir_evaluator import DirEvaluator
 from attrs import evolve
 from tqdm import tqdm  # type: ignore
 from time import time
-st = time()
 
-#%%
-# model_name = "distilgpt2"
-# model_name = "gpt2"
-# model_name = "gpt2-large"
-model_name = "gpt2-xl"
-# model_name = "EleutherAI/gpt-j-6B"
-#%%
-model: torch.nn.Module = AutoModelForCausalLM.from_pretrained(model_name).to(device)
-for param in model.parameters():
-    param.requires_grad = False
-figure_folder = f"figures/{model_name}"
-#%%
-def load_dirs(name: str, method: str = ""):
-    method_suffix = "" if method == "sgd" or method == "" else f"-{method}"
+ds_conversion_dict = {
+    "5c_v_5i_goodbad": "imdb_5_shot",
+    "5c_v_0_goodbad": "imdb_5_shot_v5",
+    "5i_v_0_goodbad": "imdb_5_shot_v5b",
+    "0_v_0_goodbad": "imdb_0_shot",
+    "5c_v_5i_positivenegative": "imdb_5_shot_v2",
+    "0_v_0_positivenegative": "imdb_0_shot_v2",
+    "5c_v_5i_any": "imdb_5_shot_v3",
+    "5c_v_0_any": "imdb_5_shot_v4",
+    "5i_v_0_any": "imdb_5_shot_v4b",
+    "0_v_0_any": "imdb_0_shot_v3",
+}
 
-    return {
-        l: torch.load(path).to(device)
-        for l, path in [(l, Path(f"./saved_dirs/v3-{model_name}{method_suffix}/l{l}-{name}.pt")) for l in range(80)]
-        if path.exists()
-    }
+version = "1.0"
 
+def convert_name(ds_name: str) -> str:
+    for k, v in ds_conversion_dict.items():
+        ds_name = ds_name.replace(k, v)
+    return ds_name
 
-def load(ds: str, max_amount: Optional[int] = None, seed: int = 0) -> list[Pair]:
-    g = PairGeneratorDataset.from_dict(json.load(Path(f"./data/{ds}.json").open("r")))
-
-    if max_amount is None:
-        return list(g.generate_all())
-    else:
-        random.seed(seed)
-        return list(g.take(max_amount))
+def load(ds_name: str, max_amount: Optional[int] = None) -> list[Pair]:
+    g = PairGeneratorDataset.from_dict(json.load(Path(f"./data/{ds_name}.json").open("r")))
+    ds = list(g.generate_all())
+    if max_amount is not None:
+        ds = ds[:max_amount]
+    return ds
 
 
-
-dir_ds = "imdb_5_shot_v5"
-ds0 = load("imdb_0_shot_v5/test")
-ds5 = load("imdb_5_shot/test")
-ds5_v_0 = load("imdb_5_shot_v5/test")
-#%%
-injector = PromptInjector(model)
-#%%
-print(f"raw rebalanced: {injector.measure_rebalanced_acc(ds0)}")
-print(f"raw 5 shot rebalanced {injector.measure_rebalanced_acc(ds5)}")
-print(f"raw 5 adv shots rebalanced {injector.measure_rebalanced_acc(ds5, adverserial=True)}")
-#%%
-from src.utils import get_number_of_layers
-layer_nbs = [0]
-gap = 4
-for i in range(1,gap+1):
-    layer_nbs.append(i * get_number_of_layers(model) // gap - 1)
-print(layer_nbs)
-#%%
-positive_prompts = [p.positive.prompt for p in ds5_v_0]
-negative_prompts = [p.negative.prompt for p in ds5_v_0]
-
-injectors = []
-for nb in layer_nbs:
-    injector = PromptInjector(model, layer_nb=nb)
-    injector.inject(positive_prompts, negative_prompts)
-    injectors.append(injector)
-    
-
-#%%
-for bs in [1, 2, 4, 8, 16]:
+def run(
+    model_name: str = "gpt2-xl",
+    injection_ds_name: str = "none",
+    injection_nb: int = 64,
+    test_ds_name: str = "0_v_0_any",
+    batch_size: int = 16,
+    gap: int = 6,
+    adversarial: bool = False,
+):
     st = time()
-    
-    # Measure perfs
-    for injector, nb in zip(injectors, layer_nbs):
-        injector.batch_size = bs
-        print(f"layer {nb}")
-        print(f"positive rebalanced {injector.measure_rebalanced_acc(ds0)}")
 
-    print(time() - st, injector.batch_size)
+    # dict with all arguments
+    config_dict = {
+        "model_name": model_name,
+        "injection_ds_name": injection_ds_name,
+        "injection_nb": injection_nb,
+        "test_ds_name": test_ds_name,
+        "batch_size": batch_size,
+        "gap": gap,
+        "adversarial": adversarial,
+    }
+    print(config_dict)
+    
+    test_ds_name_ = convert_name(test_ds_name) + "/test"
+    test_ds = load(test_ds_name_)
+
+    model: HFModel = AutoModelForCausalLM.from_pretrained(model_name).to(device)  # type: ignore
+    for param in model.parameters():  # type: ignore
+        param.requires_grad = False
+
+    load_time = time() - st
+    st = time()
+
+    injectors: list[PromptInjector] = []
+    if injection_ds_name == "none":
+        layer_nbs = [None]
+        injection_ds_name_ = "none"
+        injectors = [PromptInjector(model, layer_nb=None, batch_size=batch_size)]
+    else:
+        injection_ds_name_ = convert_name(injection_ds_name) + "/train"
+        injection_ds = load(injection_ds_name_, injection_nb)
+        positive_prompts = [p.positive.prompt for p in injection_ds]
+        negative_prompts = [p.negative.prompt for p in injection_ds]
+
+        layer_nbs = [0]
+        for i in range(1, gap + 1):
+            layer_nbs.append(i * get_number_of_layers(model) // gap - 1)
+
+        for nb in layer_nbs:
+            injector = PromptInjector(model, layer_nb=nb, batch_size=batch_size)
+            injector.inject(positive_prompts, negative_prompts)
+            injectors.append(injector)
+
+    injection_time = time() - st
+    st = time()
+
+    # Measure perfs
+    perfs = []
+    for injector, nb in tqdm(list(zip(injectors, layer_nbs))):
+        perfs.append({"layer": nb, "acc": injector.measure_rebalanced_acc(test_ds, adversarial=adversarial)})
+
+    eval_time = time() - st
+    total_time = load_time + injection_time + eval_time
+
+    meta_dict = {
+        "version": version,
+        "load_time": load_time,
+        "injection_time": injection_time,
+        "eval_time": eval_time,
+        "total_time": total_time,
+        "injection_ds_name_": injection_ds_name_,
+        "test_ds_name_": test_ds_name_,
+    }
+    result_dict = {
+        "config": config_dict,
+        "perfs": perfs,
+        "meta": meta_dict,
+    }
+    dir = Path(f"./injection_measurements/{model_name}/{test_ds_name}")
+    dir.mkdir(parents=True, exist_ok=True)
+    
+    result_hash = hash(json.dumps(config_dict))
+    id = result_hash % 100000
+
+    adversarial_suffix = "_adv" if adversarial else ""
+    filename = f"{injection_ds_name}_N{injection_nb}{adversarial_suffix}_{id}"
+    save_path = dir / (filename + ".json")
+
+    json.dump(result_dict, save_path.open("w"), indent=4)
+
+    if injection_ds_name != "none":
+        dirs = [injector.params.dirs for injector in injectors if injector.params is not None]
+        assert len(dirs) == len(layer_nbs)
+        dir_folder = dir / filename
+        dir_folder.mkdir(exist_ok=True)
+        for d, nb in zip(dirs, layer_nbs):
+            torch.save(d, str(dir_folder / f"dirs_{nb}.pt"))
+
+
+if __name__ == "__main__":
+    import fire  # type: ignore
+
+    fire.Fire(run)
