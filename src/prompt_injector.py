@@ -11,6 +11,7 @@ from src.utils import (
     get_layer,
     edit_model_inplace,
     get_layer_name,
+    ProjectionWrapper,
 )
 from typing import Literal, Optional, Callable, TypeVar
 from src.constants import get_tokenizer, device
@@ -31,11 +32,11 @@ class PromptInjector:
     method: Literal["ln"] = "ln"
     n_classes: int = 2
     batch_size: int = 16
+    params: Optional[ProjectionParams] = None
     _recover_handle: Optional[Callable[[], None]] = None
-    _current_params: Optional[ProjectionParams] = None
 
     def inject(self, positive_prompts: list[str], negative_prompts: list[str], completions: list[str] = [""]):
-        """Inject the positive prompt, in the direction which constrasts the most with negative prompt on the completions.
+        """Inject the positive prompts, in the direction which constrasts the most with negative prompts on the completions.
 
         Completions are appended are the prompts.
 
@@ -44,33 +45,27 @@ class PromptInjector:
         negatives = [(1, p) for p in batchyfy(negative_prompts, self.batch_size)]
         tokens_class_ntoks: list[tuple[BatchEncoding, int, int]] = []
         for completion in completions:
-            ntoks = self._tokenizer(completion).input_ids.shape[1] + 1
+            ntoks = len(self._tokenizer(completion).input_ids) + 1
             for class_, prompts in positives + negatives:
                 tokens = self._tokenizer(
                     append_to_all(prompts, completion),
                     return_tensors="pt",
-                    pad_token_id=self._tokenizer.eos_token_id,
                     padding=True,
                 )
                 tokens_class_ntoks.append((tokens, class_, ntoks))
 
-        params = self._compute_params(tokens_class_ntoks)
-        self._inject_projection(params)
+        self.params = self._compute_params(tokens_class_ntoks)
 
-    def recover(self):
-        """Remove the injection."""
-        assert self._recover_handle is not None, "Can't recover before injecting"
-        self._recover_handle()
-        self._current_dirs_and_offsets = None
-
-    def forward(self, prompts: list[str], completion: str = ""):
+    def forward(self, prompts: list[str], completion: str = "") -> torch.Tensor:
         """Return the logits on the completion.
 
         Includes the logits on the last token of the prompts."""
-
-        old_n_toks = self._current_params.ntoks
-
-        self._current_params.ntoks = self._tokenizer(completion).input_ids.shape[1] + 1
+        n_toks = len(self._tokenizer(completion).input_ids) + 1
+        
+        if self.params is not None:
+            old_n_toks = self.params.ntoks
+            self.params.ntoks = n_toks
+            self._inject_projection(self.params)
 
         batches = batchyfy(prompts, self.batch_size)
         logits = []
@@ -78,23 +73,25 @@ class PromptInjector:
             tokens = self._tokenizer(
                 append_to_all(batch, completion),
                 return_tensors="pt",
-                pad_token_id=self._tokenizer.eos_token_id,
                 padding=True,
             )
-            r = self.model(**tokens).logits  # type: ignore
+            r = self.model(**tokens.to(self.model.device)).logits  # type: ignore
+            ends = tokens.attention_mask.sum(dim=1)
             for i in range(r.shape[0]):
-                logits.append(r[i, -self._ntoks, :])
+                logits.append(r[i, ends[i]-n_toks:ends[i], :])
 
-        self._current_params.ntoks = old_n_toks
+        if self.params is not None:
+            self.params.ntoks = old_n_toks
+            self._recover()
 
         return torch.stack(logits)
 
     def measure_correct_probs(self, tests: list[Pair], adverserial: bool = False) -> list[float]:
         probs: list[float] = []
         for test_batch in batchyfy(tests, self.batch_size):
-            prompts = [test.positive.prompt if adverserial else test.negative.prompt for test in test_batch]
+            prompts = [test.negative.prompt if adverserial else test.positive.prompt for test in test_batch]
             logits = self.forward(prompts)
-            assert logits.shape == (len(test_batch), 1, logits.shape[-1])
+            assert logits.shape == (len(test_batch), 1, logits.shape[-1]), f"{logits.shape} != {(len(test_batch), 1, logits.shape[-1])}"
 
             for i, test in enumerate(test_batch):
                 good_answers: list[int] = [self._tokenizer.encode(a)[0] for a in test.positive.answers]
@@ -166,27 +163,40 @@ class PromptInjector:
         return get_layer(self.model, self.layer_nb)
 
     def _get_activations(self, tokens: BatchEncoding, ntoks: int) -> torch.Tensor:
-        nb_toks = tokens.input_ids.shape[0]
+        nb_seqs = tokens.input_ids.shape[0]
         assert tokens.input_ids.shape[1] >= ntoks >= 0
 
-        return get_activations(
-            tokens.to(device), self.model, [self.layer], lambda t: t[:, -ntoks:, :].reshape((nb_toks * ntoks, -1))
-        )[self.layer]
+        all_activations = get_activations(
+            tokens.to(device), self.model, [self.layer])[self.layer]
+        
+        ntoks_activations = []
+        for i in range(nb_seqs):
+            mask = tokens.attention_mask[i]
+            selected_activations = all_activations[i][mask == 1]
+            ntoks_activations.append(selected_activations[-ntoks:])
+        return torch.cat(ntoks_activations)
 
     @property
     def _tokenizer(self) -> PreTrainedTokenizerBase:
         t = get_tokenizer(self.model)
-        t.padding_side = "left"
+        t.padding_side = "right"
         t.pad_token = t.eos_token
         return t
 
     def _inject_projection(self, params: ProjectionParams):
-        assert self._recover_handle is None, "Can't inject twice"
+        assert not isinstance(self.layer, ProjectionWrapper), "Can't inject twice, try to recover first"
+        
         projection = partial(project_with_params, params=params)
+        projection_with_attn_mask = partial(project_with_params_and_attn_mask, params=params)
         self._recover_handle = edit_model_inplace(
-            self.model, self.layer, get_layer_name(self.model, self.layer_nb), projection, True
+            self.model, self.layer, get_layer_name(self.model, self.layer_nb), projection, has_leftover=True, projection_with_attn_mask=projection_with_attn_mask
         )
-        self._current_params = params
+    
+    def _recover(self):
+        """Remove the injection."""
+        assert self._recover_handle is not None, "Can't recover before injecting"
+        self._recover_handle()
+        self._recover_handle = None
 
     def __attrs_post_init__(self):
         if self.n_classes != 2:
@@ -209,6 +219,21 @@ def project_with_params(x: torch.Tensor, params: ProjectionParams) -> torch.Tens
         y[..., -params.ntoks :, :] += torch.einsum("...n, n h -> ...h", params.offsets - inner_products, params.dirs)
         return y
 
+def project_with_params_and_attn_mask(x: torch.Tensor, attn_mask: torch.Tensor, params: ProjectionParams) -> torch.Tensor:
+    assert attn_mask.shape == (x.shape[0], 1, 1, x.shape[1]), f"attn_mask shape is {attn_mask.shape}, x shape is {x.shape}"
+    assert x.ndim == 3, f"x shape is {x.shape}"
+    
+    attn_mask = (attn_mask[:, 0, 0, :] == 0) # attn_mask is 0 or -inf
+    
+    apply_projection_mask = attn_mask
+    if params.ntoks is not None:
+        rev_cum_sum = torch.cumsum(attn_mask.flip(1), dim=1).flip(1)
+        ntoks_mask = (rev_cum_sum <= params.ntoks) & (rev_cum_sum > 0)
+        apply_projection_mask = apply_projection_mask & ntoks_mask
+    inner_products = torch.einsum("n h, ...h -> ...n", params.dirs, x)
+    y = x + torch.einsum("...n, n h -> ...h", params.offsets - inner_products, params.dirs)
+    x = torch.where(apply_projection_mask[:, :, None], y, x)
+    return x
 
 T = TypeVar("T")
 
@@ -219,3 +244,4 @@ def batchyfy(prompts: list[T], batch_size: int) -> list[list[T]]:
 
 def append_to_all(prompts: list[str], completion: str) -> list[str]:
     return [p + completion for p in prompts]
+

@@ -113,11 +113,13 @@ class ProjectionWrapper(torch.nn.Module):
         wrapped_module: torch.nn.Module,
         projection: Callable[[torch.Tensor], torch.Tensor],
         has_leftover: bool = False,
+        projection_with_attn_mask: Optional[Callable[[torch.Tensor, torch.Tensor], torch.Tensor]] = None,
     ):
         super().__init__()
         self.wrapped_module = wrapped_module
         self.projection = projection
         self.has_leftover = has_leftover
+        self.projection_with_attn_mask = projection_with_attn_mask
 
     def forward(self, *args, **kwargs):
         y = self.wrapped_module(*args, **kwargs)
@@ -127,7 +129,10 @@ class ProjectionWrapper(torch.nn.Module):
         else:
             hidden_states = y
 
-        hidden_states = self.projection(hidden_states)
+        if "attention_mask" in kwargs and kwargs["attention_mask"] is not None and self.projection_with_attn_mask is not None:
+            hidden_states = self.projection_with_attn_mask(hidden_states, kwargs["attention_mask"])
+        else:
+            hidden_states = self.projection(hidden_states)
 
         return (hidden_states, *leftover) if self.has_leftover else hidden_states
 
@@ -138,9 +143,10 @@ def edit_model_inplace(
     module_name: str,
     projection: Callable[[torch.Tensor], torch.Tensor],
     has_leftover: bool,
+    projection_with_attn_mask: Optional[Callable[[torch.Tensor, torch.Tensor], torch.Tensor]] = None
 ):
     """Return a new module where the replacements described in the config have been done."""
-    new_module = ProjectionWrapper(old_module, projection, has_leftover)
+    new_module = ProjectionWrapper(old_module, projection, has_leftover, projection_with_attn_mask)
 
     *parent_path, name = module_name.split(".")
     parent_name = ".".join(parent_path)
@@ -149,7 +155,6 @@ def edit_model_inplace(
         setattr(parent, name, new_module)
     else:  # ModuleList case, if it's the member of a list
         parent[int(name)] = new_module  # type: ignore
-    gc.collect()
 
     return lambda: recover_model_inplace(model, old_module, module_name)
 
