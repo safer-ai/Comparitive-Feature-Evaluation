@@ -132,7 +132,7 @@ class ProjectionWrapper(torch.nn.Module):
 
 
 def edit_model_inplace(
-    model: nn.Module,
+    model: HFModel,
     old_module: nn.Module,
     module_name: str,
     projection: Callable[[torch.Tensor], torch.Tensor],
@@ -312,7 +312,7 @@ def gen_and_print(model, prompt: str, n: int = 3):
 
 def get_activations(
     tokens: BatchEncoding,
-    model: nn.Module,
+    model: HFModel,
     modules: list[nn.Module],
     operation: Callable[[torch.Tensor], torch.Tensor] = lambda x: x,
 ) -> dict[nn.Module, torch.Tensor]:
@@ -781,7 +781,7 @@ def get_layer(model, layer: int) -> torch.nn.Module:
     raise NotImplementedError(f"Model of type {type(model)} not supported yet")
 
 
-def get_layer_name(model, layer: int) -> torch.nn.Module:
+def get_layer_name(model, layer: int) -> str:
     if isinstance(model, GPTJForCausalLM) or isinstance(model, GPT2LMHeadModel):
         return f"transformer.h.{layer}"
     if isinstance(model, GPTNeoXForCausalLM):
