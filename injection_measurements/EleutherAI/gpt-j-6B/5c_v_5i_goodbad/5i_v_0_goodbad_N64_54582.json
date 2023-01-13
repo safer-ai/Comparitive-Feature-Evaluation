@@ -1,0 +1,50 @@
+{
+    "config": {
+        "model_name": "EleutherAI/gpt-j-6B",
+        "injection_ds_name": "5i_v_0_goodbad",
+        "injection_nb": 64,
+        "test_ds_name": "5c_v_5i_goodbad",
+        "batch_size": 16,
+        "gap": 6,
+        "adversarial": false
+    },
+    "perfs": [
+        {
+            "layer": 0,
+            "acc": 0.95
+        },
+        {
+            "layer": 3,
+            "acc": 0.95
+        },
+        {
+            "layer": 8,
+            "acc": 0.93
+        },
+        {
+            "layer": 13,
+            "acc": 0.85
+        },
+        {
+            "layer": 17,
+            "acc": 0.93
+        },
+        {
+            "layer": 22,
+            "acc": 0.93
+        },
+        {
+            "layer": 27,
+            "acc": 0.95
+        }
+    ],
+    "meta": {
+        "version": "1.0",
+        "load_time": 68.23321962356567,
+        "injection_time": 169.30320191383362,
+        "eval_time": 194.29280066490173,
+        "total_time": 431.829222202301,
+        "injection_ds_name_": "imdb_5_shot_v5b/train",
+        "test_ds_name_": "imdb_5_shot/test"
+    }
+}

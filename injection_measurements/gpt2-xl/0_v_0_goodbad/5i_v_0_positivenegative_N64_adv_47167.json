@@ -1,0 +1,50 @@
+{
+    "config": {
+        "model_name": "gpt2-xl",
+        "injection_ds_name": "5i_v_0_positivenegative",
+        "injection_nb": 64,
+        "test_ds_name": "0_v_0_goodbad",
+        "batch_size": 16,
+        "gap": 6,
+        "adversarial": true
+    },
+    "perfs": [
+        {
+            "layer": 0,
+            "acc": 0.67
+        },
+        {
+            "layer": 7,
+            "acc": 0.65
+        },
+        {
+            "layer": 15,
+            "acc": 0.63
+        },
+        {
+            "layer": 23,
+            "acc": 0.75
+        },
+        {
+            "layer": 31,
+            "acc": 0.75
+        },
+        {
+            "layer": 39,
+            "acc": 0.77
+        },
+        {
+            "layer": 47,
+            "acc": 0.61
+        }
+    ],
+    "meta": {
+        "version": "1.0",
+        "load_time": 19.94105839729309,
+        "injection_time": 83.17291855812073,
+        "eval_time": 43.68934106826782,
+        "total_time": 146.80331802368164,
+        "injection_ds_name_": "imdb_5_shot_v6b/train",
+        "test_ds_name_": "imdb_0_shot/test"
+    }
+}

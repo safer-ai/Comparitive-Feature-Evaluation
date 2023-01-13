@@ -1,0 +1,26 @@
+{
+    "config": {
+        "model_name": "EleutherAI/pythia-2.7b-deduped",
+        "injection_ds_name": "none",
+        "injection_nb": 64,
+        "test_ds_name": "imdb_0_v_0_goodbad",
+        "batch_size": 2,
+        "gap": 6,
+        "adversarial": false
+    },
+    "perfs": [
+        {
+            "layer": null,
+            "acc": 0.772
+        }
+    ],
+    "meta": {
+        "version": "1.0",
+        "load_time": 27.60694146156311,
+        "injection_time": 2.1219253540039062e-05,
+        "eval_time": 27.23930287361145,
+        "total_time": 54.8462655544281,
+        "injection_ds_name_": "none",
+        "test_ds_name_": "imdb_0_v_0_goodbad/test"
+    }
+}

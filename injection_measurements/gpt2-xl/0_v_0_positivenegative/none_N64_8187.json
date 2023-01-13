@@ -1,0 +1,26 @@
+{
+    "config": {
+        "model_name": "gpt2-xl",
+        "injection_ds_name": "none",
+        "injection_nb": 64,
+        "test_ds_name": "0_v_0_positivenegative",
+        "batch_size": 16,
+        "gap": 6,
+        "adversarial": false
+    },
+    "perfs": [
+        {
+            "layer": null,
+            "acc": 0.59
+        }
+    ],
+    "meta": {
+        "version": "1.0",
+        "load_time": 18.961755990982056,
+        "injection_time": 1.6450881958007812e-05,
+        "eval_time": 6.106778621673584,
+        "total_time": 25.068551063537598,
+        "injection_ds_name_": "none",
+        "test_ds_name_": "imdb_0_shot_v2/test"
+    }
+}

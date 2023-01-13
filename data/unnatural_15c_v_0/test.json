@@ -1,0 +1,202 @@
+{
+  "version": "1",
+  "positive": "correct",
+  "negative": "inverse",
+  "generators": [
+    {
+      "pattern": "{prompt}parsley:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "endive: plant\n\nsquash: plant\n\ndiving: sport\n\ngarlic: plant\n\nvolleyball: sport\n\nclimbing: sport\n\nkarate: sport\n\nboxing: sport\n\naubergine: plant\n\nonions: plant\n\nbeet: plant\n\nlacrosse: sport\n\nshooting: sport\n\nzucchini: plant\n\nmarathon: sport\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" plant"],
+      "negative_answers": [" sport"]
+    },
+    {
+      "pattern": "{prompt}archery:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "diving: sport\n\ntomato: plant\n\ncabbage: plant\n\nmarathon: sport\n\nbadminton: sport\n\nspinach: plant\n\ntriathlon: sport\n\nbeet: plant\n\nbilliards: sport\n\nendive: plant\n\ngymnastics: sport\n\nonions: plant\n\nvolleyball: sport\n\nasparagus: plant\n\nradish: plant\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" sport"],
+      "negative_answers": [" plant"]
+    },
+    {
+      "pattern": "{prompt}weightlifting:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "artichoke: plant\n\nclimbing: sport\n\nboxing: sport\n\nradish: plant\n\ntriathlon: sport\n\ndill: plant\n\ntomato: plant\n\nsquash: plant\n\nkarate: sport\n\nsnowboarding: sport\n\ndiving: sport\n\nshooting: sport\n\nvolleyball: sport\n\nbroccoli: plant\n\nlettuce: plant\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" sport"],
+      "negative_answers": [" plant"]
+    },
+    {
+      "pattern": "{prompt}thyme:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "radish: plant\n\nspinach: plant\n\nasparagus: plant\n\nbroccoli: plant\n\ndiving: sport\n\nboxing: sport\n\nlettuce: plant\n\nclimbing: sport\n\nsnowboarding: sport\n\ndill: plant\n\nbadminton: sport\n\nsquash: plant\n\njudo: sport\n\nshooting: sport\n\ngymnastics: sport\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" plant"],
+      "negative_answers": [" sport"]
+    },
+    {
+      "pattern": "{prompt}peas:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "dill: plant\n\nclimbing: sport\n\nkarate: sport\n\ncabbage: plant\n\nsquash: plant\n\nbeet: plant\n\nbilliards: sport\n\nvolleyball: sport\n\nbadminton: sport\n\nspinach: plant\n\nradish: plant\n\ntomato: plant\n\nasparagus: plant\n\njudo: sport\n\ndiving: sport\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" plant"],
+      "negative_answers": [" sport"]
+    },
+    {
+      "pattern": "{prompt}kale:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "boxing: sport\n\nendive: plant\n\nvolleyball: sport\n\nshooting: sport\n\nasparagus: plant\n\nlacrosse: sport\n\ngymnastics: sport\n\nbeet: plant\n\nlettuce: plant\n\nartichoke: plant\n\nonions: plant\n\nspinach: plant\n\nradish: plant\n\naubergine: plant\n\ngarlic: plant\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" plant"],
+      "negative_answers": [" sport"]
+    },
+    {
+      "pattern": "{prompt}bowling:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "lettuce: plant\n\nsquash: plant\n\nendive: plant\n\nonions: plant\n\nbroccoli: plant\n\ntomato: plant\n\nradish: plant\n\nartichoke: plant\n\nshooting: sport\n\ndill: plant\n\naubergine: plant\n\nbeet: plant\n\ncabbage: plant\n\ntriathlon: sport\n\nbilliards: sport\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" sport"],
+      "negative_answers": [" plant"]
+    },
+    {
+      "pattern": "{prompt}taekwondo:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "asparagus: plant\n\ngymnastics: sport\n\nbilliards: sport\n\ntomato: plant\n\nmarathon: sport\n\nsquash: plant\n\ncabbage: plant\n\nspinach: plant\n\ndill: plant\n\nsnowboarding: sport\n\naubergine: plant\n\ndiving: sport\n\ngarlic: plant\n\nclimbing: sport\n\nvolleyball: sport\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" sport"],
+      "negative_answers": [" plant"]
+    },
+    {
+      "pattern": "{prompt}rugby:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "asparagus: plant\n\nonions: plant\n\ncabbage: plant\n\nlettuce: plant\n\nlacrosse: sport\n\ngymnastics: sport\n\nclimbing: sport\n\nartichoke: plant\n\naubergine: plant\n\nzucchini: plant\n\nshooting: sport\n\nboxing: sport\n\nvolleyball: sport\n\nsnowboarding: sport\n\ngarlic: plant\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" sport"],
+      "negative_answers": [" plant"]
+    },
+    {
+      "pattern": "{prompt}sprout:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "beet: plant\n\nradish: plant\n\nsnowboarding: sport\n\ntomato: plant\n\ndiving: sport\n\ndill: plant\n\nclimbing: sport\n\nsquash: plant\n\njudo: sport\n\nshooting: sport\n\nbroccoli: plant\n\ngymnastics: sport\n\naubergine: plant\n\nspinach: plant\n\nbilliards: sport\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" plant"],
+      "negative_answers": [" sport"]
+    },
+    {
+      "pattern": "{prompt}corn:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "karate: sport\n\nlacrosse: sport\n\nasparagus: plant\n\nbeet: plant\n\ndill: plant\n\ntomato: plant\n\ndiving: sport\n\nclimbing: sport\n\nbroccoli: plant\n\nsquash: plant\n\nsnowboarding: sport\n\nshooting: sport\n\ntriathlon: sport\n\nendive: plant\n\nbadminton: sport\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" plant"],
+      "negative_answers": [" sport"]
+    },
+    {
+      "pattern": "{prompt}cucumber:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "badminton: sport\n\nmarathon: sport\n\nlettuce: plant\n\nbeet: plant\n\ngarlic: plant\n\ntriathlon: sport\n\nonions: plant\n\nradish: plant\n\nartichoke: plant\n\nspinach: plant\n\nboxing: sport\n\nkarate: sport\n\ndill: plant\n\ndiving: sport\n\nsquash: plant\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" plant"],
+      "negative_answers": [" sport"]
+    },
+    {
+      "pattern": "{prompt}hockey:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "endive: plant\n\nonions: plant\n\nmarathon: sport\n\nvolleyball: sport\n\nkarate: sport\n\ncabbage: plant\n\ngymnastics: sport\n\nboxing: sport\n\ngarlic: plant\n\nradish: plant\n\ndill: plant\n\nsnowboarding: sport\n\nasparagus: plant\n\nshooting: sport\n\ntriathlon: sport\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" sport"],
+      "negative_answers": [" plant"]
+    },
+    {
+      "pattern": "{prompt}cycling:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "snowboarding: sport\n\nbeet: plant\n\nendive: plant\n\nradish: plant\n\nbilliards: sport\n\nshooting: sport\n\nclimbing: sport\n\ntomato: plant\n\naubergine: plant\n\nartichoke: plant\n\ngymnastics: sport\n\nsquash: plant\n\ntriathlon: sport\n\ngarlic: plant\n\ndill: plant\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" sport"],
+      "negative_answers": [" plant"]
+    },
+    {
+      "pattern": "{prompt}luge:",
+      "tag": "no tag",
+      "positive_replacements": {
+        "prompt": [
+          "dill: plant\n\nbilliards: sport\n\nkarate: sport\n\ndiving: sport\n\naubergine: plant\n\ngarlic: plant\n\nvolleyball: sport\n\nclimbing: sport\n\njudo: sport\n\ngymnastics: sport\n\nartichoke: plant\n\nasparagus: plant\n\nboxing: sport\n\nlacrosse: sport\n\ntomato: plant\n\n"
+        ]
+      },
+      "negative_replacements": { "prompt": [""] },
+      "neutral_replacements": {},
+      "positive_answers": [" sport"],
+      "negative_answers": [" plant"]
+    }
+  ]
+}

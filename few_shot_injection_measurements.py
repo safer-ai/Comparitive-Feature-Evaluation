@@ -11,9 +11,9 @@ import matplotlib.pyplot as plt  # type: ignore
 import json
 from src.data_generation import PairGeneratorDataset, Pair
 from src.dir_evaluator import DirEvaluator
-from attrs import evolve
 from tqdm import tqdm  # type: ignore
 from time import time
+import datetime
 
 ds_conversion_dict = {
     "5c_v_5i_goodbad": "imdb_5_shot",
@@ -22,17 +22,19 @@ ds_conversion_dict = {
     "0_v_0_goodbad": "imdb_0_shot",
     "5c_v_5i_positivenegative": "imdb_5_shot_v2",
     "0_v_0_positivenegative": "imdb_0_shot_v2",
+    "5c_v_0_positivenegative": "imdb_5_shot_v6",
+    "5i_v_0_positivenegative": "imdb_5_shot_v6b",
     "5c_v_5i_any": "imdb_5_shot_v3",
     "5c_v_0_any": "imdb_5_shot_v4",
     "5i_v_0_any": "imdb_5_shot_v4b",
     "0_v_0_any": "imdb_0_shot_v3",
 }
 
-version = "1.0"
+version = "1.1"
 
 def convert_name(ds_name: str) -> str:
-    for k, v in ds_conversion_dict.items():
-        ds_name = ds_name.replace(k, v)
+    if ds_name in ds_conversion_dict:
+        return ds_conversion_dict[ds_name]
     return ds_name
 
 def load(ds_name: str, max_amount: Optional[int] = None) -> list[Pair]:
@@ -90,7 +92,8 @@ def run(
         layer_nbs = [0]
         for i in range(1, gap + 1):
             layer_nbs.append(i * get_number_of_layers(model) // gap - 1)
-
+        layer_nbs = list(set(layer_nbs))
+        
         for nb in layer_nbs:
             injector = PromptInjector(model, layer_nb=nb, batch_size=batch_size)
             injector.inject(positive_prompts, negative_prompts)
@@ -115,6 +118,7 @@ def run(
         "total_time": total_time,
         "injection_ds_name_": injection_ds_name_,
         "test_ds_name_": test_ds_name_,
+        "timestamp": f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S}",
     }
     result_dict = {
         "config": config_dict,

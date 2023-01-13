@@ -1,0 +1,26 @@
+{
+    "config": {
+        "model_name": "EleutherAI/gpt-j-6B",
+        "injection_ds_name": "none",
+        "injection_nb": 64,
+        "test_ds_name": "0_v_0_positivenegative",
+        "batch_size": 16,
+        "gap": 6,
+        "adversarial": false
+    },
+    "perfs": [
+        {
+            "layer": null,
+            "acc": 0.65
+        }
+    ],
+    "meta": {
+        "version": "1.0",
+        "load_time": 68.03215336799622,
+        "injection_time": 1.5497207641601562e-05,
+        "eval_time": 13.300522089004517,
+        "total_time": 81.33269095420837,
+        "injection_ds_name_": "none",
+        "test_ds_name_": "imdb_0_shot_v2/test"
+    }
+}

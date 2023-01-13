@@ -1,0 +1,51 @@
+{
+    "config": {
+        "model_name": "EleutherAI/pythia-2.7b-deduped",
+        "injection_ds_name": "imdb_10c_v_0_positivenegative",
+        "injection_nb": 64,
+        "test_ds_name": "imdb_10i_v_0_goodbad",
+        "batch_size": 2,
+        "gap": 6,
+        "adversarial": false
+    },
+    "perfs": [
+        {
+            "layer": 0,
+            "acc": 0.92
+        },
+        {
+            "layer": 4,
+            "acc": 0.92
+        },
+        {
+            "layer": 9,
+            "acc": 0.92
+        },
+        {
+            "layer": 15,
+            "acc": 0.892
+        },
+        {
+            "layer": 20,
+            "acc": 0.92
+        },
+        {
+            "layer": 25,
+            "acc": 0.912
+        },
+        {
+            "layer": 31,
+            "acc": 0.92
+        }
+    ],
+    "meta": {
+        "version": "1.1",
+        "load_time": 26.500823497772217,
+        "injection_time": 139.7867090702057,
+        "eval_time": 956.9146435260773,
+        "total_time": 1123.2021760940552,
+        "injection_ds_name_": "imdb_10c_v_0_positivenegative/train",
+        "test_ds_name_": "imdb_10i_v_0_goodbad/test",
+        "timestamp": "2023-01-13 15:54:10"
+    }
+}
